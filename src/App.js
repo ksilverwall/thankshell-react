@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import Top from './Top.js'
+import LoginCallback from './LoginCallback.js'
 import { BrowserRouter, Route, Switch, Link } from 'react-router-dom'
 
 const App = () => (
@@ -10,6 +11,7 @@ const App = () => (
         <Route exact path='/' component={Top} />
         <Route exact path='/tos' component={Tos} />
         <Route exact path='/privacy-policy' component={PrivacyPolicy} />
+        <Route exact path='/login/callback' component={LoginCallback} />
         <Route path='/' component={NotFoundPage} />
       </Switch>
     </main>
@@ -20,6 +22,7 @@ const App = () => (
     </footer>
   </BrowserRouter>
 )
+
 
 const Tos = () => (
   <h1>Dummy Page</h1>
