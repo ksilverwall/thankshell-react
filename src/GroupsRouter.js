@@ -1,6 +1,7 @@
 import React from 'react';
-import { BrowserRouter, Route, Switch, Link } from 'react-router-dom'
+import { Route, Switch } from 'react-router-dom'
 import { NotFoundPage } from './Error.js'
+import GroupIndex from './GroupIndex.js'
 
 const GroupsRouter = () => (
   <React.Fragment>
@@ -12,22 +13,15 @@ const GroupsRouter = () => (
         </div>
       </nav>
     </header>
-    <Switch>
-      <Route exact path='/groups/:id' component={GroupIndex} />
-      <Route exact path='/groups/:id/admin' component={GroupAdmin} />
-      <Route component={NotFoundPage} />
-    </Switch>
+    <main>
+      <Switch>
+        <Route exact path='/groups/:id' component={GroupIndex} />
+        <Route exact path='/groups/:id/admin' component={GroupAdmin} />
+        <Route component={NotFoundPage} />
+      </Switch>
+    </main>
   </React.Fragment>
 )
-
-class GroupIndex extends React.Component {
-  render() {
-    const {params} = this.props.match
-    return (
-      <h1>This is dummy {params.id} group index</h1>
-    )
-  }
-}
 
 class GroupAdmin extends React.Component {
   render() {

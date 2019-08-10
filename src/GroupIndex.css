@@ -1,0 +1,117 @@
+body {
+    background-color: azure;
+}
+
+footer {
+    text-align: center;
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    background: cornflowerblue;
+    padding: 5px;
+}
+
+footer a {
+    color: white;
+    margin: 10px;
+}
+
+.transaction-history-list dt {
+    border-top-style: groove;
+}
+
+.transaction-history-list dt table {
+    width: 100%;
+}
+
+.transaction-datetime {
+    color: cadetblue;
+}
+
+.transaction-partner {
+    font-size: 1.5em;
+    width: 50%;
+    color: black;
+}
+
+.transaction-amount-in {
+    font-size: 1.5em;
+    width: 50%;
+    text-align: right;
+    color: limegreen;
+}
+
+.transaction-amount-out {
+    font-size: 1.5em;
+    width: 50%;
+    text-align: right;
+    color: red;
+}
+
+.transaction-message {
+    color: darkgray;
+}
+
+.transaction-log {
+    padding: 10px;
+    background: white;
+    border-radius: .25rem;
+}
+
+.modal-area {
+    display: none;
+    position: fixed;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 10%;
+    background: #000000c0;
+}
+
+.send-token-modal-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+.send-token-modal-form button {
+    margin: 5px;
+    width: 120px;
+}
+
+.send-token-modal-form .send-map {
+    width: 200px;
+    margin: auto;
+    position: relative;
+    background-color: honeydew;
+    border-radius: 10px;
+}
+
+.send-token-modal-form .send-map div {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+}
+
+.send-token-modal-form .send-map .amount {
+    position: absolute;
+    left: 60%;
+    width: 30%;
+}
+
+.button-submit {
+    background-color: blue;
+    border-radius: 5px;
+}
+
+.button-cancel {
+    background-color: red;
+    border-radius: 5px;
+}
+
+.warning-text {
+    color: red;
+}
