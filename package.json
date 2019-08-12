@@ -7,6 +7,7 @@
     "aws-amplify": "^1.1.32",
     "aws-amplify-react": "^2.3.11",
     "env-cmd": "^9.0.3",
+    "mdbreact": "^4.19.0",
     "react": "^16.8.6",
     "react-bootstrap": "^1.0.0-beta.10",
     "react-dom": "^16.8.6",
