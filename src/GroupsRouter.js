@@ -2,6 +2,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom'
 import { NotFoundPage } from './Error.js'
 import GroupIndex from './GroupIndex.js'
+import GroupAdmin from './GroupAdmin.js'
 
 const GroupsRouter = () => (
   <React.Fragment>
@@ -22,14 +23,5 @@ const GroupsRouter = () => (
     </main>
   </React.Fragment>
 )
-
-class GroupAdmin extends React.Component {
-  render() {
-    const {params} = this.props.match
-    return (
-      <h1>This is dummy {params.id} admin page</h1>
-    )
-  }
-}
 
 export default GroupsRouter
