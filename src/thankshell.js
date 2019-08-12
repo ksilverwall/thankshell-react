@@ -1,5 +1,3 @@
-'use strict'
-
 export class ThankshellApi {
     constructor(session, version) {
         this.session = session;
@@ -50,19 +48,17 @@ export class ThankshellApi {
     }
 
     async sendGroupJoinRequest(groupName, userId) {
-        let response = await fetch(this.basePath + '/groups/' + groupName + '/requests/' + userId, {
+        await fetch(this.basePath + '/groups/' + groupName + '/requests/' + userId, {
             method: "PUT",
             headers: this.headers,
         });
-        let data = await response.json();
     }
 
     async cancelGroupJoinRequest(groupName, userId) {
-        let response = await fetch(this.basePath + '/groups/' + groupName + '/requests/' + userId, {
+        await fetch(this.basePath + '/groups/' + groupName + '/requests/' + userId, {
             method: "DELETE",
             headers: this.headers,
         });
-        let data = await response.json();
     }
 
     async acceptGroupJoinRequest(groupName, userId) {
@@ -98,7 +94,7 @@ export class ThankshellApi {
 
         let data = await response.json();
 
-        if (response.status != 200) {
+        if (response.status !== 200) {
             throw new Error(response.status + ":" + data.message);
         }
 
@@ -113,7 +109,7 @@ export class ThankshellApi {
 
         let data = await response.json();
 
-        if (response.status != 200) {
+        if (response.status !== 200) {
             throw new Error(response.status + ":" + data.message);
         }
 
@@ -144,7 +140,7 @@ export class ThankshellApi {
 
         let data = await response.json();
 
-        if (response.status != 200) {
+        if (response.status !== 200) {
             throw new Error(response.status + ":" + data.message);
         }
     }
@@ -160,7 +156,7 @@ export class ThankshellApi {
 
         let json = await response.json();
 
-        if (response.status != 200) {
+        if (response.status !== 200) {
             throw new Error(json.message)
         }
 
@@ -175,7 +171,7 @@ export class ThankshellApi {
 
         let json = await response.json();
 
-        if (response.status != 200) {
+        if (response.status !== 200) {
             throw new Error(json.message)
         }
 
