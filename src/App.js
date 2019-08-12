@@ -3,12 +3,14 @@ import './App.css';
 import Top from './Top.js'
 import LoginCallback from './LoginCallback.js'
 import GroupsRouter from './GroupsRouter.js'
+import UserRegister from './UserRegister.js'
 import { BrowserRouter, Route, Switch, Link } from 'react-router-dom'
 import { NotFoundPage } from './Error.js'
 
 const App = () => (
   <BrowserRouter>
     <Switch>
+      <Route extract path='/user/register' component={UserRegister} />
       <Route path='/groups' component={GroupsRouter} />
       <Route path='/' component={VisitorAreaRouter} />
     </Switch>
