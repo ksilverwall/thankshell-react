@@ -7,9 +7,12 @@
     "aws-amplify": "^1.1.32",
     "aws-amplify-react": "^2.3.11",
     "env-cmd": "^9.0.3",
+    "mdbreact": "^4.19.0",
     "react": "^16.8.6",
     "react-bootstrap": "^1.0.0-beta.10",
     "react-dom": "^16.8.6",
+    "react-event-listener": "^0.6.6",
+    "react-modal": "^3.9.1",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1"
   },

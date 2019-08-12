@@ -1,5 +1,4 @@
 import React from 'react';
-import { CognitoAuth } from 'amazon-cognito-auth-js/dist/amazon-cognito-auth';
 import { GetCognitoAuth } from './auth'
 
 class LoginCallback extends React.Component {
