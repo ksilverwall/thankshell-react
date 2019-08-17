@@ -6,7 +6,7 @@ export const GetCognitoAuth = (onSuccess, onFailure) => {
     AppWebDomain       : 'auth2.thankshell.com',
     TokenScopesArray   : ['openid'],
     RedirectUriSignIn  : window.location.origin + '/login/callback',
-    RedirectUriSignOut : window.location.origin,
+    RedirectUriSignOut : window.location.origin + '/',
     IdentityProvider   : ''
   })
 
