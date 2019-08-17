@@ -2,20 +2,6 @@ body {
     background-color: azure;
 }
 
-footer {
-    text-align: center;
-    position: absolute;
-    bottom: 0px;
-    width: 100%;
-    background: cornflowerblue;
-    padding: 5px;
-}
-
-footer a {
-    color: white;
-    margin: 10px;
-}
-
 .transaction-history-list dt {
     border-top-style: groove;
 }

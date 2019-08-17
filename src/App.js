@@ -6,6 +6,7 @@ import GroupsRouter from './GroupsRouter.js'
 import UserRegister from './UserRegister.js'
 import UserConfig from './UserConfig.js'
 import { BrowserRouter, Route, Switch, Link } from 'react-router-dom'
+import ReactMarkdown from 'react-markdown'
 import { NotFoundPage } from './Error.js'
 
 const App = () => (
@@ -38,12 +39,60 @@ const VisitorAreaRouter = () => (
   </React.Fragment>
 )
 
-const Tos = () => (
-  <h1>Dummy Page</h1>
-)
+class Tos extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      text: '',
+    }
+  }
 
-const PrivacyPolicy = () => (
-  <h1>Dummy Page</h1>
-)
+  componentDidMount() {
+    this.loadText('/text/tos.md')
+  }
+
+  async loadText(path) {
+    let response = await fetch(path)
+    this.setState({
+      text: await response.text(),
+    })
+  }
+
+  render() {
+    return (
+      <article style={{background: 'white', margin:'20px', padding:'10px'}}>
+        <ReactMarkdown source={this.state.text} />
+      </article>
+    )
+  }
+}
+
+class PrivacyPolicy extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      text: '',
+    }
+  }
+
+  componentDidMount() {
+    this.loadText('/text/privacy-policy.md')
+  }
+
+  async loadText(path) {
+    let response = await fetch(path)
+    this.setState({
+      text: await response.text(),
+    })
+  }
+
+  render() {
+    return (
+      <article style={{background: 'white', margin:'20px', padding:'10px'}}>
+        <ReactMarkdown source={this.state.text} />
+      </article>
+    )
+  }
+}
 
 export default App;
