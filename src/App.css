@@ -1,14 +1,18 @@
-.footer {
+#root {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+footer {
     text-align: center;
-    position: absolute;
     bottom: 0px;
     width: 100%;
     background: cornflowerblue;
     padding: 5px;
 }
 
-.footer a {
+footer a {
     color: white;
     margin: 10px;
 }
-
