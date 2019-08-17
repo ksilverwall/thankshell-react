@@ -67,8 +67,32 @@ class Tos extends React.Component {
   }
 }
 
-const PrivacyPolicy = () => (
-  <h1>Dummy Page</h1>
-)
+class PrivacyPolicy extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      text: '',
+    }
+  }
+
+  componentDidMount() {
+    this.loadText('/text/privacy-policy.md')
+  }
+
+  async loadText(path) {
+    let response = await fetch(path)
+    this.setState({
+      text: await response.text(),
+    })
+  }
+
+  render() {
+    return (
+      <article style={{background: 'white', margin:'20px', padding:'10px'}}>
+        <ReactMarkdown source={this.state.text} />
+      </article>
+    )
+  }
+}
 
 export default App;
