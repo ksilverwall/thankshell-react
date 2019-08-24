@@ -259,3 +259,5 @@ class GroupInfo {
         return this.data.requests;
     }
 }
+
+export const GetThankshellApi = (session) => new ThankshellApi(session, process.env.REACT_APP_THANKSHELL_API_VERSION)

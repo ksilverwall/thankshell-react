@@ -1,6 +1,6 @@
 import React from 'react'
 import { GetCognitoAuth } from './auth'
-import { ThankshellApi } from './thankshell.js'
+import { GetThankshellApi } from './thankshell.js'
 import { Button, Alert } from 'react-bootstrap';
 
 class UserConfig extends React.Component {
@@ -30,7 +30,7 @@ class UserConfig extends React.Component {
         return
       }
 
-      const api = new ThankshellApi(session, 'dev');
+      const api = GetThankshellApi(session)
 
       let userInfo = await api.getUser();
       if (userInfo.status === 'UNREGISTERED') {

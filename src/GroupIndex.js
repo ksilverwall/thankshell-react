@@ -3,7 +3,7 @@ import EventListener from 'react-event-listener'
 import Modal from 'react-modal'
 import { Button, Table } from 'react-bootstrap';
 import { GetCognitoAuth } from './auth'
-import { ThankshellApi } from './thankshell.js'
+import { GetThankshellApi } from './thankshell.js'
 import './GroupIndex.css'
 
 Modal.setAppElement('#root')
@@ -29,7 +29,7 @@ class GroupIndex extends React.Component {
         return
       }
 
-      const api = new ThankshellApi(session, 'dev');
+      const api = GetThankshellApi(session)
 
       let userInfo = await api.getUser();
       if (userInfo.status === 'UNREGISTERED') {
