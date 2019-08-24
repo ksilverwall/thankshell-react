@@ -3,7 +3,7 @@ import EventListener from 'react-event-listener'
 import Modal from 'react-modal'
 import { Button, Table } from 'react-bootstrap';
 import { GetCognitoAuth } from './auth'
-import { ThankshellApi } from './thankshell.js'
+import { GetThankshellApi } from './thankshell.js'
 import './GroupIndex.css'
 
 Modal.setAppElement('#root')
@@ -22,14 +22,7 @@ class GroupIndex extends React.Component {
 
   async loadComponents() {
     try{
-      const auth = GetCognitoAuth()
-      const session = await this.getSession(auth)
-      if (!session) {
-        this.setState({articleComponent: (<h2>セッションの読み込みに失敗しました。再読込してください</h2>)})
-        return
-      }
-
-      const api = new ThankshellApi(session, 'dev');
+      const api = GetThankshellApi(GetCognitoAuth())
 
       let userInfo = await api.getUser();
       if (userInfo.status === 'UNREGISTERED') {
@@ -39,7 +32,8 @@ class GroupIndex extends React.Component {
 
       this.setState({articleComponent: await this.renderIndexPage(api, userInfo)})
     } catch(e) {
-      this.setState({articleComponent: (<p>読み込みエラー</p>)})
+      this.setState({articleComponent: (<p>読み込みエラー: {e.message}</p>)})
+      console.log(e.message)
     }
   }
 
@@ -50,17 +44,6 @@ class GroupIndex extends React.Component {
     } else {
       return (<GroupIndexVisitorPage />)
     }
-  }
-
-  getSession(auth) {
-    return new Promise((resolve, reject) => {
-        auth.userhandler = {
-            onSuccess: resolve,
-            onFailure: reject,
-        };
-
-        auth.getSession();
-    });
   }
 
   render() {
@@ -98,8 +81,8 @@ class GroupIndexMemberPage extends React.Component {
   async reloadTransactions() {
     try {
       this.setState({
-        holding: await this.props.api.getHolding(this.props.userInfo.user_id),
-        transactionHistory: await this.props.api.loadTransactions(this.props.userInfo.user_id),
+        holding: await this.props.api.getHolding('selan', this.props.userInfo.user_id),
+        transactionHistory: await this.props.api.loadTransactions('selan', this.props.userInfo.user_id),
       })
     } catch(e) {
       this.setState({errorMessage: 'ERROR: ' + e.message})
@@ -317,7 +300,7 @@ class SendTokenForm extends React.Component {
         comment: this.state.sendComment,
       }
 
-      await this.props.api.createTransaction(sendInfo);
+      await this.props.api.createTransaction('selan', sendInfo);
       this.props.onComplete()
     } catch(e) {
       this.setState({

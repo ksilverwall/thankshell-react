@@ -1,6 +1,6 @@
 import React from 'react'
 import { GetCognitoAuth } from './auth'
-import { ThankshellApi } from './thankshell.js'
+import { GetThankshellApi } from './thankshell.js'
 import { Button } from 'react-bootstrap';
 
 class UserRegister extends React.Component {
@@ -23,14 +23,7 @@ class UserRegister extends React.Component {
 
   async loadComponents() {
     try{
-      const auth = GetCognitoAuth()
-      const session = await this.getSession(auth)
-      if (!session) {
-        this.setState({articleComponent: (<h2>セッションの読み込みに失敗しました。再読込してください</h2>)})
-        return
-      }
-
-      const api = new ThankshellApi(session, 'dev');
+      const api = GetThankshellApi(GetCognitoAuth())
 
       let userInfo = await api.getUser();
       if (userInfo.status !== 'UNREGISTERED') {
@@ -43,17 +36,6 @@ class UserRegister extends React.Component {
       this.setState({articleComponent: (<p>読み込みエラー</p>)})
       console.log(e.message)
     }
-  }
-
-  getSession(auth) {
-    return new Promise((resolve, reject) => {
-        auth.userhandler = {
-            onSuccess: resolve,
-            onFailure: reject,
-        };
-
-        auth.getSession();
-    });
   }
 }
 

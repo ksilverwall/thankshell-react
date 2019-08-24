@@ -1,117 +1,117 @@
 export class ThankshellApi {
-    constructor(session, version) {
-        this.session = session;
-        this.headers = {
-            "Content-Type": "application/json; charset=utf-8",
-            Authorization: this.session.idToken.jwtToken
-        };
+    constructor(auth, version) {
+        this.auth = auth
+        this.session = null
         this.basePath = 'https://api.thankshell.com/' + version;
     }
 
-    getUri(path) {
-        return this.basePath + path;
+    getSession() {
+        return new Promise((resolve, reject) => {
+            this.auth.userhandler = {
+                onSuccess: resolve,
+                onFailure: reject,
+            };
+
+            this.auth.getSession();
+        });
     }
 
-    async getUser() {
-        let response = await fetch(this.basePath + '/user/', {
+    async reloadSession() {
+        this.session = await this.getSession()
+        if (!this.session) {
+            throw Error('セッションの読み込みに失敗しました。再読込してください')
+        }
+    }
+
+    getHeaders(session) {
+        return {
+            "Content-Type": "application/json; charset=utf-8",
+            Authorization: session.idToken.jwtToken
+        }
+    }
+
+    async get(path) {
+        if (!this.session) { await this.reloadSession() }
+        const response = await fetch(this.basePath + path, {
             method: "GET",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
         });
-        return await response.json();
+
+        const data = await response.json();
+
+        if (response.status !== 200) {
+            throw new Error(response.status + ":" + data.message);
+        }
+
+        return data
     }
 
-    async createUser(userId) {
-        let response = await fetch(this.basePath + '/user/', {
+    async put(path, data) {
+        if (!this.session) { await this.reloadSession() }
+        const response = await fetch(this.basePath + path, {
             method: "PUT",
-            headers: this.headers,
-            body: JSON.stringify({
-                id: userId,
-            }),
-        });
+            headers: this.getHeaders(this.session),
+            body: JSON.stringify(data),
+        })
 
         return {
             status: response.status,
             body: await response.json(),
-        };
+        }
+    }
+
+    async post(path, data) {
+        if (!this.session) { await this.reloadSession() }
+        const response = await fetch(this.basePath + path, {
+            method: "POST",
+            headers: this.getHeaders(this.session),
+            body: JSON.stringify(data),
+        })
+
+        const body = await response.json()
+        if (response.status !== 200) {
+            throw new Error(body.message)
+        }
+
+        return body
+    }
+
+    //-------------------------------------------------
+    // Users
+
+    async getUser() {
+        return await this.get('/user/')
+    }
+
+    async createUser(userId) {
+        // FIXME: should be post
+        return await this.put('/user/', {id: userId})
     }
 
     //-------------------------------------------------
     // Groups
 
     async getGroup(groupName) {
-        let response = await fetch(this.basePath + '/groups/' + groupName, {
-            method: "GET",
-            headers: this.headers,
-        });
+        const group_data = await this.get('/groups/' + groupName)
 
-        return new GroupInfo(await response.json());
-    }
-
-    async sendGroupJoinRequest(groupName, userId) {
-        await fetch(this.basePath + '/groups/' + groupName + '/requests/' + userId, {
-            method: "PUT",
-            headers: this.headers,
-        });
-    }
-
-    async cancelGroupJoinRequest(groupName, userId) {
-        await fetch(this.basePath + '/groups/' + groupName + '/requests/' + userId, {
-            method: "DELETE",
-            headers: this.headers,
-        });
-    }
-
-    async acceptGroupJoinRequest(groupName, userId) {
-        let response = await fetch(this.basePath + '/groups/' + groupName + '/members/' + userId, {
-            method: "PUT",
-            headers: this.headers,
-        });
-        let data = await response.json();
-        console.log(data);
+        return new GroupInfo(group_data)
     }
 
     //-------------------------------------------------
     // Transactions
 
-    async createTransaction(data) {
-        let response = await fetch(this.basePath + '/token/selan/transactions', {
-            method: "POST",
-            headers: this.headers,
-            body: JSON.stringify(data),
-        });
-
-        if (response.status !== 200) {
-            let data = await response.json();
-            throw new Error(data.message);
-        }
+    async createTransaction(tokenName, data) {
+        await this.post('/token/' + tokenName + '/transactions', data)
     }
 
-    async loadTransactions(userId) {
-        let response = await fetch(this.basePath + '/token/selan/transactions?user_id=' + userId, {
-            method: "GET",
-            headers: this.headers,
-        });
+    async loadTransactions(tokenName, userId) {
+        const data = await this.get('/token/' + tokenName + '/transactions?user_id=' + userId)
 
-        let data = await response.json();
-
-        if (response.status !== 200) {
-            throw new Error(response.status + ":" + data.message);
-        }
-
-        return data.history.Items;
+        return data.history.Items
     }
 
-    async loadAllTransactions() {
-        let response = await fetch(this.basePath + '/token/selan/transactions', {
-            method: "GET",
-            headers: this.headers,
-        });
-
-        let data = await response.json();
-
-        if (response.status !== 200) {
-            throw new Error(response.status + ":" + data.message);
-        }
+    async loadAllTransactions(tokenName) {
+        const data = await this.get('/token/' + tokenName + '/transactions')
 
         return data.history.Items;
     }
@@ -119,114 +119,25 @@ export class ThankshellApi {
     //-------------------------------------------------
     // Publish
 
-    async getPublished() {
-        let response = await fetch(this.basePath + '/token/selan/published', {
-            method: "GET",
-            headers: this.headers,
-        });
-
-        return await response.json();
-    }
-
-    async publish(to, amount) {
-        let response = await fetch(this.basePath + '/token/selan/published', {
-            method: "POST",
-            headers: this.headers,
-            body: JSON.stringify({
+    async publish(tokenName, to, amount) {
+        return await this.post(
+            '/token/' + tokenName + '/published',
+            {
                 to: to,
                 amount: amount,
-            }),
-        });
-
-        let data = await response.json();
-
-        if (response.status !== 200) {
-            throw new Error(response.status + ":" + data.message);
-        }
+            }
+        )
     }
 
     //-------------------------------------------------
     // Holdings
 
-    async getHoldings() {
-        let response = await fetch(this.basePath + '/token/selan/holders', {
-            method: "GET",
-            headers: this.headers,
-        });
-
-        let json = await response.json();
-
-        if (response.status !== 200) {
-            throw new Error(json.message)
-        }
-
-        return json;
-    };
-
-    async getHolding(userId) {
-        let response = await fetch(this.basePath + '/token/selan/holders', {
-            method: "GET",
-            headers: this.headers,
-        });
-
-        let json = await response.json();
-
-        if (response.status !== 200) {
-            throw new Error(json.message)
-        }
-
-        return json[userId];
-    };
-
-    //-------------------------------------------------
-    // Holdings
-
-    async getLinks() {
-        let response = await fetch(this.basePath + '/user/link', {
-            method: "GET",
-            headers: this.headers,
-        });
-
-        if (response.status !== 200) {
-            let result = await response.json();
-            throw new Error(result.message);
-        }
-
-        return await response.json();
+    async getHoldings(tokenName) {
+        return await this.get('/token/' + tokenName + '/holders')
     }
 
-    async linkFacebook(fbLoginInfo) {
-        let response = await fetch(this.basePath + '/user/link/Facebook', {
-            method: "PUT",
-            headers: this.headers,
-            body: JSON.stringify({
-                'id': fbLoginInfo.authResponse.userID,
-                'token': fbLoginInfo.authResponse.accessToken,
-            }),
-        });
-
-        if (response.status !== 200) {
-            let result = await response.json();
-            throw new Error(result.message);
-        }
-
-        return await response.json();
-    }
-
-    async unlinkFacebook(fbLoginInfo) {
-        let response = await fetch(this.basePath + '/user/link/Facebook', {
-            method: "DELETE",
-            headers: this.headers,
-            body: JSON.stringify({
-                'id': fbLoginInfo.authResponse.userID,
-                'token': fbLoginInfo.authResponse.accessToken,
-            }),
-        });
-
-        if (response.status !== 200) {
-            let result = await response.json();
-            throw new Error(result.message);
-        }
+    async getHolding(tokenName, userId) {
+        return (await this.getHoldings(tokenName))[userId]
     }
 }
 
@@ -259,3 +170,5 @@ class GroupInfo {
         return this.data.requests;
     }
 }
+
+export const GetThankshellApi = (auth) => new ThankshellApi(auth, process.env.REACT_APP_THANKSHELL_API_VERSION)

@@ -3,7 +3,7 @@ import Modal from 'react-modal'
 import { Button, Table } from 'react-bootstrap';
 import { MDBDataTable } from 'mdbreact';
 import { GetCognitoAuth } from './auth'
-import { ThankshellApi } from './thankshell.js'
+import { GetThankshellApi } from './thankshell.js'
 import './GroupIndex.css'
 
 Modal.setAppElement('#root')
@@ -28,14 +28,7 @@ class GroupAdmin extends React.Component {
 
   async loadComponents() {
     try{
-      const auth = GetCognitoAuth()
-      const session = await this.getSession(auth)
-      if (!session) {
-        this.setState({articleComponent: (<h2>セッションの読み込みに失敗しました。再読込してください</h2>)})
-        return
-      }
-
-      const api = new ThankshellApi(session, 'dev');
+      const api = GetThankshellApi(GetCognitoAuth())
 
       let userInfo = await api.getUser();
       if (userInfo.status === 'UNREGISTERED') {
@@ -45,20 +38,9 @@ class GroupAdmin extends React.Component {
 
       this.setState({articleComponent: await this.renderAdminPage(api, userInfo)})
     } catch(e) {
-      this.setState({articleComponent: (<p>読み込みエラー</p>)})
+      this.setState({articleComponent: (<p>読み込みエラー: {e.message}</p>)})
       console.log(e.message)
     }
-  }
-
-  getSession(auth) {
-    return new Promise((resolve, reject) => {
-        auth.userhandler = {
-            onSuccess: resolve,
-            onFailure: reject,
-        };
-
-        auth.getSession();
-    });
   }
 
   async renderAdminPage(api, userInfo) {
@@ -131,14 +113,14 @@ class GroupAdminPage extends React.Component {
 
   async reloadTransactions() {
     try {
-      const holdings = await this.props.api.getHoldings()
+      const holdings = await this.props.api.getHoldings('selan')
       const totalPublished = Object.values(holdings).reduce((prev, item) => prev + item, 0)
       this.setState({
         holdings: holdings,
         totalPublished: totalPublished,
         bankHolding: holdings['sla_bank'],
         userHoldings: totalPublished - holdings['sla_bank'],
-        transactionHistory: await this.props.api.loadTransactions(this.props.userInfo.user_id),
+        transactionHistory: await this.props.api.loadAllTransactions('selan'),
       })
     } catch(e) {
       this.setState({errorMessage: 'ERROR: ' + e.message})
@@ -221,7 +203,7 @@ class PublishTokenForm extends React.Component {
     })
 
     try {
-      await this.props.api.publish('sla_bank', this.state.amount);
+      await this.props.api.publish('selan', 'sla_bank', this.state.amount);
       this.props.onComplete()
     } catch(e) {
       this.setState({
@@ -260,7 +242,7 @@ class SendTokenForm extends React.Component {
         comment: this.state.sendComment,
       }
 
-      await this.props.api.createTransaction(sendInfo);
+      await this.props.api.createTransaction('selan', sendInfo);
       this.props.onComplete()
     } catch(e) {
       this.setState({
