@@ -29,11 +29,6 @@ class GroupAdmin extends React.Component {
   async loadComponents() {
     try{
       const auth = GetCognitoAuth()
-      if (!auth.isUserSignedIn()) {
-        this.setState({articleComponent: (<h2>ログインされていません</h2>)})
-        return
-      }
-
       const session = await this.getSession(auth)
       if (!session) {
         this.setState({articleComponent: (<h2>セッションの読み込みに失敗しました。再読込してください</h2>)})

@@ -8,13 +8,14 @@ import UserConfig from './UserConfig.js'
 import { BrowserRouter, Route, Switch, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import { NotFoundPage } from './Error.js'
+import PrivateRoute from './PrivateRoute.js'
 
 const App = () => (
   <BrowserRouter>
     <Switch>
-      <Route extract path='/user/register' component={UserRegister} />
-      <Route extract path='/user/config' component={UserConfig} />
-      <Route path='/groups' component={GroupsRouter} />
+      <PrivateRoute extract path='/user/register' component={UserRegister} />
+      <PrivateRoute extract path='/user/config' component={UserConfig} />
+      <PrivateRoute path='/groups' component={GroupsRouter} />
       <Route path='/' component={VisitorAreaRouter} />
     </Switch>
   </BrowserRouter>
