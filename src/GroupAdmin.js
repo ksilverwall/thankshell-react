@@ -28,14 +28,7 @@ class GroupAdmin extends React.Component {
 
   async loadComponents() {
     try{
-      const auth = GetCognitoAuth()
-      const session = await this.getSession(auth)
-      if (!session) {
-        this.setState({articleComponent: (<h2>セッションの読み込みに失敗しました。再読込してください</h2>)})
-        return
-      }
-
-      const api = GetThankshellApi(session)
+      const api = GetThankshellApi(GetCognitoAuth())
 
       let userInfo = await api.getUser();
       if (userInfo.status === 'UNREGISTERED') {
@@ -45,20 +38,9 @@ class GroupAdmin extends React.Component {
 
       this.setState({articleComponent: await this.renderAdminPage(api, userInfo)})
     } catch(e) {
-      this.setState({articleComponent: (<p>読み込みエラー</p>)})
+      this.setState({articleComponent: (<p>読み込みエラー: {e.message}</p>)})
       console.log(e.message)
     }
-  }
-
-  getSession(auth) {
-    return new Promise((resolve, reject) => {
-        auth.userhandler = {
-            onSuccess: resolve,
-            onFailure: reject,
-        };
-
-        auth.getSession();
-    });
   }
 
   async renderAdminPage(api, userInfo) {

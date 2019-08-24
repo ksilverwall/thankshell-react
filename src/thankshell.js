@@ -1,29 +1,49 @@
 export class ThankshellApi {
-    constructor(session, version) {
-        this.session = session;
-        this.headers = {
-            "Content-Type": "application/json; charset=utf-8",
-            Authorization: this.session.idToken.jwtToken
-        };
+    constructor(auth, version) {
+        this.auth = auth
+        this.session = null
         this.basePath = 'https://api.thankshell.com/' + version;
     }
 
-    getUri(path) {
-        return this.basePath + path;
+    getSession() {
+        return new Promise((resolve, reject) => {
+            this.auth.userhandler = {
+                onSuccess: resolve,
+                onFailure: reject,
+            };
+
+            this.auth.getSession();
+        });
+    }
+
+    async reloadSession() {
+        this.session = await this.getSession()
+        if (!this.session) {
+            throw Error('セッションの読み込みに失敗しました。再読込してください')
+        }
+    }
+
+    getHeaders(session) {
+        return {
+            "Content-Type": "application/json; charset=utf-8",
+            Authorization: session.idToken.jwtToken
+        }
     }
 
     async getUser() {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/user/', {
             method: "GET",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
         });
         return await response.json();
     }
 
     async createUser(userId) {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/user/', {
             method: "PUT",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
             body: JSON.stringify({
                 id: userId,
             }),
@@ -39,32 +59,36 @@ export class ThankshellApi {
     // Groups
 
     async getGroup(groupName) {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/groups/' + groupName, {
             method: "GET",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
         });
 
         return new GroupInfo(await response.json());
     }
 
     async sendGroupJoinRequest(groupName, userId) {
+        if (!this.session) { await this.reloadSession() }
         await fetch(this.basePath + '/groups/' + groupName + '/requests/' + userId, {
             method: "PUT",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
         });
     }
 
     async cancelGroupJoinRequest(groupName, userId) {
+        if (!this.session) { await this.reloadSession() }
         await fetch(this.basePath + '/groups/' + groupName + '/requests/' + userId, {
             method: "DELETE",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
         });
     }
 
     async acceptGroupJoinRequest(groupName, userId) {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/groups/' + groupName + '/members/' + userId, {
             method: "PUT",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
         });
         let data = await response.json();
         console.log(data);
@@ -74,9 +98,10 @@ export class ThankshellApi {
     // Transactions
 
     async createTransaction(data) {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/token/selan/transactions', {
             method: "POST",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
             body: JSON.stringify(data),
         });
 
@@ -87,9 +112,10 @@ export class ThankshellApi {
     }
 
     async loadTransactions(userId) {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/token/selan/transactions?user_id=' + userId, {
             method: "GET",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
         });
 
         let data = await response.json();
@@ -102,9 +128,10 @@ export class ThankshellApi {
     }
 
     async loadAllTransactions() {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/token/selan/transactions', {
             method: "GET",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
         });
 
         let data = await response.json();
@@ -120,18 +147,20 @@ export class ThankshellApi {
     // Publish
 
     async getPublished() {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/token/selan/published', {
             method: "GET",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
         });
 
         return await response.json();
     }
 
     async publish(to, amount) {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/token/selan/published', {
             method: "POST",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
             body: JSON.stringify({
                 to: to,
                 amount: amount,
@@ -149,9 +178,10 @@ export class ThankshellApi {
     // Holdings
 
     async getHoldings() {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/token/selan/holders', {
             method: "GET",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
         });
 
         let json = await response.json();
@@ -164,9 +194,10 @@ export class ThankshellApi {
     };
 
     async getHolding(userId) {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/token/selan/holders', {
             method: "GET",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
         });
 
         let json = await response.json();
@@ -182,9 +213,10 @@ export class ThankshellApi {
     // Holdings
 
     async getLinks() {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/user/link', {
             method: "GET",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
         });
 
         if (response.status !== 200) {
@@ -196,9 +228,10 @@ export class ThankshellApi {
     }
 
     async linkFacebook(fbLoginInfo) {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/user/link/Facebook', {
             method: "PUT",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
             body: JSON.stringify({
                 'id': fbLoginInfo.authResponse.userID,
                 'token': fbLoginInfo.authResponse.accessToken,
@@ -214,9 +247,10 @@ export class ThankshellApi {
     }
 
     async unlinkFacebook(fbLoginInfo) {
+        if (!this.session) { await this.reloadSession() }
         let response = await fetch(this.basePath + '/user/link/Facebook', {
             method: "DELETE",
-            headers: this.headers,
+            headers: this.getHeaders(this.session),
             body: JSON.stringify({
                 'id': fbLoginInfo.authResponse.userID,
                 'token': fbLoginInfo.authResponse.accessToken,
@@ -260,4 +294,4 @@ class GroupInfo {
     }
 }
 
-export const GetThankshellApi = (session) => new ThankshellApi(session, process.env.REACT_APP_THANKSHELL_API_VERSION)
+export const GetThankshellApi = (auth) => new ThankshellApi(auth, process.env.REACT_APP_THANKSHELL_API_VERSION)
