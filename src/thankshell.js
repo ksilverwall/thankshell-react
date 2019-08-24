@@ -30,115 +30,88 @@ export class ThankshellApi {
         }
     }
 
-    async getUser() {
+    async get(path) {
         if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/user/', {
+        const response = await fetch(this.basePath + path, {
             method: "GET",
             headers: this.getHeaders(this.session),
         });
-        return await response.json();
+
+        const data = await response.json();
+
+        if (response.status !== 200) {
+            throw new Error(response.status + ":" + data.message);
+        }
+
+        return data
     }
 
-    async createUser(userId) {
+    async put(path, data) {
         if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/user/', {
+        const response = await fetch(this.basePath + path, {
             method: "PUT",
             headers: this.getHeaders(this.session),
-            body: JSON.stringify({
-                id: userId,
-            }),
-        });
+            body: JSON.stringify(data),
+        })
 
         return {
             status: response.status,
             body: await response.json(),
-        };
+        }
+    }
+
+    async post(path, data) {
+        if (!this.session) { await this.reloadSession() }
+        const response = await fetch(this.basePath + path, {
+            method: "POST",
+            headers: this.getHeaders(this.session),
+            body: JSON.stringify(data),
+        })
+
+        const body = await response.json()
+        if (response.status !== 200) {
+            throw new Error(body.message)
+        }
+
+        return body
+    }
+
+    //-------------------------------------------------
+    // Users
+
+    async getUser() {
+        return await this.get('/user/')
+    }
+
+    async createUser(userId) {
+        // FIXME: should be post
+        return await this.put('/user/', {id: userId})
     }
 
     //-------------------------------------------------
     // Groups
 
     async getGroup(groupName) {
-        if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/groups/' + groupName, {
-            method: "GET",
-            headers: this.getHeaders(this.session),
-        });
+        const group_data = await this.get('/groups/' + groupName)
 
-        return new GroupInfo(await response.json());
-    }
-
-    async sendGroupJoinRequest(groupName, userId) {
-        if (!this.session) { await this.reloadSession() }
-        await fetch(this.basePath + '/groups/' + groupName + '/requests/' + userId, {
-            method: "PUT",
-            headers: this.getHeaders(this.session),
-        });
-    }
-
-    async cancelGroupJoinRequest(groupName, userId) {
-        if (!this.session) { await this.reloadSession() }
-        await fetch(this.basePath + '/groups/' + groupName + '/requests/' + userId, {
-            method: "DELETE",
-            headers: this.getHeaders(this.session),
-        });
-    }
-
-    async acceptGroupJoinRequest(groupName, userId) {
-        if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/groups/' + groupName + '/members/' + userId, {
-            method: "PUT",
-            headers: this.getHeaders(this.session),
-        });
-        let data = await response.json();
-        console.log(data);
+        return new GroupInfo(group_data)
     }
 
     //-------------------------------------------------
     // Transactions
 
-    async createTransaction(data) {
-        if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/token/selan/transactions', {
-            method: "POST",
-            headers: this.getHeaders(this.session),
-            body: JSON.stringify(data),
-        });
-
-        if (response.status !== 200) {
-            let data = await response.json();
-            throw new Error(data.message);
-        }
+    async createTransaction(tokenName, data) {
+        await this.post('/token/' + tokenName + '/transactions', data)
     }
 
-    async loadTransactions(userId) {
-        if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/token/selan/transactions?user_id=' + userId, {
-            method: "GET",
-            headers: this.getHeaders(this.session),
-        });
+    async loadTransactions(tokenName, userId) {
+        const data = await this.get('/token/' + tokenName + '/transactions?user_id=' + userId)
 
-        let data = await response.json();
-
-        if (response.status !== 200) {
-            throw new Error(response.status + ":" + data.message);
-        }
-
-        return data.history.Items;
+        return data.history.Items
     }
 
-    async loadAllTransactions() {
-        if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/token/selan/transactions', {
-            method: "GET",
-            headers: this.getHeaders(this.session),
-        });
-
-        let data = await response.json();
-
-        if (response.status !== 200) {
-            throw new Error(response.status + ":" + data.message);
-        }
+    async loadAllTransactions(tokenName) {
+        const data = await this.get('/token/' + tokenName + '/transactions')
 
         return data.history.Items;
     }
@@ -146,121 +119,25 @@ export class ThankshellApi {
     //-------------------------------------------------
     // Publish
 
-    async getPublished() {
-        if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/token/selan/published', {
-            method: "GET",
-            headers: this.getHeaders(this.session),
-        });
-
-        return await response.json();
-    }
-
-    async publish(to, amount) {
-        if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/token/selan/published', {
-            method: "POST",
-            headers: this.getHeaders(this.session),
-            body: JSON.stringify({
+    async publish(tokenName, to, amount) {
+        return await this.post(
+            '/token/' + tokenName + '/published',
+            {
                 to: to,
                 amount: amount,
-            }),
-        });
-
-        let data = await response.json();
-
-        if (response.status !== 200) {
-            throw new Error(response.status + ":" + data.message);
-        }
+            }
+        )
     }
 
     //-------------------------------------------------
     // Holdings
 
-    async getHoldings() {
-        if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/token/selan/holders', {
-            method: "GET",
-            headers: this.getHeaders(this.session),
-        });
-
-        let json = await response.json();
-
-        if (response.status !== 200) {
-            throw new Error(json.message)
-        }
-
-        return json;
-    };
-
-    async getHolding(userId) {
-        if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/token/selan/holders', {
-            method: "GET",
-            headers: this.getHeaders(this.session),
-        });
-
-        let json = await response.json();
-
-        if (response.status !== 200) {
-            throw new Error(json.message)
-        }
-
-        return json[userId];
-    };
-
-    //-------------------------------------------------
-    // Holdings
-
-    async getLinks() {
-        if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/user/link', {
-            method: "GET",
-            headers: this.getHeaders(this.session),
-        });
-
-        if (response.status !== 200) {
-            let result = await response.json();
-            throw new Error(result.message);
-        }
-
-        return await response.json();
+    async getHoldings(tokenName) {
+        return await this.get('/token/' + tokenName + '/holders')
     }
 
-    async linkFacebook(fbLoginInfo) {
-        if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/user/link/Facebook', {
-            method: "PUT",
-            headers: this.getHeaders(this.session),
-            body: JSON.stringify({
-                'id': fbLoginInfo.authResponse.userID,
-                'token': fbLoginInfo.authResponse.accessToken,
-            }),
-        });
-
-        if (response.status !== 200) {
-            let result = await response.json();
-            throw new Error(result.message);
-        }
-
-        return await response.json();
-    }
-
-    async unlinkFacebook(fbLoginInfo) {
-        if (!this.session) { await this.reloadSession() }
-        let response = await fetch(this.basePath + '/user/link/Facebook', {
-            method: "DELETE",
-            headers: this.getHeaders(this.session),
-            body: JSON.stringify({
-                'id': fbLoginInfo.authResponse.userID,
-                'token': fbLoginInfo.authResponse.accessToken,
-            }),
-        });
-
-        if (response.status !== 200) {
-            let result = await response.json();
-            throw new Error(result.message);
-        }
+    async getHolding(tokenName, userId) {
+        return (await this.getHoldings(tokenName))[userId]
     }
 }
 

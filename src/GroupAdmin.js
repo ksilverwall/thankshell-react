@@ -113,14 +113,14 @@ class GroupAdminPage extends React.Component {
 
   async reloadTransactions() {
     try {
-      const holdings = await this.props.api.getHoldings()
+      const holdings = await this.props.api.getHoldings('selan')
       const totalPublished = Object.values(holdings).reduce((prev, item) => prev + item, 0)
       this.setState({
         holdings: holdings,
         totalPublished: totalPublished,
         bankHolding: holdings['sla_bank'],
         userHoldings: totalPublished - holdings['sla_bank'],
-        transactionHistory: await this.props.api.loadTransactions(this.props.userInfo.user_id),
+        transactionHistory: await this.props.api.loadAllTransactions('selan'),
       })
     } catch(e) {
       this.setState({errorMessage: 'ERROR: ' + e.message})
@@ -203,7 +203,7 @@ class PublishTokenForm extends React.Component {
     })
 
     try {
-      await this.props.api.publish('sla_bank', this.state.amount);
+      await this.props.api.publish('selan', 'sla_bank', this.state.amount);
       this.props.onComplete()
     } catch(e) {
       this.setState({
@@ -242,7 +242,7 @@ class SendTokenForm extends React.Component {
         comment: this.state.sendComment,
       }
 
-      await this.props.api.createTransaction(sendInfo);
+      await this.props.api.createTransaction('selan', sendInfo);
       this.props.onComplete()
     } catch(e) {
       this.setState({

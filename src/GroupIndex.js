@@ -81,8 +81,8 @@ class GroupIndexMemberPage extends React.Component {
   async reloadTransactions() {
     try {
       this.setState({
-        holding: await this.props.api.getHolding(this.props.userInfo.user_id),
-        transactionHistory: await this.props.api.loadTransactions(this.props.userInfo.user_id),
+        holding: await this.props.api.getHolding('selan', this.props.userInfo.user_id),
+        transactionHistory: await this.props.api.loadTransactions('selan', this.props.userInfo.user_id),
       })
     } catch(e) {
       this.setState({errorMessage: 'ERROR: ' + e.message})
@@ -300,7 +300,7 @@ class SendTokenForm extends React.Component {
         comment: this.state.sendComment,
       }
 
-      await this.props.api.createTransaction(sendInfo);
+      await this.props.api.createTransaction('selan', sendInfo);
       this.props.onComplete()
     } catch(e) {
       this.setState({
