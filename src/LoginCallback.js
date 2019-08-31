@@ -12,11 +12,13 @@ class LoginCallback extends React.Component {
   componentDidMount() {
     try {
       let auth = GetCognitoAuth()
+      auth.userhandler = {
+        onSuccess: this.onLoginSuccess.bind(this),
+        onFailure: this.onLoginFailure.bind(this),
+      }
       auth.parseCognitoWebResponse(this.props.location.search);
-
-      this.props.history.push('/groups/sla')
-    } catch(e) {
-      this.setState({'message': 'ERROR: ' + e.message})
+    } catch(err) {
+      this.setState({'message': 'ERROR: ' + err.message})
     }
   }
 
@@ -24,6 +26,14 @@ class LoginCallback extends React.Component {
     return (
       <h1>{this.state.message}</h1>
     )
+  }
+
+  onLoginSuccess(result) {
+    this.props.history.push('/groups/sla')
+  }
+
+  onLoginFailure(err) {
+    this.setState({'message': 'ERROR: ' + err.message})
   }
 }
 
