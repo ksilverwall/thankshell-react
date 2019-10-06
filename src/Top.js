@@ -1,14 +1,22 @@
 import React from 'react';
 import './Top.css';
 import { Button } from 'react-bootstrap';
-import { GetCognitoAuth } from './auth'
+import { GetCognitoAuth, AuthConfig } from './auth'
+import { CognitoAuth } from 'amazon-cognito-auth-js/dist/amazon-cognito-auth';
 
 class Top extends React.Component {
   handleSignIn() {
-    const auth = GetCognitoAuth(
-      () => { this.props.history.push('/groups/sla') },
-      () => {  }
-    )
+    const auth = new CognitoAuth(AuthConfig)
+    auth.userhandler = {
+      onSuccess: function(result) {
+        this.props.history.push('/groups/sla')
+      },
+      onFailure: function(err) {
+        console.log(err);
+        auth.launchUri(auth.getFQDNSignIn())
+      }
+    }
+    auth.useCodeGrantFlow();
     auth.getSession()
   }
 
