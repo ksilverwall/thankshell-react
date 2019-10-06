@@ -7,9 +7,10 @@ import { CognitoAuth } from 'amazon-cognito-auth-js/dist/amazon-cognito-auth';
 class Top extends React.Component {
   handleSignIn() {
     const auth = new CognitoAuth(AuthConfig)
+    const history = this.props.history
     auth.userhandler = {
       onSuccess: function(result) {
-        this.props.history.push('/groups/sla')
+        history.push('/groups/sla')
       },
       onFailure: function(err) {
         console.log(err);
