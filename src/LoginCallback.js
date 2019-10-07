@@ -10,15 +10,18 @@ class LoginCallback extends React.Component {
   }
 
   componentDidMount() {
+    const responseToken = this.props.location.search
     try {
-      let auth = GetCognitoAuth()
+      const auth = GetCognitoAuth()
       auth.userhandler = {
         onSuccess: this.onLoginSuccess.bind(this),
         onFailure: this.onLoginFailure.bind(this),
       }
-      auth.parseCognitoWebResponse(this.props.location.search);
+      auth.parseCognitoWebResponse(responseToken);
     } catch(err) {
-      this.setState({'message': 'ERROR: ' + err.message})
+      this.setState({
+        'message': `ERROR on parse ${responseToken}: ${err}`
+      })
     }
   }
 
@@ -33,7 +36,9 @@ class LoginCallback extends React.Component {
   }
 
   onLoginFailure(err) {
-    this.setState({'message': 'ERROR: ' + err.message})
+    this.setState({
+      'message': `ERROR: ${err}`
+    })
   }
 }
 
