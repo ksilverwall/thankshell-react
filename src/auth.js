@@ -27,3 +27,16 @@ export const GetCognitoAuth = (onSuccess, onFailure) => {
 
   return auth
 }
+
+export const GetRedirectUri = () => {
+  const params = {
+    'redirect_uri': encodeURIComponent(AuthConfig.RedirectUriSignIn),
+    'response_type': 'code',
+    'client_id':  AuthConfig.ClientId,
+    'scope': AuthConfig.TokenScopesArray.join(' '),
+  }
+
+  const payload = Object.keys(params).map(key => `${key}=${params[key]}`).join('&')
+
+  return `https://${AuthConfig.AppWebDomain}/oauth2/authorize?${payload}`
+}
