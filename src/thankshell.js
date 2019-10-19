@@ -1,8 +1,8 @@
 export class ThankshellApi {
-    constructor(auth, version) {
+    constructor(auth, host, version) {
         this.auth = auth
         this.session = null
-        this.basePath = 'https://api.thankshell.com/' + version;
+        this.basePath = `https://${host}/${version}`
     }
 
     getSession() {
@@ -171,4 +171,4 @@ class GroupInfo {
     }
 }
 
-export const GetThankshellApi = (auth) => new ThankshellApi(auth, process.env.REACT_APP_THANKSHELL_API_VERSION)
+export const GetThankshellApi = (auth) => new ThankshellApi(auth, process.env.REACT_APP_THANKSHELL_API_HOST, process.env.REACT_APP_THANKSHELL_API_VERSION)
