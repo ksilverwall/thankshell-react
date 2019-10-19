@@ -46,7 +46,7 @@ class GroupAdmin extends React.Component {
   async renderAdminPage(api, userInfo) {
     let groupInfo = await api.getGroup('sla');
     if (groupInfo.getMembers().includes(userInfo.user_id)) {
-      return (<GroupAdminPage api={api} userInfo={userInfo} history={this.props.history}/>)
+      return (<GroupAdminPage api={api} groupInfo={groupInfo} userInfo={userInfo} history={this.props.history}/>)
     } else {
       return (<AccessDeniedPage />)
     }
@@ -68,6 +68,7 @@ class GroupAdminPage extends React.Component {
       userHoldings: '---',
       transactionHistory: [],
       modalComponent: null,
+      groupInfo: props.groupInfo,
     };
   }
 
@@ -94,7 +95,7 @@ class GroupAdminPage extends React.Component {
           <button className="btn btn-primary" onClick={this.openSendTokenModal.bind(this)}>送る</button>
         </section>
 
-        <HoldingStatusSection holdings={this.state.holdings} />
+        <HoldingStatusSection holdings={this.state.holdings} groupInfo={this.state.groupInfo} api={this.props.api}/>
         <TransactionSection
           transactionHistory={this.state.transactionHistory}
           api={this.props.api}
@@ -286,41 +287,116 @@ class SendTokenForm extends React.Component {
   }
 }
 
-const HoldingStatusSection = (props) => {
-  const names = Object.keys(props.holdings)
-  const data = {
-    columns: [
-      {
-        label: 'ユーザ',
-        field: 'user',
-      },
-      {
-        label: '保有量',
-        field: 'amount',
-        sort: 'asc',
-      },
-    ],
-    rows: names.map(name => {return {
-      user: name,
-      amount: props.holdings[name],
-    }}),
+class DeleteMemberForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      message: null
+    }
   }
+  render() {
+    return (
+      <React.Fragment>
+        <p>{this.props.name} をグループから削除します</p>
+        <Button variant="danger" onClick={()=>{this.deleteMember(this.props.name)}}>削除</Button>
+        <p className="warning-text">{this.state.message}</p>
+      </React.Fragment>
+    )
+  }
+
+  async deleteMember(name) {
+    try {
+      await this.props.api.deleteUserFromGroup(this.props.groupId, name)
+      this.props.onComplete()
+    } catch(error) {
+      this.setState({message: error.message})
+    }
+  }
+}
+
+class HoldingStatusSection extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isOpenning: false,
+      modalContents: null,
+    };
+  }
+
+  render() {
+    const names = this.props.groupInfo.getMembers()
+    const data = {
+      columns: [
+        {
+          label: 'ユーザ',
+          field: 'user',
+        },
+        {
+          label: '保有量',
+          field: 'amount',
+          sort: 'asc',
+        },
+        {
+          label: '操作',
+          field: 'deleteButton',
+        },
+      ],
+      rows: names.map(name => {
+        return {
+          user: name,
+          amount: this.props.holdings[name] ? this.props.holdings[name] : 0,
+          deleteButton: (
+            <Button variant="danger" onClick={() => {
+              this.setState({
+                modalContents: this.getModalContents(name),
+                isOpenning: true,
+              })
+            }}>
+              退会
+            </Button>
+          )
+        }
+      }),
+    }
  
-  return (
-    <section className="card mb-3">
-      <div className="card-header">
-        <h4>保有状況</h4>
-      </div>
-      <div className="card-body">
-        <MDBDataTable
-          striped
-          bordered
-          hover
-          data={data}
-        />
-      </div>
-    </section>
-  )
+    return (
+      <section className="card mb-3">
+        <div className="card-header">
+          <h4>保有状況</h4>
+        </div>
+        <div className="card-body">
+          <MDBDataTable
+            striped
+            bordered
+            hover
+            data={data}
+          />
+        </div>
+        <Modal isOpen={this.state.isOpenning} onRequestClose={this.handleCloseModal.bind(this)}>
+          <button type="button" className="close" aria-label="close" onClick={this.handleCloseModal.bind(this)}>
+            <span aria-hidden="true">&times;</span>
+          </button>
+          {this.state.modalContents}
+        </Modal>
+      </section>
+    )
+  }
+
+  handleCloseModal() {
+    this.setState({
+      isOpenning: false,
+    })
+  }
+
+  getModalContents(name) {
+    return (
+      <DeleteMemberForm
+        api={this.props.api}
+        groupId={this.props.groupInfo.groupId}
+        name={name}
+        onComplete={this.handleCloseModal.bind(this)} />
+    )
+  }
 }
 
 class TransactionSection extends React.Component {
