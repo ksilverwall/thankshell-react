@@ -10,15 +10,21 @@ import ReactMarkdown from 'react-markdown'
 import { NotFoundPage } from './Error.js'
 import PrivateRoute from './PrivateRoute.js'
 
+import appReducer from './reducers'
+import { Provider } from 'react-redux'
+import { createStore } from 'redux'
+
 const App = () => (
-  <BrowserRouter>
-    <Switch>
-      <PrivateRoute extract path='/user/register' component={UserRegister} />
-      <PrivateRoute extract path='/user/config' component={UserConfig} />
-      <PrivateRoute path='/groups' component={GroupsRouter} />
-      <Route path='/' component={VisitorAreaRouter} />
-    </Switch>
-  </BrowserRouter>
+  <Provider store={createStore(appReducer)}>
+    <BrowserRouter>
+      <Switch>
+        <PrivateRoute extract path='/user/register' component={UserRegister} />
+        <PrivateRoute extract path='/user/config' component={UserConfig} />
+        <PrivateRoute path='/groups' component={GroupsRouter} />
+        <Route path='/' component={VisitorAreaRouter} />
+      </Switch>
+    </BrowserRouter>
+  </Provider>
 )
 
 const VisitorAreaRouter = () => (
