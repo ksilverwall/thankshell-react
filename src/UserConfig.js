@@ -1,47 +1,47 @@
 import React from 'react'
+import { Alert } from 'react-bootstrap'
+
+import { UserLoadingState } from './actions'
+import LogoutButton from './LogoutButton'
 import { GetCognitoAuth } from './auth'
-import { GetThankshellApi } from './thankshell.js'
-import { Button, Alert } from 'react-bootstrap';
+import { GetThankshellApi } from './thankshell'
 
 class UserConfig extends React.Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
-      articleComponent: (<h1>読込中・・・</h1>)
-    };
+      auth: GetCognitoAuth(),
+      errorMessage: null,
+    }
   }
 
   componentDidMount() {
-    this.loadComponents()
-  }
-
-  render() {
-    return (
-      <article>{this.state.articleComponent}</article>
-    )
-  }
-
-  async loadComponents() {
-    try{
-      const auth = GetCognitoAuth()
-      const api = GetThankshellApi(auth)
-
-      let userInfo = await api.getUser();
-      if (userInfo.status === 'UNREGISTERED') {
-        this.props.history.push('/groups/sla')
-        return
-      }
-
-      this.setState({articleComponent: (<UserConfigPage auth={auth} userId={userInfo.user_id}/>)})
-    } catch(e) {
-      this.setState({articleComponent: (<p>読み込みエラー: {e.message}</p>)})
-      console.log(e.message)
+    if (this.props.userLoadStatus === UserLoadingState.NOT_LOADED) {
+      this.props.loadUser(GetThankshellApi(this.state.auth))
     }
   }
-}
 
-class UserConfigPage extends React.Component {
   render() {
+    const errorMessage = (this.props.userLoadStatus === UserLoadingState.ERROR)
+      ? `Error on loading user data: ${this.props.user.error}`
+      : this.state.errorMessage
+
+    const isLoading = [
+      UserLoadingState.NOT_LOADED,
+      UserLoadingState.LOADING
+    ].includes(this.props.userLoadStatus)
+
+    let userId = '-----'
+    if (this.props.userLoadStatus === UserLoadingState.LOADED) {
+      if (this.props.user.status === 'UNREGISTERED') {
+        this.props.history.push('/groups/sla')
+      }
+
+      if (this.props.user.status === 'ENABLE') {
+        userId = this.props.user.user_id
+      }
+    }
+
     return (
       <React.Fragment>
         <nav className="navbar navbar-expand navbar-light bg-light">
@@ -52,17 +52,15 @@ class UserConfigPage extends React.Component {
         </nav>
 
         <article className="container-fluid">
-          <Alert variant="denger"></Alert>
-          <h4>ID: {this.props.userId}</h4>
-          <Button variant="primary" onClick={this.logout.bind(this)}>ログアウト</Button>
+          <Alert variant={errorMessage ? "danger" : "primary"}>
+            {isLoading ? "読込中・・・" : errorMessage}
+          </Alert>
+          <h4>ID: {userId}</h4>
+          <LogoutButton auth={this.state.auth} />
         </article>
       </React.Fragment>
     )
   }
-
-  async logout() {
-    this.props.auth.signOut()
-  } 
 }
 
 export default UserConfig

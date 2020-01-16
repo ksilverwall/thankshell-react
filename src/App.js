@@ -4,7 +4,6 @@ import Top from './Top.js'
 import LoginCallback from './LoginCallback.js'
 import GroupsRouter from './GroupsRouter.js'
 import UserRegister from './UserRegister.js'
-import UserConfig from './UserConfig.js'
 import { BrowserRouter, Route, Switch, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import { NotFoundPage } from './Error.js'
@@ -14,12 +13,14 @@ import appReducer from './reducers'
 import { Provider } from 'react-redux'
 import { createStore } from 'redux'
 
+import LoadUser from './containers/LoadUser.js'
+
 const App = () => (
   <Provider store={createStore(appReducer)}>
     <BrowserRouter>
       <Switch>
         <PrivateRoute extract path='/user/register' component={UserRegister} />
-        <PrivateRoute extract path='/user/config' component={UserConfig} />
+        <PrivateRoute extract path='/user/config' component={LoadUser} />
         <PrivateRoute path='/groups' component={GroupsRouter} />
         <Route path='/' component={VisitorAreaRouter} />
       </Switch>
