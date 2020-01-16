@@ -40,3 +40,9 @@ export const GetRedirectUri = () => {
 
   return `https://${AuthConfig.AppWebDomain}/oauth2/authorize?${payload}`
 }
+
+export const SignIn = () => {
+  const auth = new CognitoAuth(AuthConfig)
+  auth.useCodeGrantFlow();
+  auth.launchUri(GetRedirectUri())
+}
