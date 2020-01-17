@@ -1,49 +1,79 @@
 import React from 'react'
+import { Button } from 'react-bootstrap';
+import { Alert } from 'react-bootstrap'
+
+import { UserLoadingState } from './actions'
+
 import { GetCognitoAuth } from './auth'
 import { GetThankshellApi } from './thankshell.js'
-import { Button } from 'react-bootstrap';
+
 
 class UserRegister extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      articleComponent: (<h1>読込中・・・</h1>)
+      api: GetThankshellApi(GetCognitoAuth()),
+      user: null,
+      errorMessage: null,
     };
   }
 
-  componentDidMount() {
-    this.loadComponents()
-  }
-
   render() {
+    const errorMessage = this.getErrorMessage()
+    const isLoading = [
+      UserLoadingState.NOT_LOADED,
+      UserLoadingState.LOADING
+    ].includes(this.props.userLoadStatus)
+
+    if (this.props.userLoadStatus === UserLoadingState.NOT_LOADED) {
+      this.props.loadUser(this.state.api)
+    }
+
+    if (this.props.userLoadStatus === UserLoadingState.LOADED) {
+      if (this.props.user.status !== 'UNREGISTERED') {
+        this.props.history.push('/groups/sla')
+      }
+    }
+
     return (
-      <article>{this.state.articleComponent}</article>
+      <React.Fragment>
+        <nav className="navbar navbar-expand navbar-light bg-light">
+          <div className="navbar-nav">
+            <a className="nav-item nav-link" href="/groups/sla">ホーム </a>
+            <a className="nav-item nav-link" href="/user/config">設定</a>
+          </div>
+        </nav>
+
+        <article className="container-fluid">
+          <Alert variant={errorMessage ? "danger" : "primary"}>
+            {isLoading ? "読込中・・・" : errorMessage}
+          </Alert>
+          <UserRegisterForm
+            {...this.props}
+            api={this.state.api}
+            disabled={this.props.userLoadStatus === UserLoadingState.SAVING || isLoading}
+          />
+        </article>
+      </React.Fragment>
     )
   }
 
-  async loadComponents() {
-    try{
-      const api = GetThankshellApi(GetCognitoAuth())
-
-      let userInfo = await api.getUser();
-      if (userInfo.status !== 'UNREGISTERED') {
-        this.props.history.push('/groups/sla')
-        return
-      }
-
-      this.setState({articleComponent: (<UserRegisterPage api={api} history={this.props.history}/>)})
-    } catch(e) {
-      this.setState({articleComponent: (<p>読み込みエラー</p>)})
-      console.log(e.message)
+  getErrorMessage() {
+    if (this.props.userLoadStatus === UserLoadingState.ERROR) {
+      return `Error on loading user data: ${this.props.user.error}`
     }
+    if (this.props.userRegisterError) {
+      return this.props.userRegisterError
+    }
+
+    return this.state.errorMessage
   }
 }
 
-class UserRegisterPage extends React.Component {
+class UserRegisterForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      message: null,
       userId: null,
       checked: false,
     };
@@ -51,58 +81,39 @@ class UserRegisterPage extends React.Component {
 
   render() {
     return (
-      <article className="container-fluid">
-        <p className="alert alert-danger" role="alert">{this.state.message}</p>
-        <form className="form-horizontal" id="register" onsubmit="register(); return false">
-          <div className="form-group">
-            <label for="user-id">ID</label>
-            <input
-             className="form-control"
-             type="text"
-             value={this.state.userId}
-             onChange={e=>this.setState({userId: e.target.value})} />
-          </div>
-          <div className="form-check">
-            <input
-             className="form-check-input"
-             type="checkbox"
-             checked={this.state.checked}
-             onChange={e=>this.setState({checked: e.target.checked})} />
-            <label className="form-check-label" for="agree-check"><a href="/tos" target="_blank">利用規約</a>に同意する</label>
-          </div>
-          <Button
-            variant="primary"
-            id="register-button"
-            onClick={this.register.bind(this)}
-            disabled={!this.state.checked || !this.state.userId}>登録する</Button>
-        </form>
-      </article>
+      <form className="form-horizontal">
+        <div className="form-group">
+          <label for="user-id">ID</label>
+          <input
+           className="form-control"
+           type="text"
+           value={this.state.userId}
+           onChange={e=>this.setState({userId: e.target.value})} />
+        </div>
+        <div className="form-check">
+          <input
+           className="form-check-input"
+           type="checkbox"
+           checked={this.state.checked}
+           onChange={e=>this.setState({checked: e.target.checked})} />
+          <label className="form-check-label" for="agree-check">
+            <a href="/tos" target="_blank">利用規約</a>に同意する
+          </label>
+        </div>
+        <Button
+          variant="primary"
+          id="register-button"
+          onClick={this.register.bind(this)}
+          disabled={!this.state.checked || !this.state.userId || this.props.disabled}
+        >
+          登録する
+        </Button>
+      </form>
     )
   }
 
-  async register() {
-    try {
-      const data = await this.props.api.createUser(this.state.userId);
-      const responseBody = data.body;
-      switch (data.status) {
-        case 200:
-          break;
-        case 403:
-          switch (responseBody.code) {
-            case 'AUTHINFO_ALREADY_REGISTERD':
-              break
-            default:
-              throw new Error(responseBody.message)
-          }
-          break
-        default:
-          throw new Error(responseBody.message)
-      }
-
-      this.props.history.push('/groups/sla')
-    } catch(e) {
-      this.setState({message: e.message})
-    }
+  register() {
+    this.props.registerUser(this.props.api, this.state.userId)
   }
 }
 

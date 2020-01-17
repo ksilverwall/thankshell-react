@@ -100,7 +100,24 @@ export class ThankshellApi {
 
     async createUser(userId) {
         // FIXME: should be post
-        return await this.put('/user/', {id: userId})
+        const data = await this.put('/user/', {id: userId})
+        const responseBody = data.body;
+        switch (data.status) {
+          case 200:
+            break;
+          case 403:
+            switch (responseBody.code) {
+              case 'AUTHINFO_ALREADY_REGISTERD':
+                break
+              default:
+                throw new Error(responseBody.message)
+            }
+            break
+          default:
+            throw new Error(responseBody.message)
+        }
+
+        return data
     }
 
     //-------------------------------------------------

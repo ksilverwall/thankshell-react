@@ -8,7 +8,7 @@ import GroupsRouter from './GroupsRouter'
 
 import Top from './Top'
 import LoginCallback from './LoginCallback'
-import UserRegister from './UserRegister'
+import RegisterUser from './containers/RegisterUser'
 import { NotFoundPage } from './Error'
 import { Tos, PrivacyPolicy } from './Constants'
 
@@ -22,7 +22,7 @@ const routes = {
     {
       path: '/user/register',
       extract: true,
-      component: UserRegister,
+      component: RegisterUser,
     },
     {
       path: '/user/config',
