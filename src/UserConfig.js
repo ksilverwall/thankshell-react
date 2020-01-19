@@ -31,15 +31,15 @@ class UserConfig extends React.Component {
       UserLoadingState.LOADING
     ].includes(this.props.userLoadStatus)
 
-    let userId = '-----'
     if (this.props.userLoadStatus === UserLoadingState.LOADED) {
       if (this.props.user.status === 'UNREGISTERED') {
         this.props.history.push('/groups/sla')
       }
+    }
 
-      if (this.props.user.status === 'ENABLE') {
-        userId = this.props.user.user_id
-      }
+    let user = null
+    if (this.props.userLoadStatus === UserLoadingState.LOADED) {
+      user = this.props.user
     }
 
     return (
@@ -55,12 +55,24 @@ class UserConfig extends React.Component {
           <Alert variant={errorMessage ? "danger" : "primary"}>
             {isLoading ? "読込中・・・" : errorMessage}
           </Alert>
-          <h4>ID: {userId}</h4>
-          <LogoutButton auth={this.state.auth} />
+          <UserView user={user} auth={this.state.auth}/>
         </article>
       </React.Fragment>
     )
   }
+}
+
+const UserView = (props) => {
+  const userId = (props.user && props.user.status === 'ENABLE')
+    ? props.user.user_id
+    : '-----'
+
+  return (
+    <section>
+      <h4>ID: {userId}</h4>
+      <LogoutButton auth={props.auth} />
+    </section>
+  )
 }
 
 export default UserConfig
