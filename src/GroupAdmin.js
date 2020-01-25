@@ -3,7 +3,7 @@ import Modal from 'react-modal'
 import { Button, Table } from 'react-bootstrap';
 import { MDBDataTable } from 'mdbreact';
 import { GetCognitoAuth } from './auth'
-import { GetThankshellApi } from './thankshell.js'
+import { GetThankshellApi, GroupInfo } from './thankshell.js'
 import './GroupIndex.css'
 
 Modal.setAppElement('#root')
@@ -44,7 +44,7 @@ class GroupAdmin extends React.Component {
   }
 
   async renderAdminPage(api, userInfo) {
-    let groupInfo = await api.getGroup('sla');
+    let groupInfo = new GroupInfo(await api.getGroup('sla'));
     if (groupInfo.getMembers().includes(userInfo.user_id)) {
       return (<GroupAdminPage api={api} groupInfo={groupInfo} userInfo={userInfo} history={this.props.history}/>)
     } else {

@@ -1,69 +1,60 @@
-import React from 'react';
+import React from 'react'
+import { Button, Table, Alert } from 'react-bootstrap'
 import EventListener from 'react-event-listener'
 import Modal from 'react-modal'
-import { Button, Table, Alert } from 'react-bootstrap';
-import { GetCognitoAuth } from './auth'
-import { GetThankshellApi } from './thankshell.js'
+import { UserLoadingState } from './actions'
+import { GroupInfo } from './thankshell'
 import './GroupIndex.css'
-import { Link } from 'aws-amplify-react';
 
 Modal.setAppElement('#root')
 
-class GroupIndex extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isLoading: true,
-      errorMessage: null,
-      user: null,
-      group: null,
+const GroupIndex = (props) => {
+  // FIXME: Move to private router
+  if (props.userLoadingState === UserLoadingState.ERROR) {
+    return (<Alert>ERROR: {props.user.error}</Alert>)
+  }
+
+  if (props.userLoadingState === UserLoadingState.LOADING) {
+    return (<h1>Loading...</h1>)
+  }
+
+  if (props.userLoadingState === UserLoadingState.NOT_LOADED) {
+    props.loadUser(props.api)
+    return (<h1>Loading...</h1>)
+  }
+
+  // FIXME: Move to group router
+  if (props.groupLoadingState === UserLoadingState.ERROR) {
+    return (<Alert>ERROR: {props.user.error}</Alert>)
+  }
+
+  if (props.groupLoadingState === UserLoadingState.LOADING) {
+    return (<h1>Loading...</h1>)
+  }
+
+  if (props.groupLoadingState === UserLoadingState.NOT_LOADED) {
+    props.loadGroup(props.api, props.match.params.id)
+    return (<h1>Loading...</h1>)
+  }
+
+  const group = new GroupInfo(props.group)
+
+  if (props.user) {
+    if (props.user.status === 'UNREGISTERED') {
+      props.history.push('/user/register')
+      return (<p>redirecting...</p>)
     }
   }
 
-  componentDidMount() {
-    this.loadComponents()
-  }
-
-  async loadComponents() {
-    try{
-      const user = await this.props.api.getUser();
-      const group = await this.props.api.getGroup('sla');
-
-      this.setState({
-        user: user,
-        group: group,
-      })
-    } catch(e) {
-      console.log(e.message)
-      this.setState({
-        errorMessage: e.message,
-      })
-    } finally {
-      this.setState({
-        isLoading: false,
-      })
-    }
-  }
-
-  render() {
-    if (this.state.user) {
-      if (this.state.user.status === 'UNREGISTERED') {
-        this.props.history.push('/user/register')
-        return (<p>redirecting...</p>)
+  return (
+    <article>
+      {
+        group.getMembers().includes(props.user.user_id) ?
+          (<GroupIndexMemberPage {...props} />) :
+          (<GroupIndexVisitorPage />)
       }
-    }
-
-    return (
-      <article>
-        {
-          this.state.errorMessage ? (<Alert>ERROR: {this.state.errorMessage}</Alert>):
-            this.state.isLoading ? (<h1>Loading...</h1>):
-            !this.state.group.getMembers().includes(this.state.user.user_id) ? (<GroupIndexVisitorPage />):
-            (<GroupIndexMemberPage {...this.props} user={this.state.user} />)
-        }
-      </article>
-    )
-  }
+    </article>
+  )
 }
 
 const GroupIndexVisitorPage = () => (
@@ -85,7 +76,6 @@ class GroupIndexMemberPage extends React.Component {
     this.state = {
       holding: null,
       transactionHistory: [],
-      modalIsOpen: false,
       errorMessage: null,
     };
   }

@@ -124,9 +124,7 @@ export class ThankshellApi {
     // Groups
 
     async getGroup(groupName) {
-        const group_data = await this.get('/groups/' + groupName)
-
-        return new GroupInfo(group_data)
+        return await this.get('/groups/' + groupName)
     }
 
     async deleteUserFromGroup(groupId, name) {
@@ -177,7 +175,7 @@ export class ThankshellApi {
     }
 }
 
-class GroupInfo {
+export class GroupInfo {
     constructor(data) {
         this.groupId = data['group_id']
         this.data = data;
