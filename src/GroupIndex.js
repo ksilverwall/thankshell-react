@@ -1,10 +1,11 @@
 import React from 'react';
 import EventListener from 'react-event-listener'
 import Modal from 'react-modal'
-import { Button, Table } from 'react-bootstrap';
+import { Button, Table, Alert } from 'react-bootstrap';
 import { GetCognitoAuth } from './auth'
 import { GetThankshellApi } from './thankshell.js'
 import './GroupIndex.css'
+import { Link } from 'aws-amplify-react';
 
 Modal.setAppElement('#root')
 
@@ -12,8 +13,11 @@ class GroupIndex extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      articleComponent: (<h1>読込中・・・</h1>)
-    };
+      isLoading: true,
+      errorMessage: null,
+      user: null,
+      group: null,
+    }
   }
 
   componentDidMount() {
@@ -22,55 +26,67 @@ class GroupIndex extends React.Component {
 
   async loadComponents() {
     try{
-      const api = GetThankshellApi(GetCognitoAuth())
+      const user = await this.props.api.getUser();
+      const group = await this.props.api.getGroup('sla');
 
-      let userInfo = await api.getUser();
-      if (userInfo.status === 'UNREGISTERED') {
-        this.props.history.push('/user/register')
-        return
-      }
-
-      this.setState({articleComponent: await this.renderIndexPage(api, userInfo)})
+      this.setState({
+        user: user,
+        group: group,
+      })
     } catch(e) {
-      this.setState({articleComponent: (<p>読み込みエラー: {e.message}</p>)})
       console.log(e.message)
-    }
-  }
-
-  async renderIndexPage(api, userInfo) {
-    let groupInfo = await api.getGroup('sla');
-    if (groupInfo.getMembers().includes(userInfo.user_id)) {
-      return (<GroupIndexMemberPage api={api} userInfo={userInfo} history={this.props.history}/>)
-    } else {
-      return (<GroupIndexVisitorPage />)
+      this.setState({
+        errorMessage: e.message,
+      })
+    } finally {
+      this.setState({
+        isLoading: false,
+      })
     }
   }
 
   render() {
-    return (
-      <article>{this.state.articleComponent}</article>
-    )
-  }
-}
+    if (this.state.user) {
+      if (this.state.user.status === 'UNREGISTERED') {
+        this.props.history.push('/user/register')
+        return (<p>redirecting...</p>)
+      }
+    }
 
-class GroupIndexVisitorPage extends React.Component {
-  render() {
     return (
-      <article className="container-fluid">
-        <p id="visitor-text">このグループに参加していません</p>
-        <p className="warning-text">6/1以前にSLA入会のユーザ様でこの画面が表示された場合は<a href="https://forms.gle/vrXj9XF95LDGBMEJ6" target="_blank" rel="noopener noreferrer">問い合わせフォーム</a>から連絡をお願いします。</p>
+      <article>
+        {
+          this.state.errorMessage ? (<Alert>ERROR: {this.state.errorMessage}</Alert>):
+            this.state.isLoading ? (<h1>Loading...</h1>):
+            !this.state.group.getMembers().includes(this.state.user.user_id) ? (<GroupIndexVisitorPage />):
+            (<GroupIndexMemberPage {...this.props} user={this.state.user} />)
+        }
       </article>
     )
   }
 }
 
+const GroupIndexVisitorPage = () => (
+  <article className="container-fluid">
+    <p id="visitor-text">このグループに参加していません</p>
+    <p className="warning-text">
+      6/1以前にSLA入会のユーザ様でこの画面が表示された場合は
+      <a href="https://forms.gle/vrXj9XF95LDGBMEJ6" target="_blank" rel="noopener noreferrer">
+        問い合わせフォーム
+      </a>
+      から連絡をお願いします。
+    </p>
+  </article>
+)
+
 class GroupIndexMemberPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      holding: '---',
+      holding: null,
       transactionHistory: [],
       modalIsOpen: false,
+      errorMessage: null,
     };
   }
 
@@ -78,69 +94,102 @@ class GroupIndexMemberPage extends React.Component {
     this.reloadTransactions()
   }
 
-  async reloadTransactions() {
-    try {
-      this.setState({
-        holding: await this.props.api.getHolding('selan', this.props.userInfo.user_id),
-        transactionHistory: await this.props.api.loadTransactions('selan', this.props.userInfo.user_id),
-      })
-    } catch(e) {
-      this.setState({errorMessage: 'ERROR: ' + e.message})
-    }
-  }
-
-  moveToAdminPage() {
-    this.props.history.push('/groups/sla/admin')
-  }
-
-  openSendTokenModal() {
-    this.setState({modalIsOpen: true})
-  }
-
-  closeSendTokenModal() {
-    this.setState({modalIsOpen: false})
-  }
-
-  onSendTokenCompleted() {
-    this.closeSendTokenModal()
-    this.reloadTransactions()
-  }
-
   render() {
     return (
       <article className="container-fluid">
-        <p className="text-center text-danger">{this.state.errorMessage}</p>
+        {
+          this.state.errorMessage ? (
+            <Alert variant="danger">
+              {this.state.errorMessage}
+            </Alert>
+          ) : null
+        }
         <section>
           <a className="row" href="https://sketch-life-academy.com/selan-help/">ヘルプ</a>
-          <button className="row btn my-2 my-sm-0" onClick={this.moveToAdminPage.bind(this)}>管理ページへ</button>
+          <button
+            className="row btn my-2 my-sm-0"
+            onClick={() => {this.props.history.push('/groups/sla/admin')}}
+          >
+            管理ページへ
+          </button>
         </section>
 
         <section>
           <img src="/images/logo.png" className="row col-6 col-sm-2 offset-3 offset-sm-5 img-fluid" alt="selan-logo" />
         </section>
+
         <section>
-          <h1 className="text-right">残高<u>{this.state.holding} Selan</u></h1>
+          <h1 className="text-right">残高<u>{this.state.holding ? this.state.holding: '---'} Selan</u></h1>
         </section>
 
         <section>
           <p className="warning-text">送金後の取り消しはできませんのでご注意ください</p>
-          <button className="btn btn-primary" onClick={this.openSendTokenModal.bind(this)}>送る</button>
+          <SendTokenButton {...this.props} callback={this.reloadTransactions.bind(this)} />
         </section>
 
-        <TransactionSection transactionHistory={this.state.transactionHistory} api={this.props.api} userInfo={this.props.userInfo} />
+        <TransactionSection
+          transactionHistory={this.state.transactionHistory}
+          api={this.props.api}
+          user={this.props.user}
+        />
+      </article>
+    )
+  }
 
-        <Modal isOpen={this.state.modalIsOpen} onRequestClose={this.closeSendTokenModal.bind(this)}>
-          <button type="button" className="close" aria-label="close" onClick={this.closeSendTokenModal.bind(this)}>
+  //-------------------------------------------------------------------
+  // async load
+
+  async reloadTransactions() {
+    try {
+      this.setState({
+        holding: await this.props.api.getHolding('selan', this.props.user.user_id),
+        transactionHistory: await this.props.api.loadTransactions('selan', this.props.user.user_id),
+      })
+    } catch(e) {
+      this.setState({errorMessage: 'ERROR: ' + e.message})
+    }
+  }
+}
+
+class SendTokenButton extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      modalIsOpen: false,
+    }
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <Button variant="primary" onClick={this.openModal.bind(this)}>
+          送る
+        </Button>
+        <Modal isOpen={this.state.modalIsOpen} onRequestClose={this.closeModal.bind(this)}>
+          <button type="button" className="close" aria-label="close" onClick={this.closeModal.bind(this)}>
             <span aria-hidden="true">&times;</span>
           </button>
           <SendTokenForm
-            from={this.props.userInfo.user_id}
+            from={this.props.user.user_id}
             api={this.props.api}
-            onComplete={this.onSendTokenCompleted.bind(this)}
+            onComplete={this.onCompleted.bind(this)}
           />
         </Modal>
-      </article>
+      </React.Fragment>
     )
+  }
+
+  openModal() {
+    this.setState({modalIsOpen: true})
+  }
+
+  closeModal() {
+    this.setState({modalIsOpen: false})
+  }
+
+  onCompleted() {
+    this.closeModal()
+    this.props.callback()
   }
 }
 
@@ -167,9 +216,9 @@ class TransactionSection extends React.Component {
         <EventListener target="window" onResize={this.handleResize.bind(this)} />
         {
           this.state.isListMode ? (
-            <HistoryList transactionHistory={this.props.transactionHistory} userId={this.props.userInfo.user_id}/>
+            <HistoryList transactionHistory={this.props.transactionHistory} userId={this.props.user.user_id}/>
           ) : (
-            <HistoryTable transactionHistory={this.props.transactionHistory} userId={this.props.userInfo.user_id}/>
+            <HistoryTable transactionHistory={this.props.transactionHistory} userId={this.props.user.user_id}/>
           )
         }
       </section>

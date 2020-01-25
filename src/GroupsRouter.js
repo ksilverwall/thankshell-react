@@ -3,8 +3,9 @@ import { Route, Switch } from 'react-router-dom'
 import { NotFoundPage } from './Error.js'
 import GroupIndex from './GroupIndex.js'
 import GroupAdmin from './GroupAdmin.js'
+import { GetThankshellApi } from './thankshell'
 
-const GroupsRouter = () => (
+const GroupsRouter = ({auth}) => (
   <React.Fragment>
     <header>
       <nav className="navbar navbar-expand navbar-light bg-light">
@@ -16,7 +17,16 @@ const GroupsRouter = () => (
     </header>
     <main>
       <Switch>
-        <Route exact path='/groups/:id' component={GroupIndex} />
+        <Route
+          exact
+          path='/groups/:id'
+          render={props => (
+            <GroupIndex
+              {...props}
+              auth={auth}
+              api={GetThankshellApi(auth)}
+            />)}
+        />
         <Route exact path='/groups/:id/admin' component={GroupAdmin} />
         <Route component={NotFoundPage} />
       </Switch>
