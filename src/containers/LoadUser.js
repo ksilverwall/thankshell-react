@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import UserConfig from '../UserConfig'
+import UserRoute from '../UserRoute'
 import {
   setUser,
   UserLoadingState,
@@ -33,6 +33,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 const LoadUser = connect(
   mapStateToProps,
   mapDispatchToProps
-)(UserConfig)
+)(UserRoute)
 
 export default LoadUser

@@ -5,7 +5,6 @@ import { BrowserRouter, Route, Switch, Link } from 'react-router-dom'
 
 import PrivateRoute from './PrivateRoute'
 import GroupsRouter from './GroupsRouter'
-import UserRoute from './UserRoute'
 
 import Top from './Top'
 import LoginCallback from './LoginCallback'
@@ -13,6 +12,7 @@ import { NotFoundPage } from './Error'
 import { Tos, PrivacyPolicy } from './Constants'
 
 import appReducer from './reducers'
+import LoadUser from './containers/LoadUser';
 
 import './App.css'
 
@@ -21,7 +21,7 @@ const routes = {
     {
       path: '/user',
       extract: false,
-      component: UserRoute,
+      component: LoadUser,
     },
     {
       path: '/groups',
