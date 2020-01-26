@@ -2,7 +2,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom'
 import { NotFoundPage } from './Error.js'
 import GroupAdmin from './GroupAdmin.js'
-import LoadGroup from './containers/LoadGroup'
+import LoadGroupIndex from './containers/LoadGroupIndex'
 import { GetThankshellApi } from './thankshell'
 
 const GroupsRouter = ({auth}) => (
@@ -21,7 +21,7 @@ const GroupsRouter = ({auth}) => (
           exact
           path='/groups/:id'
           render={props => (
-            <LoadGroup
+            <LoadGroupIndex
               {...props}
               auth={auth}
               api={GetThankshellApi(auth)}
