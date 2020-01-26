@@ -1,8 +1,8 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom'
 import { NotFoundPage } from './Error.js'
-import GroupAdmin from './GroupAdmin.js'
 import LoadGroupIndex from './containers/LoadGroupIndex'
+import LoadGroupAdmin from './containers/LoadGroupAdmin'
 import { GetThankshellApi } from './thankshell'
 
 const GroupsRouter = ({auth}) => (
@@ -27,7 +27,16 @@ const GroupsRouter = ({auth}) => (
               api={GetThankshellApi(auth)}
             />)}
         />
-        <Route exact path='/groups/:id/admin' component={GroupAdmin} />
+        <Route
+          exact
+          path='/groups/:id/admin'
+          render={props => (
+            <LoadGroupAdmin
+              {...props}
+              auth={auth}
+              api={GetThankshellApi(auth)}
+            />)}
+        />
         <Route component={NotFoundPage} />
       </Switch>
     </main>

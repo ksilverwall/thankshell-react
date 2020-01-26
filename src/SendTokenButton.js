@@ -11,9 +11,9 @@ class SendTokenForm extends React.Component {
       isSending: false,
       message: null,
       sendFrom: props.from,
-      sendTo: null,
+      sendTo: '',
       sendAmount: 1000,
-      sendComment: null,
+      sendComment: '',
     };
   }
 
@@ -23,9 +23,28 @@ class SendTokenForm extends React.Component {
         <h4>Selanを送る</h4>
         <form className="send-token-modal-form">
           <p className="warning-text">{this.state.message}</p>
+
+
           <div className="send-map">
-            <div className="from-block" colspan="2">{this.state.sendFrom}</div>
+            <div className="from-block" colSpan="2">
+              {
+                this.props.mutableFrom
+                ? (
+                  <input
+                    className="form-condivol"
+                    type="text"
+                    name="to"
+                    placeholder="FROM"
+                    value={this.state.sendFrom}
+                    onChange={e=>this.setState({sendFrom: e.target.value})}
+                  />
+                )
+                : this.state.sendFrom
+              }
+            </div>
+
             <div className="arrow">
+              ↓
               <input
                 className="amount form-condivol"
                 type="number"
@@ -35,6 +54,7 @@ class SendTokenForm extends React.Component {
                 onChange={e=>this.setState({sendAmount: e.target.value})}
               />
             </div>
+
             <div className="to-block">
               <input
                 className="form-condivol"
@@ -58,15 +78,15 @@ class SendTokenForm extends React.Component {
             />
           </div>
 
-          <div style={{"text-align": "center"}}>
-            <Button
-              variant="primary"
+          <div style={{"textAlign": "center"}}>
+            <Button variant="primary"
               onClick={this.sendToken.bind(this)}
               disabled={this.state.isSending}
             >
               送る
             </Button>
           </div>
+
           <p className="warning-text">送金後の取り消しはできませんのでご注意ください</p>
         </form>
       </React.Fragment>
@@ -117,7 +137,8 @@ class SendTokenButton extends React.Component {
             <span aria-hidden="true">&times;</span>
           </button>
           <SendTokenForm
-            from={this.props.user.user_id}
+            mutableFrom={this.props.adminMode}
+            from={this.props.adminMode ? 'sla_bank' : this.props.user.user_id}
             api={this.props.api}
             onComplete={this.onCompleted.bind(this)}
           />
