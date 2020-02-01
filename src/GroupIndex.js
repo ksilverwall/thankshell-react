@@ -6,35 +6,8 @@ import TransactionHistory from './TransactionHistory'
 import { GroupInfo } from './thankshell'
 import './GroupIndex.css'
 
+
 const GroupIndex = (props) => {
-  // FIXME: Move to private router
-  if (props.userLoadingState === UserLoadingState.ERROR) {
-    return (<Alert>ERROR: {props.user.error}</Alert>)
-  }
-
-  if (props.userLoadingState === UserLoadingState.LOADING) {
-    return (<h1>Loading...</h1>)
-  }
-
-  if (props.userLoadingState === UserLoadingState.NOT_LOADED) {
-    props.loadUser(props.api)
-    return (<h1>Loading...</h1>)
-  }
-
-  // FIXME: Move to group router
-  if (props.groupLoadingState === UserLoadingState.ERROR) {
-    return (<Alert>ERROR: {props.user.error}</Alert>)
-  }
-
-  if (props.groupLoadingState === UserLoadingState.LOADING) {
-    return (<h1>Loading...</h1>)
-  }
-
-  if (props.groupLoadingState === UserLoadingState.NOT_LOADED) {
-    props.loadGroup(props.api, props.match.params.id)
-    return (<h1>Loading...</h1>)
-  }
-
   // FIXME: Move to transaction history
   if (props.tokenLoadingState === UserLoadingState.ERROR) {
     return (<Alert>ERROR: {props.token.error}</Alert>)
@@ -49,40 +22,6 @@ const GroupIndex = (props) => {
     return (<h1>Loading...</h1>)
   }
 
-  const group = new GroupInfo(props.group)
-
-  if (props.user) {
-    if (props.user.status === 'UNREGISTERED') {
-      props.history.push('/user/register')
-      return (<p>redirecting...</p>)
-    }
-  }
-
-  return (
-    <article>
-      {
-        group.getMembers().includes(props.user.user_id) ?
-          (<GroupIndexMemberPage {...props} />) :
-          (<GroupIndexVisitorPage />)
-      }
-    </article>
-  )
-}
-
-const GroupIndexVisitorPage = () => (
-  <article className="container-fluid">
-    <p id="visitor-text">このグループに参加していません</p>
-    <p className="warning-text">
-      6/1以前にSLA入会のユーザ様でこの画面が表示された場合は
-      <a href="https://forms.gle/vrXj9XF95LDGBMEJ6" target="_blank" rel="noopener noreferrer">
-        問い合わせフォーム
-      </a>
-      から連絡をお願いします。
-    </p>
-  </article>
-)
-
-const GroupIndexMemberPage = (props) => {
   return (
     <article className="container-fluid">
       <section>

@@ -1,10 +1,6 @@
 import { connect } from 'react-redux'
 import {
-  setUser,
   UserLoadingState,
-  setUserLoadingState,
-  setGroup,
-  setGroupLoadingState,
   setToken,
   setTokenLoadingState,
 } from '../actions'
@@ -12,10 +8,6 @@ import GroupIndex from '../GroupIndex'
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    userLoadingState: state.userLoadingState,
-    user: state.user,
-    groupLoadingState: state.groupLoadingState,
-    group: state.group,
     tokenLoadingState: state.tokenLoadingState,
     token: state.token,
   }
@@ -23,30 +15,6 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    loadUser: (api) => {
-      dispatch(setUserLoadingState(UserLoadingState.LOADING))
-      api.getUser()
-        .then(user => {
-          dispatch(setUser(user))
-          dispatch(setUserLoadingState(UserLoadingState.LOADED))
-        })
-        .catch(err => {
-          dispatch(setUser({error: err.message}))
-          dispatch(setUserLoadingState(UserLoadingState.ERROR))
-        })
-    },
-    loadGroup: (api, groupId) => {
-      dispatch(setGroupLoadingState(UserLoadingState.LOADING))
-      api.getGroup(groupId)
-        .then(group => {
-          dispatch(setGroup(group))
-          dispatch(setGroupLoadingState(UserLoadingState.LOADED))
-        })
-        .catch(err => {
-          dispatch(setGroup({error: err.message}))
-          dispatch(setGroupLoadingState(UserLoadingState.ERROR))
-        })
-    },
     loadTransactions: (api, tokenName, userId) => {
       dispatch(setTokenLoadingState(UserLoadingState.LOADING))
 

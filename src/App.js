@@ -4,7 +4,6 @@ import { createStore } from 'redux'
 import { BrowserRouter, Route, Switch, Link } from 'react-router-dom'
 
 import PrivateRoute from './PrivateRoute'
-import GroupsRouter from './GroupsRouter'
 
 import Top from './Top'
 import LoginCallback from './LoginCallback'
@@ -13,6 +12,7 @@ import { Tos, PrivacyPolicy } from './Constants'
 
 import appReducer from './reducers'
 import LoadUser from './containers/LoadUser';
+import LoadGroup from './containers/LoadGroup';
 
 import './App.css'
 
@@ -24,9 +24,9 @@ const routes = {
       component: LoadUser,
     },
     {
-      path: '/groups',
+      path: '/groups/:id',
       extract: false,
-      component: GroupsRouter,
+      component: LoadGroup,
     },
   ],
   public: [

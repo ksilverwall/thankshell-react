@@ -5,10 +5,8 @@ import {
   setUserLoadingState,
   setGroup,
   setGroupLoadingState,
-  setToken,
-  setTokenLoadingState,
 } from '../actions'
-import GroupAdmin from '../GroupAdmin'
+import GroupsRouter from '../GroupsRouter'
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -51,6 +49,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 const LoadGroup = connect(
   mapStateToProps,
   mapDispatchToProps
-)(GroupAdmin)
+)(GroupsRouter)
 
 export default LoadGroup

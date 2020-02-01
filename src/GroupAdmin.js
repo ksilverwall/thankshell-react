@@ -1,10 +1,8 @@
 import React from 'react';
-import { Alert } from 'react-bootstrap'
 import Modal from 'react-modal'
 import { Button, Table } from 'react-bootstrap';
 import { MDBDataTable } from 'mdbreact';
 import { GroupInfo } from './thankshell.js'
-import { UserLoadingState } from './actions'
 import SendTokenButton from './SendTokenButton'
 import PublishTokenButton from './PublishTokenButton'
 import './GroupIndex.css'
@@ -12,40 +10,7 @@ import './GroupIndex.css'
 Modal.setAppElement('#root')
 
 const GroupAdmin = (props) => {
-  // FIXME: Move to private router
-  if (props.userLoadingState === UserLoadingState.ERROR) {
-    return (<Alert>ERROR: {props.user.error}</Alert>)
-  }
-
-  if (props.userLoadingState === UserLoadingState.LOADING) {
-    return (<h1>Loading...</h1>)
-  }
-
-  if (props.userLoadingState === UserLoadingState.NOT_LOADED) {
-    props.loadUser(props.api)
-    return (<h1>Loading...</h1>)
-  }
-
-  // FIXME: Move to group router
-  if (props.groupLoadingState === UserLoadingState.ERROR) {
-    return (<Alert>ERROR: {props.user.error}</Alert>)
-  }
-
-  if (props.groupLoadingState === UserLoadingState.LOADING) {
-    return (<h1>Loading...</h1>)
-  }
-
-  if (props.groupLoadingState === UserLoadingState.NOT_LOADED) {
-    props.loadGroup(props.api, props.match.params.id)
-    return (<h1>Loading...</h1>)
-  }
-
   const group = new GroupInfo(props.group)
-
-  if (props.user.status === 'UNREGISTERED') {
-    props.history.push('/user/register')
-    return (<p>redirecting...</p>)
-  }
 
   if (!group.getAdmins().includes(props.user.user_id)) {
     return (<h1>アクセス権限がありません</h1>)
