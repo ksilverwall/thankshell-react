@@ -3,16 +3,17 @@ import { Provider } from 'react-redux'
 import { createStore } from 'redux'
 import { BrowserRouter, Route, Switch, Link } from 'react-router-dom'
 
-import PrivateRoute from './PrivateRoute'
-
 import Top from './Top'
 import LoginCallback from './LoginCallback'
 import { NotFoundPage } from './Error'
 import { Tos, PrivacyPolicy } from './Constants'
 
 import appReducer from './reducers'
-import LoadUser from './containers/LoadUser';
+import UserRoute from './UserRoute';
 import LoadGroup from './containers/LoadGroup';
+import LoadPrivate from './containers/LoadPrivate';
+
+import { GetCognitoAuth } from './auth'
 
 import './App.css'
 
@@ -21,7 +22,7 @@ const routes = {
     {
       path: '/user',
       extract: false,
-      component: LoadUser,
+      component: UserRoute,
     },
     {
       path: '/groups/:id',
@@ -54,14 +55,15 @@ const routes = {
 }
 
 const MainRoutes = (props) => {
+  const auth = GetCognitoAuth()
   return (
     <Switch>
       {
         routes.private.map(({path, extract, component}) => (
-          <PrivateRoute
+          <Route
             path={path}
             extract={extract}
-            component={component}
+            render={(props) => (<LoadPrivate renderProps={props} auth={auth} component={component}/>)}
           />
         ))
       }

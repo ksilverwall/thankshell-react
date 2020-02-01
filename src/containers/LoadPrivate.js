@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import UserRoute from '../UserRoute'
+import PrivateArea from '../PrivateArea'
 import {
   setUser,
   UserLoadingState,
@@ -8,7 +8,7 @@ import {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    userLoadStatus: state.userLoadingState,
+    userLoadingState: state.userLoadingState,
     user: state.user,
   }
 }
@@ -30,9 +30,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-const LoadUser = connect(
+const LoadPrivate = connect(
   mapStateToProps,
   mapDispatchToProps
-)(UserRoute)
+)(PrivateArea)
 
-export default LoadUser
+export default LoadPrivate

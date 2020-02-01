@@ -3,7 +3,6 @@ import { Alert } from 'react-bootstrap'
 import { UserLoadingState } from './actions'
 import SendTokenButton from './SendTokenButton'
 import TransactionHistory from './TransactionHistory'
-import { GroupInfo } from './thankshell'
 import './GroupIndex.css'
 
 

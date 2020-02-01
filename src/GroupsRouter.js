@@ -12,29 +12,6 @@ const GroupsRouter = (props) => {
   const {auth, user, group} = props
   const api = GetThankshellApi(auth)
 
-  //-----------------------------------------
-  // FIXME: Move to private router
-  if (props.userLoadingState === UserLoadingState.ERROR) {
-    return (<Alert>ERROR: {props.user.error}</Alert>)
-  }
-
-  if (props.userLoadingState === UserLoadingState.LOADING) {
-    return (<h1>Loading...</h1>)
-  }
-
-  if (props.userLoadingState === UserLoadingState.NOT_LOADED) {
-    props.loadUser(api)
-    return (<h1>Loading...</h1>)
-  }
-
-  if (props.user && props.user.status === 'UNREGISTERED') {
-    props.history.push('/user/register')
-
-    return (<p>redirecting...</p>)
-  }
-  //-----------------------------------------
-
-
   if (props.groupLoadingState === UserLoadingState.ERROR) {
     return (<Alert>ERROR: {props.group.error}</Alert>)
   }
@@ -55,14 +32,6 @@ const GroupsRouter = (props) => {
 
   return (
     <React.Fragment>
-      <header>
-        <nav className="navbar navbar-expand navbar-light bg-light">
-          <div className="navbar-nav">
-            <a className="nav-item nav-link" href="/groups/sla">ホーム </a>
-            <a className="nav-item nav-link" href="/user/config">設定</a>
-          </div>
-        </nav>
-      </header>
       <main>
         <Switch>
           <Route
