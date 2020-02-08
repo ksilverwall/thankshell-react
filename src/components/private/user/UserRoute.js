@@ -2,7 +2,7 @@ import React from 'react'
 import { Route } from 'react-router-dom'
 import UserConfig from './UserConfig'
 
-const UserRoute = ({user, userLoadingState, auth}) => {
+const UserRoute = ({user, auth}) => {
   return (
     <React.Fragment>
       <article className="container-fluid">

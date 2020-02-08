@@ -1,7 +1,9 @@
 import React from 'react';
 import { Alert } from 'react-bootstrap'
-import UserRegister from './UserRegister'
+
 import { UserLoadingState } from '../../actions'
+import RegisterUser from '../../containers/RegisterUser.js'
+
 import { GetThankshellApi } from '../../libs/thankshell.js';
 
 
@@ -9,20 +11,23 @@ const PrivateContents = (props) => {
   const {renderProps, auth, component: C} = props
   const api = GetThankshellApi(auth)
 
-  if (props.userLoadingState === UserLoadingState.ERROR) {
-    return (<Alert>ERROR: {props.user.error}</Alert>)
+  if (!auth.isUserSignedIn()) {
+    return (
+      <div>
+        <h2>ログインされていません</h2>
+      </div>
+    )
   }
 
-  if (props.userLoadingState === UserLoadingState.LOADING) {
-    return (<h1>Loading...</h1>)
+  if (props.errorMessage) {
+    return (<Alert>ERROR: {props.errorMessage}</Alert>)
   }
 
-  if (props.userLoadingState === UserLoadingState.NOT_LOADED) {
+  if (props.reloadUser) {
     props.loadUser(api)
-    return (<h1>Loading...</h1>)
   }
 
-  if (props.user && props.user.status === 'UNREGISTERED') {
+  if (props.openRegisterUser) {
     const isStandby = [
       UserLoadingState.NOT_LOADED,
       UserLoadingState.LOADING,
@@ -30,20 +35,11 @@ const PrivateContents = (props) => {
     ].includes(props.userLoadingState)
 
     return (
-      <UserRegister
+      <RegisterUser
         {...props}
-        api={GetThankshellApi(auth)}
-        user={props.user}
+        api={api}
         disabled={isStandby}
       />
-    )
-  }
-
-  if (!auth.isUserSignedIn()) {
-    return (
-      <div>
-        <h2>ログインされていません</h2>
-      </div>
     )
   }
 
