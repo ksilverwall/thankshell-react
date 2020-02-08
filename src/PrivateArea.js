@@ -2,6 +2,8 @@ import React from 'react';
 import { Alert } from 'react-bootstrap'
 import { UserLoadingState } from './actions'
 import { GetThankshellApi } from './thankshell';
+import UserRegister from './UserRegister'
+
 
 const PrivateContents = (props) => {
   const {renderProps, auth, component: C} = props
@@ -21,11 +23,22 @@ const PrivateContents = (props) => {
   }
 
   if (props.user && props.user.status === 'UNREGISTERED') {
-    props.history.push('/user/register')
+    const isStandby = [
+      UserLoadingState.NOT_LOADED,
+      UserLoadingState.LOADING,
+      UserLoadingState.SAVING,
+    ].includes(props.userLoadingState)
 
-    return (<p>redirecting...</p>)
+    return (
+      <UserRegister
+        {...props}
+        api={GetThankshellApi(auth)}
+        user={props.user}
+        disabled={isStandby}
+      />
+    )
   }
- 
+
   if (!auth.isUserSignedIn()) {
     return (
       <div>
