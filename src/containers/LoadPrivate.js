@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import PrivateArea from '../PrivateArea'
+import PrivateArea from '../components/private/PrivateArea.js'
 import {
   setUser,
   UserLoadingState,

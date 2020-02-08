@@ -1,5 +1,5 @@
 import React from 'react'
-import RegisterUser from './containers/RegisterUser'
+import RegisterUser from '../../containers/RegisterUser'
 
 const UserRegister = (props) => {
   if (props.user && props.user.status !== 'UNREGISTERED') {

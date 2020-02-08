@@ -4,7 +4,7 @@ import {
   setGroup,
   setGroupLoadingState,
 } from '../actions'
-import GroupsRouter from '../GroupsRouter'
+import GroupsRouter from '../components/private/groups/GroupsRouter.js'
 
 const mapStateToProps = (state, ownProps) => {
   return {

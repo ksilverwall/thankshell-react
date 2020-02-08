@@ -2,9 +2,9 @@ import React from 'react';
 import Modal from 'react-modal'
 import { Button, Table } from 'react-bootstrap';
 import { MDBDataTable } from 'mdbreact';
-import { GroupInfo } from './thankshell.js'
-import SendTokenButton from './SendTokenButton'
-import PublishTokenButton from './PublishTokenButton'
+import SendTokenButton from './SendTokenButton.js'
+import PublishTokenButton from './PublishTokenButton.js'
+import { GroupInfo } from '../../../libs/thankshell.js'
 import './GroupIndex.css'
 
 Modal.setAppElement('#root')

@@ -1,12 +1,12 @@
 import React from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom'
 import { Alert } from 'react-bootstrap'
-import { NotFoundPage } from './Error.js'
-import LoadGroupIndex from './containers/LoadGroupIndex'
 import GroupAdmin from './GroupAdmin'
-import { GetThankshellApi } from './thankshell'
-import { UserLoadingState } from './actions'
-import GroupIndexVisitorPage from './GroupIndexVisitorPage'
+import GroupIndexVisitorPage from './GroupIndexVisitorPage.js'
+import { NotFoundPage } from '../../public/Error.js'
+import { UserLoadingState } from '../../../actions'
+import LoadGroupIndex from '../../../containers/LoadGroupIndex.js'
+import { GetThankshellApi } from '../../../libs/thankshell.js'
 
 const GroupsRouter = (props) => {
   const {auth, user, group} = props

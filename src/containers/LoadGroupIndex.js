@@ -4,7 +4,7 @@ import {
   setToken,
   setTokenLoadingState,
 } from '../actions'
-import GroupIndex from '../GroupIndex'
+import GroupIndex from '../components/private/groups/GroupIndex.js'
 
 const mapStateToProps = (state, ownProps) => {
   return {

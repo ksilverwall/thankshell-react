@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import UserRegisterForm from '../UserRegisterForm'
+import UserRegisterForm from '../components/private/UserRegisterForm.js'
 import {
   UserLoadingState,
   setUserLoadingState,

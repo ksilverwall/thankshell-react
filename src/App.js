@@ -3,17 +3,17 @@ import { Provider } from 'react-redux'
 import { createStore } from 'redux'
 import { BrowserRouter, Route, Switch, Link } from 'react-router-dom'
 
-import Top from './Top'
-import LoginCallback from './LoginCallback'
-import { NotFoundPage } from './Error'
-import { Tos, PrivacyPolicy } from './Constants'
+import Top from './components/public/Top.js'
+import LoginCallback from './components/public/LoginCallback.js'
+import { NotFoundPage } from './components/public/Error.js'
+import { Tos, PrivacyPolicy } from './components/public/Constants.js'
+import UserRoute from './components/private/user/UserRoute.js'
 
 import appReducer from './reducers'
-import UserRoute from './UserRoute';
-import LoadGroup from './containers/LoadGroup';
-import LoadPrivate from './containers/LoadPrivate';
+import LoadGroup from './containers/LoadGroup.js'
+import LoadPrivate from './containers/LoadPrivate.js'
 
-import { GetCognitoAuth } from './auth'
+import { GetCognitoAuth } from './libs/auth.js'
 
 import './App.css'
 

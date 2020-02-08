@@ -1,8 +1,8 @@
 import React from 'react';
 import { Alert } from 'react-bootstrap'
-import { UserLoadingState } from './actions'
-import { GetThankshellApi } from './thankshell';
 import UserRegister from './UserRegister'
+import { UserLoadingState } from '../../actions'
+import { GetThankshellApi } from '../../libs/thankshell.js';
 
 
 const PrivateContents = (props) => {

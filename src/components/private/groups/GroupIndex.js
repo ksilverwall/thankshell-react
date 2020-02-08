@@ -1,8 +1,8 @@
 import React from 'react'
 import { Alert } from 'react-bootstrap'
-import { UserLoadingState } from './actions'
-import SendTokenButton from './SendTokenButton'
-import TransactionHistory from './TransactionHistory'
+import { UserLoadingState } from '../../../actions'
+import SendTokenButton from './SendTokenButton.js'
+import TransactionHistory from './TransactionHistory.js'
 import './GroupIndex.css'
 
 

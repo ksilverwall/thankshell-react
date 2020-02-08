@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
-import { SignIn } from './auth'
+import { SignIn } from '../../libs/auth.js'
 import './Top.css';
 
 const SignInButton = () => (
