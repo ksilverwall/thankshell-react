@@ -31,7 +31,7 @@ const GroupsRouter = (props) => {
   }
 
   if (props.group && !props.group.members.includes(props.user.user_id)) {
-    return (<Redirect to={`/groups/${props.match.params.id}/visitor`}/>)
+    return (<GroupIndexVisitorPage/>)
   }
 
   return (
@@ -63,11 +63,6 @@ const GroupsRouter = (props) => {
                 group={group}
               />
             )}
-          />
-          <Route
-            exact
-            path='/groups/:id/visitor'
-            component={GroupIndexVisitorPage} 
           />
           <Route component={NotFoundPage} />
         </Switch>
