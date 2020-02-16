@@ -89,7 +89,6 @@ class GroupAdminPage extends React.Component {
   }
 }
 
-
 class DeleteMemberForm extends React.Component {
   constructor(props) {
     super(props);
@@ -97,11 +96,12 @@ class DeleteMemberForm extends React.Component {
       message: null
     }
   }
+
   render() {
     return (
       <React.Fragment>
-        <p>{this.props.name} をグループから削除します</p>
-        <Button variant="danger" onClick={()=>{this.deleteMember(this.props.name)}}>削除</Button>
+        <p>{this.props.userId} をグループから削除します</p>
+        <Button variant="danger" onClick={()=>{this.deleteMember(this.props.userId)}}>削除</Button>
         <p className="warning-text">{this.state.message}</p>
       </React.Fragment>
     )
@@ -117,15 +117,43 @@ class DeleteMemberForm extends React.Component {
   }
 }
 
-class HoldingStatusSection extends React.Component {
+class UnregisterUserButton extends React.Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       isOpenning: false,
-      modalContents: null,
-    };
+    }
   }
 
+  render() {
+    return (
+      <React.Fragment>
+        <Modal isOpen={this.state.isOpenning} onRequestClose={this.handleCloseModal.bind(this)}>
+          <button type="button" className="close" aria-label="close" onClick={this.handleCloseModal.bind(this)}>
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <DeleteMemberForm
+            api={this.props.api}
+            group={this.props.group}
+            userId={this.props.name}
+            onComplete={this.handleCloseModal.bind(this)}
+          />
+        </Modal>
+        <Button variant="danger" onClick={() => {
+          this.setState({isOpenning: true})
+        }}>
+          退会
+        </Button>
+      </React.Fragment>
+    )
+  }
+
+  handleCloseModal() {
+    this.setState({isOpenning: false})
+  }
+}
+
+class HoldingStatusSection extends React.Component {
   render() {
     const names = this.props.group.getMembers()
     const data = {
@@ -149,14 +177,11 @@ class HoldingStatusSection extends React.Component {
           user: name,
           amount: this.props.holdings[name] ? this.props.holdings[name] : 0,
           deleteButton: (
-            <Button variant="danger" onClick={() => {
-              this.setState({
-                modalContents: this.getModalContents(name),
-                isOpenning: true,
-              })
-            }}>
-              退会
-            </Button>
+            <UnregisterUserButton
+              group={this.props.group}
+              api={this.props.api}
+              name={name}
+            />
           )
         }
       }),
@@ -175,29 +200,7 @@ class HoldingStatusSection extends React.Component {
             data={data}
           />
         </div>
-        <Modal isOpen={this.state.isOpenning} onRequestClose={this.handleCloseModal.bind(this)}>
-          <button type="button" className="close" aria-label="close" onClick={this.handleCloseModal.bind(this)}>
-            <span aria-hidden="true">&times;</span>
-          </button>
-          {this.state.modalContents}
-        </Modal>
       </section>
-    )
-  }
-
-  handleCloseModal() {
-    this.setState({
-      isOpenning: false,
-    })
-  }
-
-  getModalContents(name) {
-    return (
-      <DeleteMemberForm
-        api={this.props.api}
-        group={this.props.group}
-        name={name}
-        onComplete={this.handleCloseModal.bind(this)} />
     )
   }
 }
