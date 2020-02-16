@@ -29,7 +29,6 @@ class GroupAdminPage extends React.Component {
       userHoldings: '---',
       transactionHistory: [],
       modalComponent: null,
-      groupInfo: props.group,
     };
   }
 
@@ -62,7 +61,7 @@ class GroupAdminPage extends React.Component {
           />
         </section>
 
-        <HoldingStatusSection holdings={this.state.holdings} group={this.state.groupInfo} api={this.props.api}/>
+        <HoldingStatusSection holdings={this.state.holdings} group={this.props.group} api={this.props.api}/>
         <TransactionSection
           transactionHistory={this.state.transactionHistory}
           api={this.props.api}
@@ -110,7 +109,7 @@ class DeleteMemberForm extends React.Component {
 
   async deleteMember(name) {
     try {
-      await this.props.api.deleteUserFromGroup(this.props.groupId, name)
+      await this.props.api.deleteUserFromGroup(this.props.group.groupId, name)
       this.props.onComplete()
     } catch(error) {
       this.setState({message: error.message})
@@ -196,7 +195,7 @@ class HoldingStatusSection extends React.Component {
     return (
       <DeleteMemberForm
         api={this.props.api}
-        groupId={this.props.groupInfo.groupId}
+        group={this.props.group}
         name={name}
         onComplete={this.handleCloseModal.bind(this)} />
     )

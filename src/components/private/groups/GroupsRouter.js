@@ -26,6 +26,10 @@ const GroupsRouter = (props) => {
     return (<h1>Loading...</h1>)
   }
 
+  if (!props.user) {
+    return (<h1>Loading...</h1>)
+  }
+
   if (props.group && !props.group.members.includes(props.user.user_id)) {
     return (<Redirect to={`/groups/${props.match.params.id}/visitor`}/>)
   }
