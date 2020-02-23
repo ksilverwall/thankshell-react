@@ -4,7 +4,8 @@ import LogoutButton from './LogoutButton.js'
 const UserConfig = (props) => {
   return (
     <section>
-      <h4>ID: {props.user ? props.user.user_id : '-----'}</h4>
+      <h2>{props.user ? props.user.displayName : '-----'}</h2>
+      <p>ID: {props.user ? props.user.user_id : '-----'}</p>
       <LogoutButton auth={props.auth} />
     </section>
   )
