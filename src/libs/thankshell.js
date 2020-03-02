@@ -127,6 +127,13 @@ export class ThankshellApi {
         return await this.get('/groups/' + groupName)
     }
 
+    async addUserToGroup(groupId, name) {
+        const result = await this.put(`/groups/${groupId}/members/${name}`)
+        if (result.status != 200) {
+            throw new Error(result.body.message)
+        }
+    }
+
     async deleteUserFromGroup(groupId, name) {
         await this.delete(`/groups/${groupId}/members/${name}`)
     }

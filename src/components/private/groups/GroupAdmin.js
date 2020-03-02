@@ -1,6 +1,6 @@
 import React from 'react';
 import Modal from 'react-modal'
-import { Button, Table } from 'react-bootstrap';
+import { Button, Table, Form } from 'react-bootstrap';
 import { MDBDataTable } from 'mdbreact';
 import SendTokenButton from './SendTokenButton.js'
 import PublishTokenButton from './PublishTokenButton.js'
@@ -89,6 +89,42 @@ class GroupAdminPage extends React.Component {
   }
 }
 
+class AddMemberForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      message: null,
+      userId: '',
+    }
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <Form>
+          <Form.Control
+            type="text"
+            placeholder="User id"
+            value={this.state.userId}
+            onChange={e=>this.setState({userId: e.target.value})}
+          />
+        </Form>
+        <Button onClick={()=>{this.addMember(this.state.userId)}}>追加</Button>
+        <p className="warning-text">{this.state.message}</p>
+      </React.Fragment>
+    )
+  }
+
+  async addMember(name) {
+    try {
+      await this.props.api.addUserToGroup(this.props.group.groupId, name)
+      this.props.onComplete()
+    } catch(error) {
+      this.setState({message: error.message})
+    }
+  }
+}
+
 class DeleteMemberForm extends React.Component {
   constructor(props) {
     super(props);
@@ -153,6 +189,42 @@ class UnregisterUserButton extends React.Component {
   }
 }
 
+class RegisterUserButton extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      isOpenning: false,
+    }
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <Modal isOpen={this.state.isOpenning} onRequestClose={this.handleCloseModal.bind(this)}>
+          <button type="button" className="close" aria-label="close" onClick={this.handleCloseModal.bind(this)}>
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <AddMemberForm
+            api={this.props.api}
+            group={this.props.group}
+            userId={this.props.name}
+            onComplete={this.handleCloseModal.bind(this)}
+          />
+        </Modal>
+        <Button onClick={() => {
+          this.setState({isOpenning: true})
+        }}>
+          追加
+        </Button>
+      </React.Fragment>
+    )
+  }
+
+  handleCloseModal() {
+    this.setState({isOpenning: false})
+  }
+}
+
 class HoldingStatusSection extends React.Component {
   render() {
     const names = this.props.group.getMembers()
@@ -190,9 +262,13 @@ class HoldingStatusSection extends React.Component {
     return (
       <section className="card mb-3">
         <div className="card-header">
-          <h4>保有状況</h4>
+          <h4>ユーザリスト</h4>
         </div>
         <div className="card-body">
+          <RegisterUserButton
+            api={this.props.api}
+            group={this.props.group}
+          />
           <MDBDataTable
             striped
             bordered
