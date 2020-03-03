@@ -12,7 +12,7 @@ class SendTokenForm extends React.Component {
       message: null,
       sendFrom: props.from,
       sendTo: '',
-      sendAmount: 1000,
+      sendAmount: this.props.defaultAmount,
       sendComment: '',
     };
   }
@@ -140,6 +140,7 @@ class SendTokenButton extends React.Component {
             mutableFrom={this.props.adminMode}
             from={this.props.adminMode ? 'sla_bank' : this.props.user.user_id}
             api={this.props.api}
+            defaultAmount={this.props.adminMode ? 10000 : 1000}
             onComplete={this.onCompleted.bind(this)}
           />
         </Modal>
