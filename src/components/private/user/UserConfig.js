@@ -48,7 +48,7 @@ class UserConfig extends React.Component {
 
     return (
       <section>
-        <div class='flex-area' {...flex}>
+        <div className='flex-area' {...flex}>
           {
             this.state.editMode ? (
               <React.Fragment>
