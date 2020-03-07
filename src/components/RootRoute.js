@@ -30,8 +30,9 @@ const RootRoutes = (props) => {
               extract: false,
               component: LoadGroup,
             },
-          ].map(({path, extract, component}) => (
+          ].map(({path, extract, component}, index) => (
             <Route
+              key={`private_${index}`}
               path={path}
               extract={extract}
               render={(props) => (<LoadPrivate renderProps={props} auth={auth} component={component}/>)}
@@ -60,8 +61,8 @@ const RootRoutes = (props) => {
               extract: true,
               component: LoginCallback,
             },
-          ].map(({path, extract, component}) => (
-            <Route path={path} exact={extract} component={component} />
+          ].map(({path, extract, component}, index) => (
+            <Route key={`global_${index}`} path={path} exact={extract} component={component} />
           ))
         }
         <Route path='*' component={NotFoundPage} />
