@@ -1,122 +1,137 @@
+export class Session {
+  constructor(auth) {
+    this.auth = auth
+    this.session = null
+  }
+
+  getSession() {
+    return new Promise((resolve, reject) => {
+      this.auth.userhandler = {
+        onSuccess: resolve,
+        onFailure: reject,
+      };
+
+      this.auth.getSession();
+    })
+  }
+
+  async reload() {
+    this.session = await this.getSession()
+    if (!this.session) {
+      throw Error('セッションの読み込みに失敗しました。再読込してください')
+    }
+  }
+
+  async getJwtToken() {
+    if (!this.session) { await this.reload() }
+    return this.session.idToken.jwtToken
+  }
+}
+
+export class RestApi {
+  constructor(session, basePath) {
+    this.session = session
+    this.basePath = basePath
+  }
+
+  async getHeaders() {
+    return {
+      "Content-Type": "application/json; charset=utf-8",
+      Authorization: await this.session.getJwtToken()
+    }
+  }
+
+  async get(path) {
+    const response = await fetch(this.basePath + path, {
+      method: "GET",
+      headers: await this.getHeaders(),
+    })
+
+    const body = await response.json();
+
+    if (response.status !== 200) {
+      throw new Error(response.status + ":" + body.message);
+    }
+
+    return body
+  }
+
+  async post(path, data) {
+    const response = await fetch(this.basePath + path, {
+      method: "POST",
+      headers: await this.getHeaders(),
+      body: JSON.stringify(data),
+    })
+
+    const body = await response.json()
+
+    if (response.status !== 200) {
+      throw new Error(response.status + ":" + body.message);
+    }
+
+    return body
+  }
+
+  async put(path, data) {
+    const response = await fetch(this.basePath + path, {
+      method: "PUT",
+      headers: await this.getHeaders(),
+      body: JSON.stringify(data),
+    })
+
+    return {
+      status: response.status,
+      body: await response.json(),
+    }
+  }
+  
+  async patch(path, data) {
+    const response = await fetch(this.basePath + path, {
+      method: "PATCH",
+      headers: await this.getHeaders(),
+      body: JSON.stringify(data),
+    })
+
+    const body = await response.json()
+
+    if (response.status !== 200) {
+      throw new Error(response.status + ":" + body.message);
+    }
+
+    return body
+  }
+
+  async delete(path) {
+    const response = await fetch(this.basePath + path, {
+      method: "DELETE",
+      headers: await this.getHeaders(),
+    })
+
+    const body = await response.json()
+
+    if (response.status !== 200) {
+      throw new Error(response.status + ":" + body.message);
+    }
+
+    return body
+  }
+}
+
 export class ThankshellApi {
-    constructor(auth, host, version) {
-        this.auth = auth
-        this.session = null
-        this.basePath = `https://${host}/${version}`
-    }
-
-    getSession() {
-        return new Promise((resolve, reject) => {
-            this.auth.userhandler = {
-                onSuccess: resolve,
-                onFailure: reject,
-            };
-
-            this.auth.getSession();
-        });
-    }
-
-    async reloadSession() {
-        this.session = await this.getSession()
-        if (!this.session) {
-            throw Error('セッションの読み込みに失敗しました。再読込してください')
-        }
-    }
-
-    getHeaders(session) {
-        return {
-            "Content-Type": "application/json; charset=utf-8",
-            Authorization: session.idToken.jwtToken
-        }
-    }
-
-    async get(path) {
-        if (!this.session) { await this.reloadSession() }
-        const response = await fetch(this.basePath + path, {
-            method: "GET",
-            headers: this.getHeaders(this.session),
-        });
-
-        const data = await response.json();
-
-        if (response.status !== 200) {
-            throw new Error(response.status + ":" + data.message);
-        }
-
-        return data
-    }
-
-    async put(path, data) {
-        if (!this.session) { await this.reloadSession() }
-        const response = await fetch(this.basePath + path, {
-            method: "PUT",
-            headers: this.getHeaders(this.session),
-            body: JSON.stringify(data),
-        })
-
-        return {
-            status: response.status,
-            body: await response.json(),
-        }
-    }
-
-    async post(path, data) {
-        if (!this.session) { await this.reloadSession() }
-        const response = await fetch(this.basePath + path, {
-            method: "POST",
-            headers: this.getHeaders(this.session),
-            body: JSON.stringify(data),
-        })
-
-        const body = await response.json()
-        if (response.status !== 200) {
-            throw new Error(body.message)
-        }
-
-        return body
-    }
-
-    async patch(path, data) {
-        if (!this.session) { await this.reloadSession() }
-        const response = await fetch(this.basePath + path, {
-            method: "PATCH",
-            headers: this.getHeaders(this.session),
-            body: JSON.stringify(data),
-        })
-
-        const body = await response.json()
-        if (response.status !== 200) {
-            throw new Error(body.message)
-        }
-
-        return body
-    }
-
-    async delete(path) {
-        if (!this.session) { await this.reloadSession() }
-        const response = await fetch(this.basePath + path, {
-            method: "DELETE",
-            headers: this.getHeaders(this.session),
-        })
-
-        const body = await response.json()
-        if (response.status !== 200) {
-            throw new Error(body.message)
-        }
-
-        return body
+    constructor(restApi) {
+        this.restApi = restApi
     }
 
     //-------------------------------------------------
     // Users
 
     async getUser() {
-        return await this.get('/user/')
+        return await this.restApi.get('/user/')
     }
 
     async createUser(userId) {
         // FIXME: should be post
-        const data = await this.put('/user/', {id: userId})
+        const data = await this.restApi.put('/user/', {id: userId})
         const responseBody = data.body;
         switch (data.status) {
           case 200:
@@ -137,42 +152,42 @@ export class ThankshellApi {
     }
 
     async updateUser(userId, user) {
-        await this.patch(`/user/${userId}`, user)
+        await this.restApi.patch(`/user/${userId}`, user)
     }
 
     //-------------------------------------------------
     // Groups
 
     async getGroup(groupName) {
-        return await this.get('/groups/' + groupName)
+        return await this.restApi.get('/groups/' + groupName)
     }
 
     async addUserToGroup(groupId, name) {
-        const result = await this.put(`/groups/${groupId}/members/${name}`)
+        const result = await this.restApi.put(`/groups/${groupId}/members/${name}`)
         if (result.status != 200) {
             throw new Error(result.body.message)
         }
     }
 
     async deleteUserFromGroup(groupId, name) {
-        await this.delete(`/groups/${groupId}/members/${name}`)
+        await this.restApi.delete(`/groups/${groupId}/members/${name}`)
     }
 
     //-------------------------------------------------
     // Transactions
 
     async createTransaction(tokenName, data) {
-        await this.post('/token/' + tokenName + '/transactions', data)
+        await this.restApi.post('/token/' + tokenName + '/transactions', data)
     }
 
     async loadTransactions(tokenName, userId) {
-        const data = await this.get('/token/' + tokenName + '/transactions?user_id=' + userId)
+        const data = await this.restApi.get('/token/' + tokenName + '/transactions?user_id=' + userId)
 
         return data.history.Items
     }
 
     async loadAllTransactions(tokenName) {
-        const data = await this.get('/token/' + tokenName + '/transactions')
+        const data = await this.restApi.get('/token/' + tokenName + '/transactions')
 
         return data.history.Items;
     }
@@ -181,7 +196,7 @@ export class ThankshellApi {
     // Publish
 
     async publish(tokenName, to, amount) {
-        return await this.post(
+        return await this.restApi.post(
             '/token/' + tokenName + '/published',
             {
                 to: to,
@@ -194,7 +209,7 @@ export class ThankshellApi {
     // Holdings
 
     async getHoldings(tokenName) {
-        return await this.get('/token/' + tokenName + '/holders')
+        return await this.restApi.get('/token/' + tokenName + '/holders')
     }
 
     async getHolding(tokenName, userId) {
@@ -232,5 +247,3 @@ export class GroupInfo {
         return this.data.requests;
     }
 }
-
-export const GetThankshellApi = (auth) => new ThankshellApi(auth, process.env.REACT_APP_THANKSHELL_API_HOST, process.env.REACT_APP_THANKSHELL_API_VERSION)

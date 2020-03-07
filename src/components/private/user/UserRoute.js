@@ -1,9 +1,8 @@
 import React from 'react'
 import { Route } from 'react-router-dom'
 import UpdateUser from '../../../containers/UpdateUser.js'
-import { GetThankshellApi } from '../../../libs/thankshell.js'
 
-const UserRoute = ({user, auth}) => {
+const UserRoute = ({user, auth, api}) => {
   return (
     <React.Fragment>
       <article className="container-fluid">
@@ -15,7 +14,7 @@ const UserRoute = ({user, auth}) => {
               {...props}
               user={user}
               auth={auth}
-              api={GetThankshellApi(auth)}
+              api={api}
             />
           )}
         />

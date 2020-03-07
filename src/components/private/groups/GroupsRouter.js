@@ -6,11 +6,9 @@ import GroupIndexVisitorPage from './GroupIndexVisitorPage.js'
 import { NotFoundPage } from '../../public/Error.js'
 import { UserLoadingState } from '../../../actions'
 import LoadGroupIndex from '../../../containers/LoadGroupIndex.js'
-import { GetThankshellApi } from '../../../libs/thankshell.js'
 
 const GroupsRouter = (props) => {
-  const {auth, user, group} = props
-  const api = GetThankshellApi(auth)
+  const {auth, user, group, api} = props
 
   if (props.groupLoadingState === UserLoadingState.ERROR) {
     return (<Alert>ERROR: {props.group.error}</Alert>)

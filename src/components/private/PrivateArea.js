@@ -1,16 +1,15 @@
-import React from 'react';
+import React from 'react'
+import { Link } from 'react-router-dom'
 import { Alert } from 'react-bootstrap'
 
 import { UserLoadingState } from '../../actions'
 import RegisterUser from '../../containers/RegisterUser.js'
 
-import { GetThankshellApi } from '../../libs/thankshell.js';
-import { Link } from 'react-router-dom';
+import { ThankshellApi, RestApi, Session } from '../../libs/thankshell.js'
 
 
 const PrivateContents = (props) => {
   const {renderProps, auth, component: C} = props
-  const api = GetThankshellApi(auth)
 
   if (!auth.isUserSignedIn()) {
     return (
@@ -19,6 +18,10 @@ const PrivateContents = (props) => {
       </div>
     )
   }
+
+  const api = new ThankshellApi(
+    new RestApi(new Session(auth), process.env.REACT_APP_THANKSHELL_API_URL)
+  )
 
   if (props.errorMessage) {
     return (<Alert>ERROR: {props.errorMessage}</Alert>)
@@ -44,7 +47,7 @@ const PrivateContents = (props) => {
     )
   }
 
-  return (<C {...renderProps} {...props} />)
+  return (<C {...renderProps} {...props} api={api}/>)
 }
 
 const PrivateArea = (props) => {
