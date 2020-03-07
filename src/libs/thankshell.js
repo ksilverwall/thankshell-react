@@ -76,6 +76,22 @@ export class ThankshellApi {
         return body
     }
 
+    async patch(path, data) {
+        if (!this.session) { await this.reloadSession() }
+        const response = await fetch(this.basePath + path, {
+            method: "PATCH",
+            headers: this.getHeaders(this.session),
+            body: JSON.stringify(data),
+        })
+
+        const body = await response.json()
+        if (response.status !== 200) {
+            throw new Error(body.message)
+        }
+
+        return body
+    }
+
     async delete(path) {
         if (!this.session) { await this.reloadSession() }
         const response = await fetch(this.basePath + path, {
@@ -118,6 +134,10 @@ export class ThankshellApi {
         }
 
         return data
+    }
+
+    async updateUser(userId, user) {
+        await this.patch(`/user/${userId}`, user)
     }
 
     //-------------------------------------------------

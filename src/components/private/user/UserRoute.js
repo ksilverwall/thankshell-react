@@ -1,6 +1,7 @@
 import React from 'react'
 import { Route } from 'react-router-dom'
-import UserConfig from './UserConfig'
+import UpdateUser from '../../../containers/UpdateUser.js'
+import { GetThankshellApi } from '../../../libs/thankshell.js'
 
 const UserRoute = ({user, auth}) => {
   return (
@@ -10,10 +11,11 @@ const UserRoute = ({user, auth}) => {
           path='/user/config'
           extract={true}
           render={(props) => (
-            <UserConfig
+            <UpdateUser
               {...props}
               user={user}
               auth={auth}
+              api={GetThankshellApi(auth)}
             />
           )}
         />
