@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import PrivateArea from '../components/private/PrivateArea.js'
+import PrivateContents from '../components/private/PrivateContents.js'
 import {
   setUser,
   UserLoadingState,
@@ -18,9 +18,9 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    loadUser: (api) => {
+    loadUser: () => {
       dispatch(setUserLoadingState(UserLoadingState.LOADING))
-      api.getUser()
+      ownProps.api.getUser()
         .then(user => {
           dispatch(setUser(user))
           dispatch(setUserLoadingState(UserLoadingState.LOADED))
@@ -36,6 +36,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 const LoadPrivate = connect(
   mapStateToProps,
   mapDispatchToProps
-)(PrivateArea)
+)(PrivateContents)
 
 export default LoadPrivate

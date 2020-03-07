@@ -1,56 +1,9 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Alert } from 'react-bootstrap'
-
-import { UserLoadingState } from '../../actions'
-import RegisterUser from '../../containers/RegisterUser.js'
-
+import LoadPrivate from '../../containers/LoadPrivate'
 import { ThankshellApi, RestApi, Session } from '../../libs/thankshell.js'
 
-
-const PrivateContents = (props) => {
-  const {renderProps, auth, component: C} = props
-
-  if (!auth.isUserSignedIn()) {
-    return (
-      <div>
-        <h2>ログインされていません</h2>
-      </div>
-    )
-  }
-
-  const api = new ThankshellApi(
-    new RestApi(new Session(auth), process.env.REACT_APP_THANKSHELL_API_URL)
-  )
-
-  if (props.errorMessage) {
-    return (<Alert>ERROR: {props.errorMessage}</Alert>)
-  }
-
-  if (props.reloadUser) {
-    props.loadUser(api)
-  }
-
-  if (props.openRegisterUser) {
-    const isStandby = [
-      UserLoadingState.NOT_LOADED,
-      UserLoadingState.LOADING,
-      UserLoadingState.SAVING,
-    ].includes(props.userLoadingState)
-
-    return (
-      <RegisterUser
-        {...props}
-        api={api}
-        disabled={isStandby}
-      />
-    )
-  }
-
-  return (<C {...renderProps} {...props} api={api}/>)
-}
-
-const PrivateArea = (props) => {
+const PrivateArea = ({renderProps, auth, component}) => {
   return (
     <React.Fragment>
       <header>
@@ -61,7 +14,25 @@ const PrivateArea = (props) => {
           </div>
         </nav>
       </header>
-      <PrivateContents {...props} />
+      {
+        auth.isUserSignedIn() ? (
+          <LoadPrivate
+            renderProps={renderProps}
+            auth={auth}
+            component={component}
+            api={
+              new ThankshellApi(
+                new RestApi(new Session(auth), process.env.REACT_APP_THANKSHELL_API_URL)
+              )
+            }
+          />
+        ) : (
+          <div>
+            <h2>ログインされていません</h2>
+            <Link to="/" className="nav-item nav-link">TOP</Link>
+          </div>
+        )
+      }
     </React.Fragment>
   )
 }

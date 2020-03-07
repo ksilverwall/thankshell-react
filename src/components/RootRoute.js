@@ -6,9 +6,9 @@ import LoginCallback from './public/LoginCallback.js'
 import { NotFoundPage } from './public/Error.js'
 import { Tos, PrivacyPolicy } from './public/Constants.js'
 import UserRoute from './private/user/UserRoute.js'
+import PrivateArea from './private/PrivateArea.js'
 
 import LoadGroup from '../containers/LoadGroup.js'
-import LoadPrivate from '../containers/LoadPrivate.js'
 
 import { GetCognitoAuth } from '../libs/auth.js'
 
@@ -35,7 +35,9 @@ const RootRoutes = (props) => {
               key={`private_${index}`}
               path={path}
               extract={extract}
-              render={(props) => (<LoadPrivate renderProps={props} auth={auth} component={component}/>)}
+              render={(props) => (
+                <PrivateArea renderProps={props} auth={auth} component={component}/>
+              )}
             />
           ))
         }
