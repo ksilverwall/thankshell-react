@@ -2,102 +2,120 @@ import React from 'react'
 import EventListener from 'react-event-listener'
 import { Table } from 'react-bootstrap'
 
+function zeroPadding(num,length){
+  return ('0000000000' + num).slice(-length);
+}
 
-class HistoryList extends React.Component {
-  getTimeString(timestamp) {
-    let d = new Date(timestamp);
-    let year  = d.getFullYear();
-    let month = d.getMonth() + 1;
-    let day   = d.getDate();
-    let hour  = ( d.getHours()   < 10 ) ? '0' + d.getHours()   : d.getHours();
-    let min   = ( d.getMinutes() < 10 ) ? '0' + d.getMinutes() : d.getMinutes();
-    let sec   = ( d.getSeconds() < 10 ) ? '0' + d.getSeconds() : d.getSeconds();
-
-    return ( year + '/' + month + '/' + day + ' ' + hour + ':' + min + ':' + sec );
+const getTimeString = (timestamp) => {
+  const current = new Date()
+  const d = new Date(timestamp)
+  const year  = d.getFullYear()
+  const month = d.getMonth() + 1;
+  const day   = d.getDate();
+  if (year !== current.getFullYear()) {
+    return `${year}/${zeroPadding(month, 2)}/${zeroPadding(day, 2)}`
   }
 
-  render() {
-    return (
-      <dl className='transaction-history-list'>
+  if (month !== current.getMonth()+1) {
+    return `${month}/${day}`
+  }
+
+  if (day !== current.getDate()) {
+    return `${month}/${day}`
+  }
+
+  return `${zeroPadding(d.getHours(), 2)}:${zeroPadding(d.getMinutes(), 2)}`
+}
+
+const getDisplayName = (userId, memberDetails) => {
+  return memberDetails[userId] ? memberDetails[userId].displayName : userId
+}
+
+const HistoryListItem = ({timestamp, targetUser, amount, comment}) => (
+  <table>
+    <tbody>
+      <tr>
+        <td colSpan="2" className='transaction-datetime'>{getTimeString(timestamp)}</td>
+      </tr>
+      <tr>
+        <td className='transaction-partner'>{targetUser}</td>
         {
-          this.props.transactionHistory.sort((a, b) => { return b.timestamp - a.timestamp; }).map((record)=> (
-            <dt key={record.timestamp}>
-              <table>
-                <tbody>
-                  <tr>
-                    <td colSpan="2" className='transaction-datetime'>{this.getTimeString(record.timestamp)}</td>
-                  </tr>
-                  <tr>
-                    <td className='transaction-partner'>{(record.to_account === this.props.userId) ? record.from_account : record.to_account}</td>
-                    {
-                      (record.to_account === this.props.userId) ? (
-                        <td className='transaction-amount-in'>+{record.amount.toLocaleString()}</td>
-                      ) : (
-                        <td className='transaction-amount-out'>-{record.amount.toLocaleString()}</td>
-                      )
-                    }
-                  </tr>
-                  {
-                    (record.comment) ?
-                      (
-                        <tr>
-                          <td colSpan="2" className="transaction-message">{record.comment}</td>
-                        </tr>
-                      )
-                    : ""
-                  }
-                </tbody>
-              </table>
-            </dt>
-          ))
+          (amount >=0) ? (
+            <td className='transaction-amount-in'>+{amount.toLocaleString()}</td>
+          ) : (
+            <td className='transaction-amount-out'>{amount.toLocaleString()}</td>
+          )
         }
-      </dl>
-    )
-  }
-}
+      </tr>
+      {
+        (comment) ?
+          (
+            <tr>
+              <td colSpan="2" className="transaction-message">{comment}</td>
+            </tr>
+          )
+        : ""
+      }
+    </tbody>
+  </table>
+)
 
-class HistoryTable extends React.Component {
-  getTimeString(timestamp) {
-    let d = new Date(timestamp);
-    let year  = d.getFullYear();
-    let month = d.getMonth() + 1;
-    let day   = d.getDate();
-    let hour  = ( d.getHours()   < 10 ) ? '0' + d.getHours()   : d.getHours();
-    let min   = ( d.getMinutes() < 10 ) ? '0' + d.getMinutes() : d.getMinutes();
-    let sec   = ( d.getSeconds() < 10 ) ? '0' + d.getSeconds() : d.getSeconds();
+const HistoryList = ({userId, group, transactionHistory}) => (
+  <dl className='transaction-history-list'>
+    {
+      transactionHistory
+        .sort((a, b) => { return b.timestamp - a.timestamp; })
+        .map(({timestamp, from_account, to_account, amount, comment}, index)=> (
+          <dt key={index}>
+            <HistoryListItem
+              timestamp={timestamp}
+              comment={comment}
+              amount={(to_account === userId) ? amount : -amount}
+              targetUser={(to_account === userId) ?
+                getDisplayName(
+                  from_account,
+                  group.memberDetails,
+                ):
+                getDisplayName(
+                  to_account,
+                  group.memberDetails,
+                )
+              }
+            />
+          </dt>
+        ))
+    }
+  </dl>
+)
 
-    return ( year + '/' + month + '/' + day + ' ' + hour + ':' + min + ':' + sec );
-  }
-
-  render() {
-    return (
-      <Table>
-        <thead>
-          <tr>
-            <th scope="col">取引日時</th>
-            <th scope="col">FROM</th>
-            <th scope="col">TO</th>
-            <th scope="col" className="text-right">金額(selan)</th>
-            <th scope="col" className="text-left">コメント</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            this.props.transactionHistory.sort((a, b) => { return b.timestamp - a.timestamp; }).map((record)=> (
-              <tr>
-                <td>{this.getTimeString(record.timestamp)}</td>
-                <td>{record.from_account}</td>
-                <td>{record.to_account}</td>
-                <td className="text-right">{record.amount.toLocaleString()}</td>
-                <td className="text-left">{record.comment ? record.comment : ''}</td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </Table>
-    )
-  }
-}
+const HistoryTable = ({group, transactionHistory}) => (
+  <Table>
+    <thead>
+      <tr>
+        <th scope="col">取引日時</th>
+        <th scope="col">FROM</th>
+        <th scope="col">TO</th>
+        <th scope="col" className="text-right">金額(selan)</th>
+        <th scope="col" className="text-left">コメント</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        transactionHistory
+          .sort((a, b) => { return b.timestamp - a.timestamp; })
+          .map(({timestamp, from_account, to_account, amount, comment}, index)=> (
+            <tr key={index}>
+              <td>{getTimeString(timestamp)}</td>
+              <td>{getDisplayName(from_account, group.memberDetails)}</td>
+              <td>{getDisplayName(to_account, group.memberDetails)}</td>
+              <td className="text-right">{amount.toLocaleString()}</td>
+              <td className="text-left">{comment ? comment : ''}</td>
+            </tr>
+          ))
+      }
+    </tbody>
+  </Table>
+)
 
 class TransactionHistory extends React.Component {
   constructor(props) {
@@ -122,9 +140,17 @@ class TransactionHistory extends React.Component {
         <EventListener target="window" onResize={this.handleResize.bind(this)} />
         {
           this.state.isListMode ? (
-            <HistoryList transactionHistory={this.props.transactionHistory} userId={this.props.user.user_id}/>
+            <HistoryList
+              transactionHistory={this.props.transactionHistory}
+              userId={this.props.user.user_id}
+              group={this.props.group}
+            />
           ) : (
-            <HistoryTable transactionHistory={this.props.transactionHistory} userId={this.props.user.user_id}/>
+            <HistoryTable
+              transactionHistory={this.props.transactionHistory}
+              userId={this.props.user.user_id}
+              group={this.props.group}
+            />
           )
         }
       </section>

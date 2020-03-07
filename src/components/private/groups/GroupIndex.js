@@ -53,6 +53,7 @@ const GroupIndex = (props) => {
         transactionHistory={props.token.transactions}
         api={props.api}
         user={props.user}
+        group={props.group}
       />
     </article>
   )
