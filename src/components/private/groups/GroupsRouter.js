@@ -19,7 +19,7 @@ const GroupsRouter = (props) => {
   }
 
   if (props.groupLoadingState === UserLoadingState.NOT_LOADED) {
-    props.loadGroup(api, props.match.params.id)
+    props.loadGroup(props.match.params.id)
 
     return (<h1>Loading...</h1>)
   }

@@ -14,9 +14,9 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    registerUser: async(api, userId) => {
+    registerUser: async(userId) => {
       dispatch(setUserLoadingState(UserLoadingState.SAVING))
-      api.createUser(userId)
+      ownProps.api.createUser(userId)
         .then(() => {
           dispatch(setCreatingUserError(null))
           dispatch(setUserLoadingState(UserLoadingState.NOT_LOADED))

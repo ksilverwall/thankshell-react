@@ -55,6 +55,6 @@ export default class UserRegisterForm extends React.Component {
   }
 
   register() {
-    this.props.registerUser(this.props.api, this.state.userId)
+    this.props.registerUser(this.state.userId)
   }
 }

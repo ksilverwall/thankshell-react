@@ -15,9 +15,9 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    loadGroup: (api, groupId) => {
+    loadGroup: (groupId) => {
       dispatch(setGroupLoadingState(UserLoadingState.LOADING))
-      api.getGroup(groupId)
+      ownProps.api.getGroup(groupId)
         .then(group => {
           dispatch(setGroup(group))
           dispatch(setGroupLoadingState(UserLoadingState.LOADED))

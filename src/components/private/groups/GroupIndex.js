@@ -17,7 +17,7 @@ const GroupIndex = (props) => {
   }
 
   if (props.tokenLoadingState === UserLoadingState.NOT_LOADED) {
-    props.loadTransactions(props.api, 'selan', props.user.user_id)
+    props.loadTransactions('selan', props.user.user_id)
     return (<h1>Loading...</h1>)
   }
 

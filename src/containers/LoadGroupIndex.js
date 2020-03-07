@@ -15,7 +15,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    loadTransactions: (api, tokenName, userId) => {
+    loadTransactions: (tokenName, userId) => {
       dispatch(setTokenLoadingState(UserLoadingState.LOADING))
 
       const loadToken = async(api, tokenName, userId) => {
@@ -25,7 +25,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
         }
       }
 
-      loadToken(api, tokenName, userId)
+      loadToken(ownProps.api, tokenName, userId)
         .then(token => {
           dispatch(setToken(token))
           dispatch(setTokenLoadingState(UserLoadingState.LOADED))
