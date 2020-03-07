@@ -5,6 +5,7 @@ import { UserLoadingState } from '../../actions'
 import RegisterUser from '../../containers/RegisterUser.js'
 
 import { GetThankshellApi } from '../../libs/thankshell.js';
+import { Link } from 'react-router-dom';
 
 
 const PrivateContents = (props) => {
@@ -52,8 +53,8 @@ const PrivateArea = (props) => {
       <header>
         <nav className="navbar navbar-expand navbar-light bg-light">
           <div className="navbar-nav">
-            <a className="nav-item nav-link" href="/groups/sla">ホーム </a>
-            <a className="nav-item nav-link" href="/user/config">設定</a>
+            <Link to="/groups/sla" className="nav-item nav-link">ホーム</Link>
+            <Link to="/user/config" className="nav-item nav-link">設定</Link>
           </div>
         </nav>
       </header>
