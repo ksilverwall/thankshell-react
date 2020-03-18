@@ -6,6 +6,7 @@ import GroupIndexVisitorPage from './GroupIndexVisitorPage.js'
 import { NotFoundPage } from '../../public/Error.js'
 import { UserLoadingState } from '../../../actions'
 import LoadGroupIndex from '../../../containers/LoadGroupIndex.js'
+import LoadGroupAdmin from '../../../containers/LoadGroupAdmin.js'
 
 const GroupsRouter = (props) => {
   const {auth, user, group, api} = props
@@ -53,7 +54,7 @@ const GroupsRouter = (props) => {
             exact
             path='/groups/:id/admin'
             render={internalProps => (
-              <GroupAdmin
+              <LoadGroupAdmin
                 {...internalProps}
                 auth={auth}
                 api={api}

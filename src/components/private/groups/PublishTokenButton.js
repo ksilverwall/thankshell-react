@@ -93,7 +93,7 @@ export default class PublishTokenButton extends React.Component {
   }
 
   onComplete() {
-    this.closeSendTokenModal()
+    this.closeModal()
     this.props.onComplete()
   }
 }

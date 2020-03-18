@@ -5,6 +5,8 @@ export const SET_GROUP = 'SET_GROUP'
 export const SET_GROUP_LOADING_STATE = 'SET_GROUP_LOADING_STATE'
 export const SET_TOKEN = 'SET_TOKEN'
 export const SET_TOKEN_LOADING_STATE = 'SET_TOKEN_LOADING_STATE'
+export const SET_ADMIN_TOKEN = 'SET_ADMIN_TOKEN'
+export const SET_ADMIN_TOKEN_LOADING_STATE = 'SET_ADMIN_TOKEN_LOADING_STATE'
 
 export const UserLoadingState = {
   NOT_LOADED: 'NOT_LOADED',
@@ -50,6 +52,17 @@ export function setToken(transactions) {
 export function setTokenLoadingState(state) {
   return {
     type: SET_TOKEN_LOADING_STATE,
+    state: state,
+  }
+}
+
+export function setAdminToken(transactions) {
+  return { type: SET_ADMIN_TOKEN, transactions }
+}
+
+export function setAdminTokenLoadingState(state) {
+  return {
+    type: SET_ADMIN_TOKEN_LOADING_STATE,
     state: state,
   }
 }

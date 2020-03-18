@@ -7,6 +7,8 @@ import {
   SET_GROUP_LOADING_STATE,
   SET_TOKEN,
   SET_TOKEN_LOADING_STATE,
+  SET_ADMIN_TOKEN,
+  SET_ADMIN_TOKEN_LOADING_STATE,
   UserLoadingState
 } from '../actions'
 
@@ -73,6 +75,24 @@ const token = (state = null, action) => {
   }
 }
 
+const adminTokenLoadingState = (state = UserLoadingState.NOT_LOADED, action) => {
+  switch (action.type) {
+    case SET_ADMIN_TOKEN_LOADING_STATE:
+      return action.state
+    default:
+      return state
+  }
+}
+
+const adminToken = (state = null, action) => {
+  switch (action.type) {
+    case SET_ADMIN_TOKEN:
+      return action.transactions
+    default:
+      return state
+  }
+}
+
 const appReducer = combineReducers({
   userRegisterError,
   userLoadingState,
@@ -81,6 +101,8 @@ const appReducer = combineReducers({
   group,
   tokenLoadingState,
   token,
+  adminTokenLoadingState,
+  adminToken,
 })
 
 export default appReducer

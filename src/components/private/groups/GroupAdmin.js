@@ -2,10 +2,11 @@ import React from 'react';
 import Modal from 'react-modal'
 import { Button, Table, Form } from 'react-bootstrap';
 import { MDBDataTable } from 'mdbreact';
-import SendTokenButton from './SendTokenButton.js'
+import ControlMemberTokenButton from './ControlMemberTokenButton.js'
 import PublishTokenButton from './PublishTokenButton.js'
 import { GroupInfo } from '../../../libs/thankshell.js'
 import './GroupIndex.css'
+import { UserLoadingState } from '../../../actions/index.js';
 
 Modal.setAppElement('#root')
 
@@ -16,77 +17,61 @@ const GroupAdmin = (props) => {
     return (<h1>アクセス権限がありません</h1>)
   }
 
+  if (props.adminTokenLoadingState === UserLoadingState.NOT_LOADED) {
+    props.loadAdminTransactions('selan')
+  }
+
   return (<GroupAdminPage {...props} group={group}/>)
 }
 
-class GroupAdminPage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      holdings: {},
-      totalPublished: '---',
-      bankHolding: '---',
-      userHoldings: '---',
-      transactionHistory: [],
-      modalComponent: null,
-    };
-  }
+const GroupAdminPage = (props) => {
+  const holdings = props.adminToken ? props.adminToken.holdings : {}
+  const transactionHistory = props.adminToken ? props.adminToken.allTransactions : []
+  return (
+    <article className="container-fluid">
+      <h1>管理フォーム</h1>
 
-  componentDidMount() {
-    this.reloadTransactions()
-  }
+      <Holdings
+        holdings={holdings}
+        api={props.api}
+        reloadAdminTransactions={props.reloadAdminTransactions}
+      />
 
-  render() {
-    return (
-      <article className="container-fluid">
-        <h1>管理フォーム</h1>
-
-        <p className="text-center text-danger">{this.state.errorMessage}</p>
-        <section>
-          <h4 className="text-right">総発行量 <u>{this.state.totalPublished} Selan</u></h4>
-          <h4 className="text-right">銀行保有量 <u>{this.state.bankHolding} Selan</u></h4>
-          <h4 className="text-right">流通量 <u>{this.state.userHoldings} Selan</u></h4>
-        </section>
-
-        <section>
-          <PublishTokenButton onComplete={this.reloadTransactions.bind(this)} api={this.props.api} />
-        </section>
-
-        <section>
-          <p className="text-center text-danger">送金後の取り消しはできませんのでご注意ください</p>
-          <SendTokenButton
-            {...this.props}
-            callback={this.reloadTransactions.bind(this)}
-            adminMode={true}
-          />
-        </section>
-
-        <HoldingStatusSection holdings={this.state.holdings} group={this.props.group} api={this.props.api}/>
-        <TransactionSection
-          transactionHistory={this.state.transactionHistory}
-          api={this.props.api}
-          userInfo={this.props.user}
+      <section>
+        <p className="text-center text-danger">送金後の取り消しはできませんのでご注意ください</p>
+        <ControlMemberTokenButton
+          {...props}
+          callback={props.reloadAdminTransactions.bind(this)}
+          adminMode={true}
         />
+      </section>
 
-      </article>
-    )
-  }
+      <HoldingStatusSection holdings={holdings} group={props.group} api={props.api}/>
+      <TransactionSection
+        transactionHistory={transactionHistory}
+        api={props.api}
+        userInfo={props.user}
+      />
 
-  async reloadTransactions() {
-    try {
-      const holdings = await this.props.api.getHoldings('selan')
-      const totalPublished = Object.values(holdings).reduce((prev, item) => prev + item, 0)
-      this.setState({
-        holdings: holdings,
-        totalPublished: totalPublished,
-        bankHolding: holdings['sla_bank'],
-        userHoldings: totalPublished - holdings['sla_bank'],
-        transactionHistory: await this.props.api.loadAllTransactions('selan'),
-      })
-    } catch(e) {
-      this.setState({errorMessage: 'ERROR: ' + e.message})
-    }
-  }
+    </article>
+  )
+}
+
+const Holdings = ({holdings, api, reloadAdminTransactions}) => {
+  const totalPublished = Object.values(holdings).reduce((prev, item) => prev + item, 0)
+  return (
+    <section className="card mb-3">
+      <div className="card-header">
+        <h4>発行管理</h4>
+      </div>
+      <div className="card-body">
+        <PublishTokenButton onComplete={reloadAdminTransactions.bind(this)} api={api} />
+        <h4 className="text-right">総発行量 <u>{totalPublished} Selan</u></h4>
+        <h4 className="text-right">銀行保有量 <u>{holdings['sla_bank']} Selan</u></h4>
+        <h4 className="text-right">流通量 <u>{totalPublished - holdings['sla_bank']} Selan</u></h4>
+      </div>
+    </section>
+  )
 }
 
 class AddMemberForm extends React.Component {
