@@ -7,7 +7,6 @@ import {
 import GroupsRouter from '../components/private/groups/GroupsRouter.js'
 
 const mapStateToProps = (state, ownProps) => {
-  console.log(state)
   return {
     groupLoadingState: state.groupLoadingState,
     group: state.group,
