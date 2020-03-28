@@ -1,14 +1,41 @@
 import React from 'react'
 import Modal from 'react-modal'
-import { Button, Form } from 'react-bootstrap'
+import { Button, Form, ListGroup } from 'react-bootstrap'
+import { css } from 'glamor'
 
 Modal.setAppElement('#root')
+
+const SendToCandidate = ({word, members, onSelected}) => {
+  const styles = css({
+    color: "gray",
+  })
+  const memberIds = Object.keys(members)
+    .filter(memberId => memberId.startsWith(word) || members[memberId].displayName.startsWith(word))
+  return (
+    <ListGroup>
+      {
+        memberIds.length
+          ? memberIds.slice(0, 5)
+            .map((memberId, index) => (
+              <ListGroup.Item
+                key={index}
+                onClick={() => onSelected(memberId)}
+              >
+                {memberId} <span {...styles}>{members[memberId].displayName}</span>
+              </ListGroup.Item>
+            ))
+          : <ListGroup.Item>候補なし</ListGroup.Item>
+      }
+    </ListGroup>
+  )
+}
 
 class SendTokenForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isSending: false,
+      isOpenAutoCorrect: false,
       message: '',
       sendTo: '',
       sendAmount: props.defaultAmount ? props.defaultAmount : 0,
@@ -29,7 +56,17 @@ class SendTokenForm extends React.Component {
               placeholder="TO"
               value={this.state.sendTo}
               onChange={e=>this.setState({sendTo: e.target.value})}
+              onFocus={()=>this.setState({isOpenAutoCorrect: true})}
             />
+            {
+              this.state.isOpenAutoCorrect ? (
+                <SendToCandidate
+                  word={this.state.sendTo}
+                  members={this.props.members}
+                  onSelected={memberId => this.setState({sendTo: memberId, isOpenAutoCorrect: false})}
+                />
+              ) : null
+            }
           </Form.Group>
           <Form.Group controlId="formAmount">
             <Form.Label>送付量</Form.Label>
@@ -109,6 +146,7 @@ class SendTokenButton extends React.Component {
             from={this.props.adminMode ? 'sla_bank' : this.props.user.user_id}
             api={this.props.api}
             onComplete={this.onCompleted.bind(this)}
+            members={this.props.members}
           />
         </Modal>
       </React.Fragment>
