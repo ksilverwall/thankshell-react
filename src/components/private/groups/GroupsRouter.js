@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom'
-import { Alert } from 'react-bootstrap'
+import { Alert, Dropdown, DropdownButton } from 'react-bootstrap'
 import GroupAdmin from './GroupAdmin'
 import GroupIndexVisitorPage from './GroupIndexVisitorPage.js'
 import { NotFoundPage } from '../../public/Error.js'
@@ -35,6 +35,17 @@ const GroupsRouter = (props) => {
 
   return (
     <React.Fragment>
+      {
+        user.groups.length >= 2 ? (
+          <DropdownButton id="dropdown-basic-button" title={group.group_id}>
+            {
+              user.groups.map((groupId, index) => (
+                <Dropdown.Item key={index} href={`/groups/${groupId}`}>{groupId}</Dropdown.Item>
+              ))
+            }
+          </DropdownButton>
+        ) : null
+      }
       <main>
         <Switch>
           <Route
