@@ -11,9 +11,7 @@ import { UserLoadingState } from '../../../actions/index.js';
 Modal.setAppElement('#root')
 
 const GroupAdmin = (props) => {
-  const group = new GroupInfo(props.group)
-
-  if (!group.getAdmins().includes(props.user.user_id)) {
+  if (!props.group.admins.includes(props.user.user_id)) {
     return (<h1>アクセス権限がありません</h1>)
   }
 
@@ -21,7 +19,7 @@ const GroupAdmin = (props) => {
     props.loadAdminTransactions('selan')
   }
 
-  return (<GroupAdminPage {...props} group={group}/>)
+  return (<GroupAdminPage {...props}/>)
 }
 
 const GroupAdminPage = (props) => {
@@ -51,6 +49,7 @@ const GroupAdminPage = (props) => {
         transactionHistory={transactionHistory}
         api={props.api}
         userInfo={props.user}
+        memberDetails={props.group.memberDetails}
       />
 
     </article>
@@ -147,6 +146,7 @@ class UnregisterUserButton extends React.Component {
   }
 
   render() {
+    const groupObj = new GroupInfo(this.props.group)
     return (
       <React.Fragment>
         <Modal isOpen={this.state.isOpenning} onRequestClose={this.handleCloseModal.bind(this)}>
@@ -155,7 +155,7 @@ class UnregisterUserButton extends React.Component {
           </button>
           <DeleteMemberForm
             api={this.props.api}
-            group={this.props.group}
+            group={groupObj}
             userId={this.props.name}
             onComplete={this.handleCloseModal.bind(this)}
           />
@@ -183,6 +183,7 @@ class RegisterUserButton extends React.Component {
   }
 
   render() {
+    const groupObj = new GroupInfo(this.props.group)
     return (
       <React.Fragment>
         <Modal isOpen={this.state.isOpenning} onRequestClose={this.handleCloseModal.bind(this)}>
@@ -191,7 +192,7 @@ class RegisterUserButton extends React.Component {
           </button>
           <AddMemberForm
             api={this.props.api}
-            group={this.props.group}
+            group={groupObj}
             userId={this.props.name}
             onComplete={this.handleCloseModal.bind(this)}
           />
@@ -212,7 +213,7 @@ class RegisterUserButton extends React.Component {
 
 class HoldingStatusSection extends React.Component {
   render() {
-    const names = this.props.group.getMembers()
+    const names = Object.keys(this.props.group.memberDetails)
     const data = {
       columns: [
         {
@@ -231,7 +232,7 @@ class HoldingStatusSection extends React.Component {
       ],
       rows: names.map(name => {
         return {
-          user: name,
+          user: `${this.props.group.memberDetails[name].displayName}(${name})`,
           amount: this.props.holdings[name] ? this.props.holdings[name] : 0,
           deleteButton: (
             <UnregisterUserButton
@@ -286,8 +287,8 @@ class TransactionSection extends React.Component {
               this.props.transactionHistory.sort((a, b) => { return b.timestamp - a.timestamp; }).map((record)=> (
                 <tr key={record.timestamp}>
                   <td>{this.getTimeString(record.timestamp)}</td>
-                  <td>{record.from_account}</td>
-                  <td>{record.to_account}</td>
+                  <td>{this.getDisplayName(this.props.memberDetails, record.from_account)}</td>
+                  <td>{this.getDisplayName(this.props.memberDetails, record.to_account)}</td>
                   <td className="text-right">{record.amount.toLocaleString()}</td>
                   <td className="text-left">{record.comment ? record.comment : ''}</td>
                 </tr>
@@ -309,6 +310,10 @@ class TransactionSection extends React.Component {
     let sec   = ( d.getSeconds() < 10 ) ? '0' + d.getSeconds() : d.getSeconds();
 
     return ( year + '/' + month + '/' + day + ' ' + hour + ':' + min + ':' + sec );
+  }
+
+  getDisplayName(memberDetails, name) {
+    return Object.keys(memberDetails).includes(name) ? memberDetails[name].displayName : name
   }
 }
 
