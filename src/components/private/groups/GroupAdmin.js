@@ -1,6 +1,7 @@
 import React from 'react';
 import Modal from 'react-modal'
 import { Button, Table, Form } from 'react-bootstrap';
+import {CopyToClipboard} from 'react-copy-to-clipboard'
 import { MDBDataTable } from 'mdbreact';
 import ControlMemberTokenButton from './ControlMemberTokenButton.js'
 import PublishTokenButton from './PublishTokenButton.js'
@@ -226,6 +227,10 @@ class HoldingStatusSection extends React.Component {
           sort: 'asc',
         },
         {
+          label: 'コピー',
+          field: 'copy',
+        },
+        {
           label: '操作',
           field: 'deleteButton',
         },
@@ -234,6 +239,11 @@ class HoldingStatusSection extends React.Component {
         return {
           user: `${this.props.group.memberDetails[name].displayName}(${name})`,
           amount: this.props.holdings[name] ? this.props.holdings[name] : 0,
+          copy: (
+            <CopyToClipboard text={`${window.location.origin}/groups/sla/entry?m=${name}`}>
+              <Button>Copy Link</Button>
+            </CopyToClipboard>
+          ),
           deleteButton: (
             <UnregisterUserButton
               group={this.props.group}
