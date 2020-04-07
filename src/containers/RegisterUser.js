@@ -23,6 +23,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
         })
         .catch(err => {
           dispatch(setCreatingUserError(err.message))
+          dispatch(setUserLoadingState(UserLoadingState.ERROR))
         })
     },
   }

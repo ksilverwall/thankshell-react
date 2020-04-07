@@ -6,7 +6,7 @@ export default class UserRegisterForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      userId: null,
+      userId: "",
       checked: false,
     };
   }
@@ -25,7 +25,7 @@ export default class UserRegisterForm extends React.Component {
             : null
         }
         <div className="form-group">
-          <label for="user-id">ID</label>
+          <label htmlFor="user-id">ID</label>
           <input
            className="form-control"
            type="text"
@@ -38,7 +38,7 @@ export default class UserRegisterForm extends React.Component {
            type="checkbox"
            checked={this.state.checked}
            onChange={e=>this.setState({checked: e.target.checked})} />
-          <label className="form-check-label" for="agree-check">
+          <label className="form-check-label" htmlFor="agree-check">
             <a href="/tos" target="_blank">利用規約</a>に同意する
           </label>
         </div>
