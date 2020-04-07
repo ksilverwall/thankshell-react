@@ -5,7 +5,6 @@ import Top from './public/Top.js'
 import LoginCallback from './public/LoginCallback.js'
 import { NotFoundPage } from './public/Error.js'
 import { Tos, PrivacyPolicy } from './public/Constants.js'
-import UserRoute from './private/user/UserRoute.js'
 import PrivateArea from './private/PrivateArea.js'
 
 import LoadGroup from '../containers/LoadGroup.js'
@@ -20,11 +19,6 @@ const RootRoutes = (props) => {
       <Switch>
         {
           [
-            {
-              path: '/user',
-              extract: false,
-              component: UserRoute,
-            },
             {
               path: '/groups/:id',
               extract: false,

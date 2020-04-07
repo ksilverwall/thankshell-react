@@ -7,9 +7,28 @@ import { NotFoundPage } from '../../public/Error.js'
 import { UserLoadingState } from '../../../actions'
 import LoadGroupIndex from '../../../containers/LoadGroupIndex.js'
 import LoadGroupAdmin from '../../../containers/LoadGroupAdmin.js'
+import UpdateUser from '../../../containers/UpdateUser.js'
+import RegisterUser from '../../../containers/RegisterUser.js'
 
 const GroupsRouter = (props) => {
-  const {auth, user, group, api} = props
+  const {auth, user, group, api, openRegisterUser, userLoadingState} = props
+
+  if (openRegisterUser) {
+    const isStandby = [
+      UserLoadingState.NOT_LOADED,
+      UserLoadingState.LOADING,
+      UserLoadingState.SAVING,
+    ].includes(userLoadingState)
+
+    return (
+      <RegisterUser
+        api={api}
+        auth={auth}
+        user={user}
+        disabled={isStandby}
+      />
+    )
+  }
 
   if (props.groupLoadingState === UserLoadingState.ERROR) {
     return (<Alert>ERROR: {props.group.error}</Alert>)
@@ -48,6 +67,18 @@ const GroupsRouter = (props) => {
       }
       <main>
         <Switch>
+          <Route
+            path='/groups/:id/user'
+            extract={true}
+            render={(props) => (
+              <UpdateUser
+                {...props}
+                user={user}
+                auth={auth}
+                api={api}
+              />
+            )}
+          />
           <Route
             exact
             path='/groups/:id'

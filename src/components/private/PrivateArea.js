@@ -10,7 +10,7 @@ const PrivateArea = ({renderProps, auth, component}) => {
         <nav className="navbar navbar-expand navbar-light bg-light">
           <div className="navbar-nav">
             <Link to="/groups/sla" className="nav-item nav-link">ホーム</Link>
-            <Link to="/user/config" className="nav-item nav-link">設定</Link>
+            <Link to="/groups/sla/user" className="nav-item nav-link">設定</Link>
           </div>
         </nav>
       </header>
