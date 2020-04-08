@@ -84,6 +84,22 @@ export class RestApi {
       body: await response.json(),
     }
   }
+
+  async put2(path, data) {
+    const response = await fetch(this.basePath + path, {
+      method: "PUT",
+      headers: await this.getHeaders(),
+      body: JSON.stringify(data),
+    })
+
+    const body = await response.json()
+
+    if (response.status !== 200) {
+      throw new Error(response.status + ":" + body.message);
+    }
+
+    return body
+  }
   
   async patch(path, data) {
     const response = await fetch(this.basePath + path, {
@@ -171,6 +187,13 @@ export class ThankshellApi {
 
     async deleteUserFromGroup(groupId, name) {
         await this.restApi.delete(`/groups/${groupId}/members/${name}`)
+    }
+
+    async entryToGroup(groupId, memberId) {
+        if (!memberId){
+            throw new Error("Invalid memberId")
+        }
+        await this.restApi.put2(`/groups/${groupId}/members/${memberId}/user`)
     }
 
     //-------------------------------------------------

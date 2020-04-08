@@ -9,8 +9,10 @@ import LoadGroupIndex from '../../../containers/LoadGroupIndex.js'
 import LoadGroupAdmin from '../../../containers/LoadGroupAdmin.js'
 import UpdateUser from '../../../containers/UpdateUser.js'
 import RegisterUser from '../../../containers/RegisterUser.js'
+import EntryToGroup from '../../../containers/EntryToGroup.js'
 
 const GroupsRouter = (props) => {
+  const groupId = props.match.params.id
   const {auth, user, group, api, openRegisterUser, userLoadingState} = props
 
   if (openRegisterUser) {
@@ -21,12 +23,33 @@ const GroupsRouter = (props) => {
     ].includes(userLoadingState)
 
     return (
-      <RegisterUser
-        api={api}
-        auth={auth}
-        user={user}
-        disabled={isStandby}
-      />
+      <main>
+        <Switch>
+          <Route
+            path='/groups/:id/entry'
+            extract={true}
+            render={(props) => (
+              <EntryToGroup
+                location={location}
+                groupId={groupId}
+                api={api}
+                userLoadingState={userLoadingState}
+              />
+            )}
+          />
+          <Route
+            path='*'
+            render={() => (
+              <RegisterUser
+                api={api}
+                auth={auth}
+                user={user}
+                disabled={isStandby}
+              />
+            )}
+          />
+        </Switch>
+      </main>
     )
   }
 
@@ -67,6 +90,18 @@ const GroupsRouter = (props) => {
       }
       <main>
         <Switch>
+          <Route
+            path='/groups/:id/entry'
+            extract={true}
+            render={(props) => (
+              <EntryToGroup
+                location={location}
+                groupId={groupId}
+                api={api}
+                userLoadingState={userLoadingState}
+              />
+            )}
+          />
           <Route
             path='/groups/:id/user'
             extract={true}
