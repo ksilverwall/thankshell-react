@@ -7,8 +7,6 @@ import { NotFoundPage } from './public/Error.js'
 import { Tos, PrivacyPolicy } from './public/Constants.js'
 import PrivateArea from './private/PrivateArea.js'
 
-import LoadGroup from '../containers/LoadGroup.js'
-
 import { GetCognitoAuth } from '../libs/auth.js'
 
 
@@ -17,24 +15,12 @@ const RootRoutes = (props) => {
   return (
     <BrowserRouter>
       <Switch>
-        {
-          [
-            {
-              path: '/groups/:id',
-              extract: false,
-              component: LoadGroup,
-            },
-          ].map(({path, extract, component}, index) => (
-            <Route
-              key={`private_${index}`}
-              path={path}
-              extract={extract}
-              render={(props) => (
-                <PrivateArea renderProps={props} auth={auth} component={component}/>
-              )}
-            />
-          ))
-        }
+        <Route
+          path='/groups/:id'
+          render={(props) => (
+            <PrivateArea renderProps={props} auth={auth}/>
+          )}
+        />
         {
           [
             {
