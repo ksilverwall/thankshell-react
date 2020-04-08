@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Switch, Link } from 'react-router-dom'
+import { Route, Switch, Link, Redirect } from 'react-router-dom'
 import { Alert, Dropdown, DropdownButton } from 'react-bootstrap'
 import GroupIndexVisitorPage from './GroupIndexVisitorPage.js'
 import { NotFoundPage } from '../../public/Error.js'
@@ -23,7 +23,7 @@ const Header = ()=> (
 
 const GroupsRouter = (props) => {
   const groupId = props.match.params.id
-  const {auth, user, group, api, openRegisterUser, userLoadingState, errorMessage, reloadUser, loadUser} = props
+  const {auth, user, group, api, openRegisterUser, userLoadingState, errorMessage, reloadUser, loadUser, loadGroup} = props
 
   if (errorMessage) {
     return (<Alert>ERROR: {errorMessage}</Alert>)
@@ -31,6 +31,7 @@ const GroupsRouter = (props) => {
 
   if (reloadUser) {
     loadUser()
+    loadGroup(groupId)
   }
 
   if (openRegisterUser) {
@@ -116,12 +117,7 @@ const GroupsRouter = (props) => {
             path='/groups/:id/entry'
             extract={true}
             render={(props) => (
-              <EntryToGroup
-                location={location}
-                groupId={groupId}
-                api={api}
-                userLoadingState={userLoadingState}
-              />
+              <Redirect to={`/groups/${groupId}`}/>
             )}
           />
           <Route
