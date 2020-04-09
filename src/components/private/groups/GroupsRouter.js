@@ -23,7 +23,7 @@ const Header = ()=> (
 
 const GroupsRouter = (props) => {
   const groupId = props.match.params.id
-  const {auth, user, group, api, openRegisterUser, userLoadingState, errorMessage, reloadUser, loadUser, loadGroup} = props
+  const {auth, user, group, api, openRegisterUser, userLoadingState, errorMessage, reloadUser, loadUser, loadGroup, location} = props
 
   if (errorMessage) {
     return (<Alert>ERROR: {errorMessage}</Alert>)
