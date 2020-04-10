@@ -227,6 +227,10 @@ class HoldingStatusSection extends React.Component {
           sort: 'asc',
         },
         {
+          label: '状態',
+          field: 'state',
+        },
+        {
           label: 'コピー',
           field: 'copy',
         },
@@ -236,14 +240,16 @@ class HoldingStatusSection extends React.Component {
         },
       ],
       rows: names.map(name => {
+        const member = this.props.group.memberDetails[name]
         return {
-          user: `${this.props.group.memberDetails[name].displayName}(${name})`,
+          user: `${member.displayName}(${name})`,
           amount: this.props.holdings[name] ? this.props.holdings[name] : 0,
-          copy: (
-            <CopyToClipboard text={`${window.location.origin}/groups/sla/entry?m=${name}`}>
+          state: member.state,
+          copy: member.linkParams ? (
+            <CopyToClipboard text={`${window.location.origin}/groups/sla/entry?m=${member.linkParams.m}&hash=${member.linkParams.hash}`}>
               <Button>Copy Link</Button>
             </CopyToClipboard>
-          ),
+          ) : null,
           deleteButton: (
             <UnregisterUserButton
               group={this.props.group}
