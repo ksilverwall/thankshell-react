@@ -8,6 +8,8 @@ import { Tos, PrivacyPolicy } from './public/Constants.js'
 import PrivateArea from './private/PrivateArea.js'
 
 import { GetCognitoAuth } from '../libs/auth.js'
+import { ThankshellApi, RestApi, Session } from '../libs/thankshell.js'
+import LoadGroup from '../containers/LoadGroup.js'
 
 
 const RootRoutes = (props) => {
@@ -18,7 +20,18 @@ const RootRoutes = (props) => {
         <Route
           path='/groups/:id'
           render={(props) => (
-            <PrivateArea renderProps={props} auth={auth}/>
+            <PrivateArea auth={auth}>
+              <LoadGroup
+                {...props}
+                auth={auth}
+                groupId={props.match.params.id}
+                api={
+                  new ThankshellApi(
+                    new RestApi(new Session(auth), process.env.REACT_APP_THANKSHELL_API_URL)
+                  )
+                }
+              />
+            </PrivateArea>
           )}
         />
         {

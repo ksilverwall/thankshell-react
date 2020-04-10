@@ -16,7 +16,6 @@ const mapStateToProps = (state, ownProps) => {
     user: state.user,
     openRegisterUser: (state.user && state.user.status === 'UNREGISTERED'),
     errorMessage: (state.userLoadingState === UserLoadingState.ERROR) ? state.user.error : null,
-    reloadUser: (state.userLoadingState === UserLoadingState.NOT_LOADED),
   }
 }
 

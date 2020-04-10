@@ -21,17 +21,36 @@ const Header = ()=> (
   </header>
 )
 
-const GroupsRouter = (props) => {
-  const groupId = props.match.params.id
-  const {auth, user, group, api, openRegisterUser, userLoadingState, errorMessage, reloadUser, loadUser, loadGroup, location} = props
-
+const GroupsRouter = ({
+  auth,
+  groupId,
+  api,
+  location,
+  // Loaded status from container
+  groupLoadingState,
+  group,
+  userLoadingState,
+  user,
+  openRegisterUser,
+  errorMessage,
+  reloadUser,
+  // Callback function to conteiner
+  loadUser,
+  loadGroup,
+}) => {
   if (errorMessage) {
     return (<Alert>ERROR: {errorMessage}</Alert>)
   }
 
-  if (reloadUser) {
+  if (userLoadingState === UserLoadingState.NOT_LOADED || groupLoadingState === UserLoadingState.NOT_LOADED) {
     loadUser()
     loadGroup(groupId)
+
+    return (<h1>Loading...</h1>)
+  }
+
+  if (userLoadingState === UserLoadingState.LOADING || groupLoadingState === UserLoadingState.LOADING) {
+    return (<h1>Loading...</h1>)
   }
 
   if (openRegisterUser) {
@@ -49,7 +68,7 @@ const GroupsRouter = (props) => {
             <Route
               path='/groups/:id/entry'
               extract={true}
-              render={(props) => (
+              render={() => (
                 <EntryToGroup
                   location={location}
                   groupId={groupId}
@@ -75,25 +94,11 @@ const GroupsRouter = (props) => {
     )
   }
 
-  if (props.groupLoadingState === UserLoadingState.ERROR) {
-    return (<Alert>ERROR: {props.group.error}</Alert>)
+  if (groupLoadingState === UserLoadingState.ERROR) {
+    return (<Alert>ERROR: {group.error}</Alert>)
   }
 
-  if (props.groupLoadingState === UserLoadingState.LOADING) {
-    return (<h1>Loading...</h1>)
-  }
-
-  if (props.groupLoadingState === UserLoadingState.NOT_LOADED) {
-    props.loadGroup(props.match.params.id)
-
-    return (<h1>Loading...</h1>)
-  }
-
-  if (!props.user) {
-    return (<h1>Loading...</h1>)
-  }
-
-  if (props.group && !props.group.members.includes(props.user.user_id)) {
+  if (group && !group.members.includes(user.user_id)) {
     return (<GroupIndexVisitorPage/>)
   }
 
@@ -116,7 +121,7 @@ const GroupsRouter = (props) => {
           <Route
             path='/groups/:id/entry'
             extract={true}
-            render={(props) => (
+            render={() => (
               <Redirect to={`/groups/${groupId}`}/>
             )}
           />
