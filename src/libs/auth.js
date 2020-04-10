@@ -41,7 +41,8 @@ export const GetRedirectUri = () => {
   return `https://${AuthConfig.AppWebDomain}/oauth2/authorize?${payload}`
 }
 
-export const SignIn = () => {
+export const SignIn = (callbackPath) => {
+  localStorage.setItem('callbackPath', callbackPath)
   const auth = new CognitoAuth(AuthConfig)
   auth.useCodeGrantFlow();
   auth.launchUri(GetRedirectUri())

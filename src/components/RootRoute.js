@@ -20,7 +20,7 @@ const RootRoutes = (props) => {
         <Route
           path='/groups/:id'
           render={(props) => (
-            <PrivateArea auth={auth}>
+            <PrivateArea auth={auth} location={props.location}>
               <LoadGroup
                 {...props}
                 auth={auth}

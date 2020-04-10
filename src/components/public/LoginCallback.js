@@ -32,7 +32,7 @@ class LoginCallback extends React.Component {
   }
 
   onLoginSuccess(result) {
-    this.props.history.push('/groups/sla')
+    this.props.history.push(localStorage.getItem('callbackPath'))
   }
 
   onLoginFailure(err) {

@@ -1,11 +1,13 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import SignInButton from '../SignInButton'
+import { GetCognitoAuth } from '../../libs/auth.js'
 
-const PrivateArea = ({auth, children}) => {
+const PrivateArea = ({location, children}) => {
+  const auth = GetCognitoAuth()
   return auth.isUserSignedIn() ? children : (
     <div>
-      <h2>ログインされていません</h2>
-      <Link to="/" className="nav-item nav-link">TOP</Link>
+      <h2>サインインされていません</h2>
+      <SignInButton callbackPath={location.pathname + location.search} />
     </div>
   )
 }
