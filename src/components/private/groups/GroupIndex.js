@@ -1,5 +1,6 @@
 import React from 'react'
-import { Alert } from 'react-bootstrap'
+import { Link } from 'react-router-dom'
+import { Alert, Button } from 'react-bootstrap'
 import { UserLoadingState } from '../../../actions'
 import SendTokenButton from './SendTokenButton.js'
 import TransactionHistory from './TransactionHistory.js'
@@ -24,13 +25,7 @@ const GroupIndex = (props) => {
   return (
     <article className="container-fluid">
       <section>
-        <a className="row" href="https://sketch-life-academy.com/selan-help/">ヘルプ</a>
-        <button
-          className="row btn my-2 my-sm-0"
-          onClick={() => {props.history.push('/groups/sla/admin')}}
-        >
-          管理ページへ
-        </button>
+        <Button className="row" href="https://sketch-life-academy.com/selan-help/">ヘルプ</Button>
       </section>
 
       <section>

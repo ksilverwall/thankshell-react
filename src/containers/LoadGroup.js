@@ -18,13 +18,11 @@ const mapStateToProps = (state, ownProps) => {
   }
 
   return {
-    groupLoadingState: state.groupLoadingState,
     group: state.group,
-    userLoadingState: state.userLoadingState,
     user: state.user,
-    openRegisterUser: (state.user && state.user.status === 'UNREGISTERED'),
     errorMessage: errorMessage,
     unloaded: state.userLoadingState === UserLoadingState.NOT_LOADED || state.groupLoadingState === UserLoadingState.NOT_LOADED,
+    loading: state.userLoadingState === UserLoadingState.LOADING || state.groupLoadingState === UserLoadingState.LOADING,
   }
 }
 

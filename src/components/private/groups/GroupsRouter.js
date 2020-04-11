@@ -1,23 +1,12 @@
 import React from 'react';
 import { Route, Switch, Link, Redirect } from 'react-router-dom'
-import { Alert, Dropdown, DropdownButton } from 'react-bootstrap'
+import { Button, Alert, Dropdown, ButtonGroup } from 'react-bootstrap'
 import { NotFoundPage } from '../../public/Error.js'
-import { UserLoadingState } from '../../../actions'
 import LoadGroupIndex from '../../../containers/LoadGroupIndex.js'
 import LoadGroupAdmin from '../../../containers/LoadGroupAdmin.js'
 import UpdateUser from '../../../containers/UpdateUser.js'
 import EntryToGroup from '../../../containers/EntryToGroup.js'
 
-const Header = ()=> (
-  <header>
-    <nav className="navbar navbar-expand navbar-light bg-light">
-      <div className="navbar-nav">
-        <Link to="/groups/sla" className="nav-item nav-link">ホーム</Link>
-        <Link to="/groups/sla/user" className="nav-item nav-link">設定</Link>
-      </div>
-    </nav>
-  </header>
-)
 
 const VisitorArticle = ({groupId}) => (
   <article>
@@ -26,18 +15,115 @@ const VisitorArticle = ({groupId}) => (
   </article>
 )
 
+const UserEditButton = ({user, onClick}) => {
+  return (
+    <Button onClick={onClick}>
+      {user ? user.displayName : '----'}さん
+    </Button>
+  )
+}
+
+const GroupMain = ({
+  auth,
+  groupId,
+  api,
+  location,
+  history,
+  group,
+  user,
+}) => {
+  return (
+    <main>
+      <UserEditButton user={user} onClick={()=>history.push(`/groups/${groupId}/user`)} />
+      {
+        (group.permission === 'admin') ? (
+          <Button onClick={()=>history.push(`/groups/${groupId}/admin`)}>管理ページ</Button>
+        ) : null
+      }
+      <Switch>
+        <Route
+          path='/groups/:id/entry'
+          extract={true}
+          render={() =>
+            (group.permission === 'visitor') ? (
+              <EntryToGroup
+                location={location}
+                groupId={groupId}
+                api={api}
+              />
+            ) : (
+              <Redirect to={`/groups/${groupId}`}/>
+            )
+          }
+        />
+        <Route
+          path='/groups/:id/user'
+          extract={true}
+          render={(props) =>
+            (group.permission === 'visitor') ? (
+              <VisitorArticle groupId={groupId}/>
+            ) : (
+              <UpdateUser
+                {...props}
+                user={user}
+                auth={auth}
+                api={api}
+              />
+            )
+          }
+        />
+        <Route
+          exact
+          path='/groups/:id'
+          render={internalProps =>
+            (group.permission === 'visitor') ? (
+              <VisitorArticle groupId={groupId}/>
+            ) : (
+              <LoadGroupIndex
+                {...internalProps}
+                auth={auth}
+                api={api}
+                user={user}
+                group={group}
+              />
+            )
+          }
+        />
+        <Route
+          exact
+          path='/groups/:id/admin'
+          render={internalProps =>
+            (group.permission === 'visitor') ? (
+              <VisitorArticle groupId={groupId}/>
+            ) : (
+              <LoadGroupAdmin
+                {...internalProps}
+                auth={auth}
+                api={api}
+                user={user}
+                group={group}
+              />
+            )
+          }
+        />
+        <Route path='*' component={NotFoundPage} />
+      </Switch>
+    </main>
+  )
+}
+
 const GroupsRouter = ({
   auth,
   groupId,
   api,
   location,
+  history,
   // Loaded status from container
-  groupLoadingState,
   group,
-  userLoadingState,
   user,
   errorMessage,
   unloaded,
+  loading,
   // Callback function to conteiner
   loadGroup,
 }) => {
@@ -51,99 +137,44 @@ const GroupsRouter = ({
     return (<h1>Loading...</h1>)
   }
 
-  if (userLoadingState === UserLoadingState.LOADING || groupLoadingState === UserLoadingState.LOADING) {
+  if (loading) {
     return (<h1>Loading...</h1>)
   }
 
   return (
     <React.Fragment>
-      <Header/>
-      <main>
-        {
-          user && user.groups && user.groups.length >= 2 ? (
-            <DropdownButton id="dropdown-basic-button" title={groupId}>
-              {
-                user.groups.map((gId, index) => (
-                  <Dropdown.Item key={index} href={`/groups/${gId}`}>{gId}</Dropdown.Item>
-                ))
-              }
-            </DropdownButton>
-          ) : null
-        }
-        {
-          (group.permission === 'visitor') ? (
-            <Switch>
-              <Route
-                path='/groups/:id/entry'
-                extract={true}
-                render={() => (
-                  <EntryToGroup
-                    location={location}
-                    groupId={groupId}
-                    api={api}
-                    userLoadingState={userLoadingState}
-                  />
-                )}
-              />
-              <Route
-                path='*'
-                render={() => (
-                  <VisitorArticle groupId={groupId}/>
-                )}
-              />
-            </Switch>
-          ) : (
-            <Switch>
-              <Route
-                path='/groups/:id/entry'
-                extract={true}
-                render={() => (
-                  <Redirect to={`/groups/${groupId}`}/>
-                )}
-              />
-              <Route
-                path='/groups/:id/user'
-                extract={true}
-                render={(props) => (
-                  <UpdateUser
-                    {...props}
-                    user={user}
-                    auth={auth}
-                    api={api}
-                  />
-                )}
-              />
-              <Route
-                exact
-                path='/groups/:id'
-                render={internalProps => (
-                  <LoadGroupIndex
-                    {...internalProps}
-                    auth={auth}
-                    api={api}
-                    user={user}
-                    group={group}
-                  />
-                )}
-              />
-              <Route
-                exact
-                path='/groups/:id/admin'
-                render={internalProps => (
-                  <LoadGroupAdmin
-                    {...internalProps}
-                    auth={auth}
-                    api={api}
-                    user={user}
-                    group={group}
-                  />
-                )}
-              />
-              <Route component={NotFoundPage} />
-            </Switch>
-          )
-        }
-      </main>
+      <header>
+        <Dropdown as={ButtonGroup}>
+          <Button variant="success" onClick={()=>history.push(`/groups/${groupId}`)}>{groupId}</Button>
+          {
+            user && user.groups && user.groups.length > 0 ? (
+              <React.Fragment>
+                <Dropdown.Toggle split variant="success" id="dropdown-split-basic" />
+                <Dropdown.Menu>
+                  {
+                    user.groups.map((gId, index) => (
+                      <Dropdown.Item key={index} onClick={()=>history.push(`/groups/${gId}`)}>{gId}</Dropdown.Item>
+                    ))
+                  }
+                </Dropdown.Menu>
+              </React.Fragment>
+            ) : null
+          }
+        </Dropdown>
+      </header>
+      {
+        (user && group) ? (
+          <GroupMain
+            auth={auth}
+            groupId={groupId}
+            api={api}
+            location={location}
+            history={history}
+            group={group}
+            user={user}
+          />
+        ) : null
+      }
     </React.Fragment>
   )
 }

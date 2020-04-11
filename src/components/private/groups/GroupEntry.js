@@ -37,7 +37,7 @@ class GroupEntry extends React.Component {
   }
 
   render() {
-    const {location, groupId, onEntry, api} = this.props
+    const {location, groupId, api, onEntry} = this.props
 
     return (
       <article>
