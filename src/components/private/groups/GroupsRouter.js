@@ -6,7 +6,6 @@ import { UserLoadingState } from '../../../actions'
 import LoadGroupIndex from '../../../containers/LoadGroupIndex.js'
 import LoadGroupAdmin from '../../../containers/LoadGroupAdmin.js'
 import UpdateUser from '../../../containers/UpdateUser.js'
-import RegisterUser from '../../../containers/RegisterUser.js'
 import EntryToGroup from '../../../containers/EntryToGroup.js'
 
 const Header = ()=> (
@@ -20,6 +19,13 @@ const Header = ()=> (
   </header>
 )
 
+const VisitorArticle = ({groupId}) => (
+  <article>
+    <p>{groupId}はプライベートグループです</p>
+    <p>招待リンクを使用して参加してください</p>
+  </article>
+)
+
 const GroupsRouter = ({
   auth,
   groupId,
@@ -31,19 +37,15 @@ const GroupsRouter = ({
   userLoadingState,
   user,
   errorMessage,
+  unloaded,
   // Callback function to conteiner
-  loadUser,
   loadGroup,
 }) => {
   if (errorMessage) {
     return (<Alert>ERROR: {errorMessage}</Alert>)
   }
-  if (groupLoadingState === UserLoadingState.ERROR) {
-    return (<Alert>ERROR: {group.error}</Alert>)
-  }
 
-  if (userLoadingState === UserLoadingState.NOT_LOADED || groupLoadingState === UserLoadingState.NOT_LOADED) {
-    loadUser()
+  if (unloaded) {
     loadGroup(groupId)
 
     return (<h1>Loading...</h1>)
@@ -86,16 +88,7 @@ const GroupsRouter = ({
               <Route
                 path='*'
                 render={() => (
-                  <RegisterUser
-                    api={api}
-                    auth={auth}
-                    user={user}
-                    disabled={[
-                      UserLoadingState.NOT_LOADED,
-                      UserLoadingState.LOADING,
-                      UserLoadingState.SAVING,
-                    ].includes(userLoadingState)}
-                  />
+                  <VisitorArticle groupId={groupId}/>
                 )}
               />
             </Switch>
