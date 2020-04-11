@@ -23,7 +23,7 @@ class EntryButton extends React.Component {
       onComplete()
     } catch(err) {
       this.setState({processing: false})
-      onFailed('招待リンクが無効です')
+      onFailed(`招待リンクが無効です: ${err.message}`)
     }
   }
 }
