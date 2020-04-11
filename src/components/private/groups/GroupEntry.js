@@ -16,14 +16,15 @@ class EntryButton extends React.Component {
 
   async entry() {
     const {api, groupId, params, onComplete, onFailed} = this.props
-    this.setState({processing: true})
     try {
+      this.setState({processing: true})
       await api.entryToGroup(groupId, params)
+      this.setState({processing: false})
       onComplete()
     } catch(err) {
+      this.setState({processing: false})
       onFailed('招待リンクが無効です')
     }
-    this.setState({processing: false})
   }
 }
 
