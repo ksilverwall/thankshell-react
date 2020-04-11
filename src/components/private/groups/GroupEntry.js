@@ -1,22 +1,61 @@
 import React from 'react';
 import queryString from 'query-string'
-import { Alert } from 'react-bootstrap'
-import { UserLoadingState } from '../../../actions'
+import { Alert, Button } from 'react-bootstrap'
 
-const GroupEntry = ({location, groupId, entry, userLoadingState, userRegisterError}) => {
-  if (userLoadingState == UserLoadingState.ERROR) {
-    return (<Alert>ERROR: {userRegisterError}</Alert>)
+class EntryButton extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      processing: false,
+    }
   }
 
-  if (userLoadingState == UserLoadingState.LOADED) {
-    const params = queryString.parse(location.search)
-    entry(params.m, params.hash)
+  render() {
+    return (<Button onClick={this.entry.bind(this)} disabled={this.state.processing}>参加</Button>)
+  }
+
+  async entry() {
+    const {api, groupId, params, onComplete, onFailed} = this.props
+    this.setState({processing: true})
+    try {
+      await api.entryToGroup(groupId, params)
+      onComplete()
+    } catch(err) {
+      onFailed('招待リンクが無効です')
+    }
+    this.setState({processing: false})
+  }
+}
+
+class GroupEntry extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      errorMessage: null,
+    }
+  }
+
+  render() {
+    const {location, groupId, onEntry, api} = this.props
+
     return (
-        <a>グループ『{groupId}』に参加する処理をしています</a>
+      <article>
+        {
+          (this.state.errorMessage) ? (
+            <Alert variant="danger">{this.state.errorMessage}</Alert>
+          ) : null
+        }
+        <p>グループ『{groupId}』に招待されています</p>
+        <EntryButton
+          api={api}
+          groupId={groupId}
+          params={queryString.parse(location.search)}
+          onComplete={onEntry}
+          onFailed={message => this.setState({errorMessage: message})}
+        />
+      </article>
     )
   }
-
-  return null
 }
 
 export default GroupEntry

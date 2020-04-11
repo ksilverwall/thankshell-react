@@ -189,8 +189,9 @@ export class ThankshellApi {
         await this.restApi.delete(`/groups/${groupId}/members/${name}`)
     }
 
-    async entryToGroup(groupId, memberId, hash) {
-        if (!memberId){
+    async entryToGroup(groupId, params) {
+        const {m: memberId, hash} = params
+        if (!memberId || !hash){
             throw new Error("Invalid memberId")
         }
         await this.restApi.put2(`/groups/${groupId}/members/${memberId}/user`, {hash: hash})
