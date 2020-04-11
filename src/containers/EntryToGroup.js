@@ -14,9 +14,9 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    entry: async(memberId) => {
+    entry: async(memberId, hash) => {
       dispatch(setUserLoadingState(UserLoadingState.SAVING))
-      ownProps.api.entryToGroup("sla", memberId)
+      ownProps.api.entryToGroup("sla", memberId, hash)
         .then(() => {
           dispatch(setCreatingUserError(null))
           dispatch(setUserLoadingState(UserLoadingState.NOT_LOADED))

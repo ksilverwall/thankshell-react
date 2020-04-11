@@ -10,7 +10,7 @@ const GroupEntry = ({location, groupId, entry, userLoadingState, userRegisterErr
 
   if (userLoadingState == UserLoadingState.LOADED) {
     const params = queryString.parse(location.search)
-    entry(params.m)
+    entry(params.m, params.hash)
     return (
         <a>グループ『{groupId}』に参加する処理をしています</a>
     )
