@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Switch, Link, Redirect } from 'react-router-dom'
-import { Button, Alert, Dropdown, ButtonGroup } from 'react-bootstrap'
+import { Button, Alert, Dropdown, DropdownButton, ButtonGroup } from 'react-bootstrap'
 import { RoutedTabs, NavTab } from "react-router-tabs"
 import { NotFoundPage } from '../../public/Error.js'
 import LoadGroupIndex from '../../../containers/LoadGroupIndex.js'
@@ -148,23 +148,15 @@ const GroupsRouter = ({
   return (
     <React.Fragment>
       <header>
-        <Dropdown as={ButtonGroup}>
-          <Button variant="success" onClick={()=>history.push(`/groups/${groupId}`)}>{groupId}</Button>
+        <DropdownButton title={groupId}>
           {
-            user && user.groups && user.groups.length > 0 ? (
-              <React.Fragment>
-                <Dropdown.Toggle split variant="success" id="dropdown-split-basic" />
-                <Dropdown.Menu>
-                  {
-                    user.groups.map((gId, index) => (
-                      <Dropdown.Item key={index} onClick={()=>history.push(`/groups/${gId}`)}>{gId}</Dropdown.Item>
-                    ))
-                  }
-                </Dropdown.Menu>
-              </React.Fragment>
-            ) : null
+            user && user.groups
+              ? user.groups.map((gId, index) => (
+                <Dropdown.Item key={index} onClick={()=>history.push(`/groups/${gId}`)}>{gId}</Dropdown.Item>
+              ))
+              : null
           }
-        </Dropdown>
+        </DropdownButton>
       </header>
       {
         (user && group) ? (
