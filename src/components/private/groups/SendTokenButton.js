@@ -100,7 +100,7 @@ class SendTokenForm extends React.Component {
 
   async sendToken() {
     this.setState({
-      isSenging: true,
+      isSending: true,
       message: '処理中...',
     })
 
@@ -116,7 +116,7 @@ class SendTokenForm extends React.Component {
       this.props.onComplete()
     } catch(e) {
       this.setState({
-        isSenging: false,
+        isSending: false,
         message: 'ERROR: ' + e.message,
       })
     }
