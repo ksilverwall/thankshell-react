@@ -1,11 +1,13 @@
 import React from 'react';
 import { Route, Switch, Link, Redirect } from 'react-router-dom'
 import { Button, Alert, Dropdown, ButtonGroup } from 'react-bootstrap'
+import { RoutedTabs, NavTab } from "react-router-tabs"
 import { NotFoundPage } from '../../public/Error.js'
 import LoadGroupIndex from '../../../containers/LoadGroupIndex.js'
 import LoadGroupAdmin from '../../../containers/LoadGroupAdmin.js'
 import UpdateUser from '../../../containers/UpdateUser.js'
 import EntryToGroup from '../../../containers/EntryToGroup.js'
+import "react-router-tabs/styles/react-router-tabs.css";
 
 
 const VisitorArticle = ({groupId}) => (
@@ -28,18 +30,20 @@ const GroupMain = ({
   groupId,
   api,
   location,
-  history,
   group,
   user,
 }) => {
   return (
     <main>
-      <UserEditButton user={user} onClick={()=>history.push(`/groups/${groupId}/user`)} />
-      {
-        (group.permission === 'admin') ? (
-          <Button onClick={()=>history.push(`/groups/${groupId}/admin`)}>管理ページ</Button>
-        ) : null
-      }
+      <RoutedTabs startPathWith={`/groups/${groupId}`}>
+        <NavTab exact to='/'>ホーム</NavTab>
+        {
+          (group.permission === 'admin') ? (
+            <NavTab to='/admin'>管理</NavTab>
+          ) : null
+        }
+        <NavTab to='/user'>ユーザ</NavTab>
+      </RoutedTabs>
       <Switch>
         <Route
           path='/groups/:id/entry'
@@ -169,7 +173,6 @@ const GroupsRouter = ({
             groupId={groupId}
             api={api}
             location={location}
-            history={history}
             group={group}
             user={user}
           />
