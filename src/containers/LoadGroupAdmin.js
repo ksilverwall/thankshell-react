@@ -4,7 +4,7 @@ import {
   setAdminToken,
   setAdminTokenLoadingState,
 } from '../actions'
-import GroupIndex from '../components/private/groups/GroupAdmin.js'
+import GroupAdmin from '../components/private/groups/GroupAdmin.js'
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -44,6 +44,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 const LoadGroup = connect(
   mapStateToProps,
   mapDispatchToProps
-)(GroupIndex)
+)(GroupAdmin)
 
 export default LoadGroup

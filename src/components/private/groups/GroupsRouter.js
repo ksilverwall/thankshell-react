@@ -23,7 +23,6 @@ const GroupMain = ({
   api,
   location,
   group,
-  user,
 }) => {
   return (
     <main>
@@ -85,15 +84,14 @@ const GroupMain = ({
         <Route
           exact
           path='/groups/:id/admin'
-          render={internalProps =>
+          render={() =>
             (group.permission === 'visitor') ? (
               <VisitorArticle groupId={groupId}/>
+            ) : (group.permission !== 'admin') ? (
+              <h1>アクセス権限がありません</h1>
             ) : (
               <LoadGroupAdmin
-                {...internalProps}
-                auth={auth}
                 api={api}
-                user={user}
                 group={group}
               />
             )
@@ -148,14 +146,13 @@ const GroupsRouter = ({
         </DropdownButton>
       </header>
       {
-        (user && group) ? (
+        (group) ? (
           <GroupMain
             auth={auth}
             groupId={groupId}
             api={api}
             location={location}
             group={group}
-            user={user}
           />
         ) : null
       }

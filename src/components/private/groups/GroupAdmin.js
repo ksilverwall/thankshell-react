@@ -10,46 +10,47 @@ import { UserLoadingState } from '../../../actions/index.js';
 
 Modal.setAppElement('#root')
 
-const GroupAdmin = (props) => {
-  if (!props.group.admins.includes(props.user.user_id)) {
-    return (<h1>アクセス権限がありません</h1>)
+const GroupAdmin = ({api, group, adminToken, adminTokenLoadingState, loadAdminTransactions, reloadAdminTransactions}) => {
+  if (adminTokenLoadingState === UserLoadingState.NOT_LOADED) {
+    loadAdminTransactions(group.groupId)
   }
 
-  if (props.adminTokenLoadingState === UserLoadingState.NOT_LOADED) {
-    props.loadAdminTransactions('selan')
-  }
-
-  return (<GroupAdminPage {...props}/>)
+  return (
+    <GroupAdminPage
+      api={api}
+      adminToken={adminToken}
+      reloadAdminTransactions={reloadAdminTransactions}
+      group={group}
+    />
+  )
 }
 
-const GroupAdminPage = (props) => {
-  const holdings = props.adminToken ? props.adminToken.holdings : {}
-  const transactionHistory = props.adminToken ? props.adminToken.allTransactions : []
+const GroupAdminPage = ({api, adminToken, reloadAdminTransactions, group}) => {
+  const holdings = adminToken ? adminToken.holdings : {}
+  const transactionHistory = adminToken ? adminToken.allTransactions : []
+
   return (
     <article className="container-fluid">
       <h1>管理フォーム</h1>
 
       <Holdings
         holdings={holdings}
-        api={props.api}
-        reloadAdminTransactions={props.reloadAdminTransactions}
+        api={api}
+        reloadAdminTransactions={reloadAdminTransactions}
       />
 
       <section>
         <p className="text-center text-danger">送金後の取り消しはできませんのでご注意ください</p>
         <ControlMemberTokenButton
-          {...props}
-          callback={props.reloadAdminTransactions.bind(this)}
-          adminMode={true}
+          api={api}
+          callback={reloadAdminTransactions.bind(this)}
         />
       </section>
 
-      <HoldingStatusSection holdings={holdings} group={props.group} api={props.api}/>
+      <HoldingStatusSection holdings={holdings} group={group} api={api}/>
       <TransactionSection
         transactionHistory={transactionHistory}
-        api={props.api}
-        userInfo={props.user}
-        members={props.group.members}
+        members={group.members}
       />
 
     </article>
@@ -280,54 +281,53 @@ class HoldingStatusSection extends React.Component {
   }
 }
 
-class TransactionSection extends React.Component {
-  render() {
-    return (
-      <section className="transaction-log">
-        <h3>取引履歴</h3>
-        <Table>
-          <thead>
-            <tr>
-              <th scope="col">取引日時</th>
-              <th scope="col">FROM</th>
-              <th scope="col">TO</th>
-              <th scope="col" className="text-right">金額(selan)</th>
-              <th scope="col" className="text-left">コメント</th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              this.props.transactionHistory.sort((a, b) => { return b.timestamp - a.timestamp; }).map((record)=> (
-                <tr key={record.timestamp}>
-                  <td>{this.getTimeString(record.timestamp)}</td>
-                  <td>{this.getDisplayName(this.props.members, record.from_account)}</td>
-                  <td>{this.getDisplayName(this.props.members, record.to_account)}</td>
-                  <td className="text-right">{record.amount.toLocaleString()}</td>
-                  <td className="text-left">{record.comment ? record.comment : ''}</td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </Table>
-      </section>
-    )
-  }
 
-  getTimeString(timestamp) {
-    let d = new Date(timestamp);
-    let year  = d.getFullYear();
-    let month = d.getMonth() + 1;
-    let day   = d.getDate();
-    let hour  = ( d.getHours()   < 10 ) ? '0' + d.getHours()   : d.getHours();
-    let min   = ( d.getMinutes() < 10 ) ? '0' + d.getMinutes() : d.getMinutes();
-    let sec   = ( d.getSeconds() < 10 ) ? '0' + d.getSeconds() : d.getSeconds();
+const getTimeString = timestamp => {
+  let d = new Date(timestamp);
+  let year  = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let day   = d.getDate();
+  let hour  = ( d.getHours()   < 10 ) ? '0' + d.getHours()   : d.getHours();
+  let min   = ( d.getMinutes() < 10 ) ? '0' + d.getMinutes() : d.getMinutes();
+  let sec   = ( d.getSeconds() < 10 ) ? '0' + d.getSeconds() : d.getSeconds();
 
-    return ( year + '/' + month + '/' + day + ' ' + hour + ':' + min + ':' + sec );
-  }
+  return ( year + '/' + month + '/' + day + ' ' + hour + ':' + min + ':' + sec );
+}
 
-  getDisplayName(members, name) {
-    return Object.keys(members).includes(name) ? members[name].displayName : name
-  }
+const getDisplayName = (members, name) => {
+  return Object.keys(members).includes(name) ? members[name].displayName : name
+}
+
+const TransactionSection = ({members, transactionHistory}) => {
+  return (
+    <section className="transaction-log">
+      <h3>取引履歴</h3>
+      <Table>
+        <thead>
+          <tr>
+            <th scope="col">取引日時</th>
+            <th scope="col">FROM</th>
+            <th scope="col">TO</th>
+            <th scope="col" className="text-right">金額(selan)</th>
+            <th scope="col" className="text-left">コメント</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            transactionHistory.sort((a, b) => { return b.timestamp - a.timestamp; }).map((record)=> (
+              <tr key={record.timestamp}>
+                <td>{getTimeString(record.timestamp)}</td>
+                <td>{getDisplayName(members, record.from_account)}</td>
+                <td>{getDisplayName(members, record.to_account)}</td>
+                <td className="text-right">{record.amount.toLocaleString()}</td>
+                <td className="text-left">{record.comment ? record.comment : ''}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </Table>
+    </section>
+  )
 }
 
 export default GroupAdmin

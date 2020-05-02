@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import Modal from 'react-modal'
 import { Button } from 'react-bootstrap'
 
@@ -118,48 +118,31 @@ class ControlMemberTokenForm extends React.Component {
   }
 }
 
-class ControlMemberTokenButton extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      modalIsOpen: false,
-    }
-  }
+const ControlMemberTokenButton = ({callback, api}) => {
+  const [isModalOpening, setModalOpening] = useState(false)
 
-  render() {
-    return (
-      <React.Fragment>
-        <Button variant="primary" onClick={this.openModal.bind(this)}>
-          送る
-        </Button>
-        <Modal isOpen={this.state.modalIsOpen} onRequestClose={this.closeModal.bind(this)}>
-          <button type="button" className="close" aria-label="close" onClick={this.closeModal.bind(this)}>
-            <span aria-hidden="true">&times;</span>
-          </button>
-          <ControlMemberTokenForm
-            mutableFrom={this.props.adminMode}
-            from={this.props.adminMode ? 'sla_bank' : this.props.user.user_id}
-            api={this.props.api}
-            defaultAmount={this.props.adminMode ? 10000 : 1000}
-            onComplete={this.onCompleted.bind(this)}
-          />
-        </Modal>
-      </React.Fragment>
-    )
-  }
-
-  openModal() {
-    this.setState({modalIsOpen: true})
-  }
-
-  closeModal() {
-    this.setState({modalIsOpen: false})
-  }
-
-  onCompleted() {
-    this.closeModal()
-    this.props.callback()
-  }
+  return (
+    <React.Fragment>
+      <Button variant="primary" onClick={()=>setModalOpening(true)}>
+        送る
+      </Button>
+      <Modal isOpen={isModalOpening} onRequestClose={()=>setModalOpening(false)}>
+        <button type="button" className="close" aria-label="close" onClick={()=>setModalOpening(false)}>
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <ControlMemberTokenForm
+          mutableFrom={true}
+          from={'sla_bank'}
+          api={api}
+          defaultAmount={10000}
+          onComplete={()=>{
+            setModalOpening(false)
+            callback()
+          }}
+        />
+      </Modal>
+    </React.Fragment>
+  )
 }
 
 export default ControlMemberTokenButton

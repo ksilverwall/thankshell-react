@@ -8,7 +8,7 @@ import {
 } from '../actions'
 import GroupsRouter from '../components/private/groups/GroupsRouter.js'
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
   let errorMessage = null
   if (state.userLoadingState === UserLoadingState.ERROR) {
     errorMessage = state.user.error
