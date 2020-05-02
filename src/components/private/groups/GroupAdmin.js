@@ -5,7 +5,6 @@ import {CopyToClipboard} from 'react-copy-to-clipboard'
 import { MDBDataTable } from 'mdbreact';
 import ControlMemberTokenButton from './ControlMemberTokenButton.js'
 import PublishTokenButton from './PublishTokenButton.js'
-import { GroupInfo } from '../../../libs/thankshell.js'
 import './GroupIndex.css'
 import { UserLoadingState } from '../../../actions/index.js';
 
@@ -102,7 +101,7 @@ class AddMemberForm extends React.Component {
 
   async addMember(name) {
     try {
-      await this.props.api.addUserToGroup(this.props.group.groupId, name)
+      await this.props.api.addUserToGroup(this.props.groupId, name)
       this.props.onComplete()
     } catch(error) {
       this.setState({message: error.message})
@@ -130,7 +129,7 @@ class DeleteMemberForm extends React.Component {
 
   async deleteMember(name) {
     try {
-      await this.props.api.deleteUserFromGroup(this.props.group.groupId, name)
+      await this.props.api.deleteUserFromGroup(this.props.groupId, name)
       this.props.onComplete()
     } catch(error) {
       this.setState({message: error.message})
@@ -147,7 +146,6 @@ class UnregisterUserButton extends React.Component {
   }
 
   render() {
-    const groupObj = new GroupInfo(this.props.group)
     return (
       <React.Fragment>
         <Modal isOpen={this.state.isOpenning} onRequestClose={this.handleCloseModal.bind(this)}>
@@ -156,7 +154,7 @@ class UnregisterUserButton extends React.Component {
           </button>
           <DeleteMemberForm
             api={this.props.api}
-            group={groupObj}
+            groupId={this.props.group.groupId}
             userId={this.props.name}
             onComplete={this.handleCloseModal.bind(this)}
           />
@@ -184,7 +182,6 @@ class RegisterUserButton extends React.Component {
   }
 
   render() {
-    const groupObj = new GroupInfo(this.props.group)
     return (
       <React.Fragment>
         <Modal isOpen={this.state.isOpenning} onRequestClose={this.handleCloseModal.bind(this)}>
@@ -193,7 +190,7 @@ class RegisterUserButton extends React.Component {
           </button>
           <AddMemberForm
             api={this.props.api}
-            group={groupObj}
+            groupId={this.props.group.groupId}
             userId={this.props.name}
             onComplete={this.handleCloseModal.bind(this)}
           />

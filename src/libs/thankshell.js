@@ -240,34 +240,3 @@ export class ThankshellApi {
         return (await this.getHoldings(tokenName))[userId]
     }
 }
-
-export class GroupInfo {
-    constructor(data) {
-        this.groupId = data['group_id']
-        this.data = data;
-    }
-
-    getAdmins() {
-        if (!this.data.admins) {
-            return [];
-        }
-
-        return this.data.admins;
-    }
-
-    getMembers() {
-        if (!this.data.members) {
-            return [];
-        }
-
-        return this.data.members;
-    }
-
-    getRequests() {
-        if (!this.data.requests) {
-            return [];
-        }
-
-        return this.data.requests;
-    }
-}
