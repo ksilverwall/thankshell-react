@@ -17,14 +17,6 @@ const VisitorArticle = ({groupId}) => (
   </article>
 )
 
-const UserEditButton = ({user, onClick}) => {
-  return (
-    <Button onClick={onClick}>
-      {user ? user.displayName : '----'}さん
-    </Button>
-  )
-}
-
 const GroupMain = ({
   auth,
   groupId,
@@ -68,8 +60,8 @@ const GroupMain = ({
               <VisitorArticle groupId={groupId}/>
             ) : (
               <UpdateUser
-                {...props}
-                user={user}
+                memberId={group.memberId}
+                memberDetail={group.members[group.memberId]}
                 auth={auth}
                 api={api}
               />
