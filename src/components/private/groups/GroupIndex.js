@@ -7,18 +7,18 @@ import TransactionHistory from './TransactionHistory.js'
 import './GroupIndex.css'
 
 
-const GroupIndex = (props) => {
+const GroupIndex = ({group, api, token, tokenLoadingState, setTokenLoadingState, loadTransactions}) => {
   // FIXME: Move to transaction history
-  if (props.tokenLoadingState === UserLoadingState.ERROR) {
-    return (<Alert>ERROR: {props.token.error}</Alert>)
+  if (tokenLoadingState === UserLoadingState.ERROR) {
+    return (<Alert>ERROR: {token.error}</Alert>)
   }
 
-  if (props.tokenLoadingState === UserLoadingState.LOADING) {
+  if (tokenLoadingState === UserLoadingState.LOADING) {
     return (<h1>Loading...</h1>)
   }
 
-  if (props.tokenLoadingState === UserLoadingState.NOT_LOADED) {
-    props.loadTransactions('selan', props.user.user_id)
+  if (tokenLoadingState === UserLoadingState.NOT_LOADED) {
+    loadTransactions(group.groupId, group.memberId)
     return (<h1>Loading...</h1>)
   }
 
@@ -33,23 +33,22 @@ const GroupIndex = (props) => {
       </section>
 
       <section>
-        <h1 className="text-right">残高<u>{props.token.holding ? props.token.holding: '---'} Selan</u></h1>
+        <h1 className="text-right">残高<u>{token.holding ? token.holding: '---'} Selan</u></h1>
       </section>
 
       <section>
         <p className="warning-text">送金後の取り消しはできませんのでご注意ください</p>
         <SendTokenButton
-          {...props}
-          callback={() => {props.setTokenLoadingState(UserLoadingState.NOT_LOADED)}}
-          members={props.group.members}
+          memberId={group.memberId}
+          members={group.members}
+          api={api}
+          callback={() => {setTokenLoadingState(UserLoadingState.NOT_LOADED)}}
         />
       </section>
 
       <TransactionHistory
-        transactionHistory={props.token.transactions}
-        api={props.api}
-        user={props.user}
-        group={props.group}
+        group={group}
+        transactionHistory={token.transactions}
       />
     </article>
   )

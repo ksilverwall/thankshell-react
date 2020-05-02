@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react';
 import EventListener from 'react-event-listener'
 import { Table } from 'react-bootstrap'
 
@@ -117,45 +117,31 @@ const HistoryTable = ({group, transactionHistory}) => (
   </Table>
 )
 
-class TransactionHistory extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isListMode: this.getListMode()
-    }
-  }
+const TransactionHistory = ({group, transactionHistory}) => {
+  const getListMode = () => window.innerWidth < 600
+  const [isListMode, setListMode] = useState(getListMode())
 
-  getListMode() {
-    return window.innerWidth < 600
-  }
-
-  handleResize() {
-    this.setState({isListMode: this.getListMode()})
-  }
-
-  render() {
-    return (
-      <section className="transaction-log">
-        <h3>取引履歴</h3>
-        <EventListener target="window" onResize={this.handleResize.bind(this)} />
-        {
-          this.state.isListMode ? (
-            <HistoryList
-              transactionHistory={this.props.transactionHistory}
-              userId={this.props.user.user_id}
-              group={this.props.group}
-            />
-          ) : (
-            <HistoryTable
-              transactionHistory={this.props.transactionHistory}
-              userId={this.props.user.user_id}
-              group={this.props.group}
-            />
-          )
-        }
-      </section>
-    )
-  }
+  return (
+    <section className="transaction-log">
+      <h3>取引履歴</h3>
+      <EventListener target="window" onResize={()=>setListMode(getListMode())} />
+      {
+        isListMode ? (
+          <HistoryList
+            transactionHistory={transactionHistory}
+            userId={group.memberId}
+            group={group}
+          />
+        ) : (
+          <HistoryTable
+            transactionHistory={transactionHistory}
+            userId={group.memberId}
+            group={group}
+          />
+        )
+      }
+    </section>
+  )
 }
 
 export default TransactionHistory

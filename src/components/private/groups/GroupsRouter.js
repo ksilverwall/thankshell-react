@@ -71,15 +71,12 @@ const GroupMain = ({
         <Route
           exact
           path='/groups/:id'
-          render={internalProps =>
+          render={() =>
             (group.permission === 'visitor') ? (
               <VisitorArticle groupId={groupId}/>
             ) : (
               <LoadGroupIndex
-                {...internalProps}
-                auth={auth}
                 api={api}
-                user={user}
                 group={group}
               />
             )

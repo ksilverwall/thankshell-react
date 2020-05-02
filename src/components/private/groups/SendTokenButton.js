@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Modal from 'react-modal'
 import { Button, Form, ListGroup } from 'react-bootstrap'
 import { css } from 'glamor'
@@ -123,48 +123,31 @@ class SendTokenForm extends React.Component {
   }
 }
 
-class SendTokenButton extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      modalIsOpen: false,
-    }
-  }
+const SendTokenButton = ({ memberId, members, api, callback }) => {
+  const [isModalOpening, setIsModalOpening] = useState(false)
 
-  render() {
-    return (
-      <React.Fragment>
-        <Button variant="primary" onClick={this.openModal.bind(this)}>
-          送る
-        </Button>
-        <Modal isOpen={this.state.modalIsOpen} onRequestClose={this.closeModal.bind(this)}>
-          <button type="button" className="close" aria-label="close" onClick={this.closeModal.bind(this)}>
-            <span aria-hidden="true">&times;</span>
-          </button>
-          <SendTokenForm
-            mutableFrom={this.props.adminMode}
-            from={this.props.adminMode ? 'sla_bank' : this.props.user.user_id}
-            api={this.props.api}
-            onComplete={this.onCompleted.bind(this)}
-            members={this.props.members}
-          />
-        </Modal>
-      </React.Fragment>
-    )
-  }
-
-  openModal() {
-    this.setState({modalIsOpen: true})
-  }
-
-  closeModal() {
-    this.setState({modalIsOpen: false})
-  }
-
-  onCompleted() {
-    this.closeModal()
-    this.props.callback()
-  }
+  return (
+    <React.Fragment>
+      <Button variant="primary" onClick={() => setIsModalOpening(true)}>
+        送る
+      </Button>
+      <Modal isOpen={isModalOpening} onRequestClose={() => setIsModalOpening(false)}>
+        <button type="button" className="close" aria-label="close" onClick={() => setIsModalOpening(false)}>
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <SendTokenForm
+          mutableFrom={false}
+          from={memberId}
+          api={api}
+          members={members}
+          onComplete={() => {
+            setIsModalOpening(false)
+            callback()
+          }}
+        />
+      </Modal>
+    </React.Fragment>
+  )
 }
 
 export default SendTokenButton
