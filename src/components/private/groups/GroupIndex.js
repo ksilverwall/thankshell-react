@@ -41,7 +41,7 @@ const GroupIndex = (props) => {
         <SendTokenButton
           {...props}
           callback={() => {props.setTokenLoadingState(UserLoadingState.NOT_LOADED)}}
-          members={props.group.memberDetails}
+          members={props.group.members}
         />
       </section>
 

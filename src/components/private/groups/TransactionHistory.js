@@ -27,8 +27,8 @@ const getTimeString = (timestamp) => {
   return `${zeroPadding(d.getHours(), 2)}:${zeroPadding(d.getMinutes(), 2)}`
 }
 
-const getDisplayName = (userId, memberDetails) => {
-  return memberDetails[userId] ? memberDetails[userId].displayName : userId
+const getDisplayName = (userId, members) => {
+  return members[userId] ? members[userId].displayName : userId
 }
 
 const HistoryListItem = ({timestamp, targetUser, amount, comment}) => (
@@ -74,11 +74,11 @@ const HistoryList = ({userId, group, transactionHistory}) => (
               targetUser={(to_account === userId) ?
                 getDisplayName(
                   from_account,
-                  group.memberDetails,
+                  group.members,
                 ):
                 getDisplayName(
                   to_account,
-                  group.memberDetails,
+                  group.members,
                 )
               }
             />
@@ -106,8 +106,8 @@ const HistoryTable = ({group, transactionHistory}) => (
           .map(({timestamp, from_account, to_account, amount, comment}, index)=> (
             <tr key={index}>
               <td>{getTimeString(timestamp)}</td>
-              <td>{getDisplayName(from_account, group.memberDetails)}</td>
-              <td>{getDisplayName(to_account, group.memberDetails)}</td>
+              <td>{getDisplayName(from_account, group.members)}</td>
+              <td>{getDisplayName(to_account, group.members)}</td>
               <td className="text-right">{amount.toLocaleString()}</td>
               <td className="text-left">{comment ? comment : ''}</td>
             </tr>

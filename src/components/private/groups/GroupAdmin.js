@@ -49,7 +49,7 @@ const GroupAdminPage = (props) => {
         transactionHistory={transactionHistory}
         api={props.api}
         userInfo={props.user}
-        memberDetails={props.group.memberDetails}
+        members={props.group.members}
       />
 
     </article>
@@ -211,7 +211,7 @@ class RegisterUserButton extends React.Component {
 
 class HoldingStatusSection extends React.Component {
   render() {
-    const names = Object.keys(this.props.group.memberDetails)
+    const names = Object.keys(this.props.group.members)
     const data = {
       columns: [
         {
@@ -237,7 +237,7 @@ class HoldingStatusSection extends React.Component {
         },
       ],
       rows: names.map(name => {
-        const member = this.props.group.memberDetails[name]
+        const member = this.props.group.members[name]
         return {
           user: `${member.displayName}(${name})`,
           amount: this.props.holdings[name] ? this.props.holdings[name] : 0,
@@ -300,8 +300,8 @@ class TransactionSection extends React.Component {
               this.props.transactionHistory.sort((a, b) => { return b.timestamp - a.timestamp; }).map((record)=> (
                 <tr key={record.timestamp}>
                   <td>{this.getTimeString(record.timestamp)}</td>
-                  <td>{this.getDisplayName(this.props.memberDetails, record.from_account)}</td>
-                  <td>{this.getDisplayName(this.props.memberDetails, record.to_account)}</td>
+                  <td>{this.getDisplayName(this.props.members, record.from_account)}</td>
+                  <td>{this.getDisplayName(this.props.members, record.to_account)}</td>
                   <td className="text-right">{record.amount.toLocaleString()}</td>
                   <td className="text-left">{record.comment ? record.comment : ''}</td>
                 </tr>
@@ -325,8 +325,8 @@ class TransactionSection extends React.Component {
     return ( year + '/' + month + '/' + day + ' ' + hour + ':' + min + ':' + sec );
   }
 
-  getDisplayName(memberDetails, name) {
-    return Object.keys(memberDetails).includes(name) ? memberDetails[name].displayName : name
+  getDisplayName(members, name) {
+    return Object.keys(members).includes(name) ? members[name].displayName : name
   }
 }
 
