@@ -1,20 +1,20 @@
 import { connect } from 'react-redux'
 import GroupEntry from '../components/private/groups/GroupEntry.js'
 import {
-  setUserLoadingState,
+  setGroupLoadingState,
   UserLoadingState,
 } from '../actions'
 
-const mapDispatchToProps = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch) => {
   return {
     onEntry: () => {
-      dispatch(setUserLoadingState(UserLoadingState.NOT_LOADED))
+      dispatch(setGroupLoadingState(UserLoadingState.NOT_LOADED))
     },
   }
 }
 
 const EntryToGroup = connect(
-  () => {},
+  () => { return {} },
   mapDispatchToProps
 )(GroupEntry)
 
