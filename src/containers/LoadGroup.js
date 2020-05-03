@@ -16,8 +16,6 @@ const mapStateToProps = (state) => {
   return {
     user: state.user,
     group: state.group,
-    groupLoadingErrorMessage: errorMessage,
-    groupLoadingState: state.groupLoadingState,
   }
 }
 
@@ -26,18 +24,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     setUser: (user) => {
       dispatch(setUser(user))
     },
-    loadGroup: async(api, groupId) => {
-      dispatch(setGroupLoadingState(UserLoadingState.LOADING))
-
-      try {
-        const group = await api.getGroup(groupId)
-
-        dispatch(setGroup(group))
-        dispatch(setGroupLoadingState(UserLoadingState.LOADED))
-      } catch(err) {
-        dispatch(setGroup({error: err.message}))
-        dispatch(setGroupLoadingState(UserLoadingState.ERROR))
-      }
+    setGroup:(group) => {
+      dispatch(setGroup(group))
     },
   }
 }

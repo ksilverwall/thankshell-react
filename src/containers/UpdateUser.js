@@ -1,14 +1,11 @@
 import { connect } from 'react-redux'
 import UserConfig from '../components/private/user/UserConfig.js'
-import {
-  UserLoadingState,
-  setGroupLoadingState,
-} from '../actions'
+import { setGroup } from '../actions'
 
 const mapDispatchToProps = (dispatch) => {
   return {
     reloadMembers: () => {
-      dispatch(setGroupLoadingState(UserLoadingState.NOT_LOADED))
+      dispatch(setGroup(null))
     },
   }
 }

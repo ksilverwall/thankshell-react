@@ -8,7 +8,6 @@ import LoadGroupAdmin from '../../../containers/LoadGroupAdmin.js'
 import UpdateUser from '../../../containers/UpdateUser.js'
 import EntryToGroup from '../../../containers/EntryToGroup.js'
 import "react-router-tabs/styles/react-router-tabs.css";
-import { UserLoadingState } from '../../../actions'
 
 
 const VisitorArticle = ({groupId}) => (
@@ -24,9 +23,25 @@ const GroupMain = ({
   api,
   location,
   group,
+  setGroup,
 }) => {
-  if (!group) {
-    return null
+  const [groupLoadingErrorMessage, setGroupLoadingErrorMessage] = useState('')
+  const loadGroup = async() => {
+    try {
+      setGroup(await api.getGroup(groupId))
+    } catch(err) {
+      setGroupLoadingErrorMessage(err.message)
+    }
+  }
+
+  if (groupLoadingErrorMessage) {
+    return (<Alert>ERROR: {groupLoadingErrorMessage}</Alert>)
+  }
+
+  if (!group || group.groupId !== groupId) {
+    loadGroup()
+
+    return (<h1>Loading...</h1>)
   }
 
   return (
@@ -117,11 +132,9 @@ const GroupsRouter = ({
   // Loaded status from container
   user,
   group,
-  groupLoadingErrorMessage,
-  groupLoadingState,
   // Callback function to conteiner
   setUser,
-  loadGroup,
+  setGroup,
 }) => {
   const [userLoadingErrorMessage, setUserLoadingErrorMessage] = useState('')
 
@@ -137,23 +150,7 @@ const GroupsRouter = ({
     return (<Alert>User Load Error: {userLoadingErrorMessage}</Alert>)
   }
 
-  if (!user) {
-    loadUser(api)
-  }
-
-  if (groupLoadingErrorMessage) {
-    return (<Alert>ERROR: {groupLoadingErrorMessage}</Alert>)
-  }
-
-  if (groupLoadingState === UserLoadingState.NOT_LOADED) {
-    loadGroup(api, groupId)
-
-    return (<h1>Loading...</h1>)
-  }
-
-  if (groupLoadingState === UserLoadingState.LOADING) {
-    return (<h1>Loading...</h1>)
-  }
+  if (!user) { loadUser() }
 
   return (
     <React.Fragment>
@@ -174,6 +171,7 @@ const GroupsRouter = ({
         api={api}
         location={location}
         group={group}
+        setGroup={setGroup}
       />
     </React.Fragment>
   )
