@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Route, Switch, Link, Redirect } from 'react-router-dom'
 import { Button, Alert, Dropdown, DropdownButton, ButtonGroup } from 'react-bootstrap'
 import { RoutedTabs, NavTab } from "react-router-tabs"
@@ -8,6 +8,7 @@ import LoadGroupAdmin from '../../../containers/LoadGroupAdmin.js'
 import UpdateUser from '../../../containers/UpdateUser.js'
 import EntryToGroup from '../../../containers/EntryToGroup.js'
 import "react-router-tabs/styles/react-router-tabs.css";
+import { UserLoadingState } from '../../../actions'
 
 
 const VisitorArticle = ({groupId}) => (
@@ -24,6 +25,10 @@ const GroupMain = ({
   location,
   group,
 }) => {
+  if (!group) {
+    return null
+  }
+
   return (
     <main>
       <RoutedTabs startPathWith={`/groups/${groupId}`}>
@@ -110,25 +115,43 @@ const GroupsRouter = ({
   location,
   history,
   // Loaded status from container
-  group,
   user,
-  errorMessage,
-  unloaded,
-  loading,
+  group,
+  groupLoadingErrorMessage,
+  groupLoadingState,
   // Callback function to conteiner
+  setUser,
   loadGroup,
 }) => {
-  if (errorMessage) {
-    return (<Alert>ERROR: {errorMessage}</Alert>)
+  const [userLoadingErrorMessage, setUserLoadingErrorMessage] = useState('')
+
+  const loadUser = async() => {
+    try {
+      setUser(await api.getUser())
+    } catch(err) {
+      setUserLoadingErrorMessage(err.message)
+    }
   }
 
-  if (unloaded) {
-    loadGroup(groupId)
+  if (userLoadingErrorMessage) {
+    return (<Alert>User Load Error: {userLoadingErrorMessage}</Alert>)
+  }
+
+  if (!user) {
+    loadUser(api)
+  }
+
+  if (groupLoadingErrorMessage) {
+    return (<Alert>ERROR: {groupLoadingErrorMessage}</Alert>)
+  }
+
+  if (groupLoadingState === UserLoadingState.NOT_LOADED) {
+    loadGroup(api, groupId)
 
     return (<h1>Loading...</h1>)
   }
 
-  if (loading) {
+  if (groupLoadingState === UserLoadingState.LOADING) {
     return (<h1>Loading...</h1>)
   }
 
@@ -145,17 +168,13 @@ const GroupsRouter = ({
           }
         </DropdownButton>
       </header>
-      {
-        (group) ? (
-          <GroupMain
-            auth={auth}
-            groupId={groupId}
-            api={api}
-            location={location}
-            group={group}
-          />
-        ) : null
-      }
+      <GroupMain
+        auth={auth}
+        groupId={groupId}
+        api={api}
+        location={location}
+        group={group}
+      />
     </React.Fragment>
   )
 }
