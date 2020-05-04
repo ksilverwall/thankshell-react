@@ -6,7 +6,6 @@ import { MDBDataTable } from 'mdbreact';
 import ControlMemberTokenButton from './ControlMemberTokenButton.js'
 import PublishTokenButton from './PublishTokenButton.js'
 import './GroupIndex.css'
-import { UserLoadingState } from '../../../actions/index.js';
 
 Modal.setAppElement('#root')
 
@@ -164,75 +163,57 @@ class RegisterUserButton extends React.Component {
   }
 }
 
-class HoldingStatusSection extends React.Component {
-  render() {
-    const names = Object.keys(this.props.group.members)
-    const data = {
-      columns: [
-        {
-          label: 'ユーザ',
-          field: 'user',
-        },
-        {
-          label: '保有量',
-          field: 'amount',
-          sort: 'asc',
-        },
-        {
-          label: '状態',
-          field: 'state',
-        },
-        {
-          label: 'コピー',
-          field: 'copy',
-        },
-        {
-          label: '操作',
-          field: 'deleteButton',
-        },
-      ],
-      rows: names.map(name => {
-        const member = this.props.group.members[name]
-        return {
-          user: `${member.displayName}(${name})`,
-          amount: this.props.holdings[name] ? this.props.holdings[name] : 0,
-          state: member.state,
-          copy: member.linkParams ? (
-            <CopyToClipboard text={`${window.location.origin}/groups/sla/entry?m=${member.linkParams.m}&hash=${member.linkParams.hash}`}>
-              <Button>Copy Link</Button>
-            </CopyToClipboard>
-          ) : null,
-          deleteButton: (
-            <UnregisterUserButton
-              group={this.props.group}
-              api={this.props.api}
-              name={name}
-            />
-          )
-        }
-      }),
-    }
- 
-    return (
-      <section className="card mb-3">
-        <div className="card-header">
-          <h4>ユーザリスト</h4>
-        </div>
-        <div className="card-body">
-          <RegisterUserButton
-            api={this.props.api}
-            group={this.props.group}
+const HoldingStatusSection = ({api, group, holdings}) => {
+  const names = Object.keys(group.members)
+  const data = {
+    columns: [
+      {label: 'ユーザ', field: 'user'},
+      {label: '保有量', field: 'amount', sort: 'asc'},
+      {label: '状態', field: 'state'},
+      {label: 'コピー', field: 'copy'},
+      {label: '操作', field: 'deleteButton'},
+    ],
+    rows: names.map(name => {
+      const member = group.members[name]
+      return {
+        user: `${member.displayName}(${name})`,
+        amount: holdings[name] ? holdings[name] : 0,
+        state: member.state,
+        copy: member.linkParams ? (
+          <CopyToClipboard text={`${window.location.origin}/groups/sla/entry?m=${member.linkParams.m}&hash=${member.linkParams.hash}`}>
+            <Button>Copy Link</Button>
+          </CopyToClipboard>
+        ) : null,
+        deleteButton: (
+          <UnregisterUserButton
+            group={group}
+            api={api}
+            name={name}
           />
-          <MDBDataTable
-            striped
-            bordered
-            hover
-            data={data}
-          />
-        </div>
-      </section>
-    )
+        )
+      }
+    }),
   }
+
+  return (
+    <section className="card mb-3">
+      <div className="card-header">
+        <h4>ユーザリスト</h4>
+      </div>
+      <div className="card-body">
+        <RegisterUserButton
+          api={api}
+          group={group}
+        />
+        <MDBDataTable
+          striped
+          bordered
+          hover
+          data={data}
+        />
+      </div>
+    </section>
+  )
 }
 
 const LoadingState = {
@@ -316,15 +297,31 @@ const TransactionSection = ({api, groupId, members}) => {
   )
 }
 
-const GroupAdminPage = ({api, adminToken, reloadAdminTransactions, group}) => {
-  const holdings = adminToken ? adminToken.holdings : {}
+const GroupAdminPage = ({api, reloadAdminTransactions, group}) => {
+  const [holdings, setHoldings] = useState()
+  const [loadingState, setLoadingState] = useState(LoadingState.INIT)
+  const [errorMessage, setErrorMessage] = useState('')
+  const loadHoldings = async() => {
+    if (loadingState !== LoadingState.INIT) { return }
+    setLoadingState(LoadingState.LOADING)
+
+    try {
+      setHoldings(await api.getHoldings(group.groupId))
+    } catch(err) {
+      setErrorMessage(err.message)
+    } finally {
+      setLoadingState(LoadingState.COMPLETE)
+    }
+  }
+
+  if (!holdings) { loadHoldings() }
 
   return (
     <article className="container-fluid">
       <h1>管理フォーム</h1>
 
       <Holdings
-        holdings={holdings}
+        holdings={holdings ? holdings : {}}
         api={api}
         reloadAdminTransactions={reloadAdminTransactions}
       />
@@ -337,7 +334,7 @@ const GroupAdminPage = ({api, adminToken, reloadAdminTransactions, group}) => {
         />
       </section>
 
-      <HoldingStatusSection holdings={holdings} group={group} api={api}/>
+      <HoldingStatusSection holdings={holdings ? holdings : {}} group={group} api={api}/>
       <TransactionSection
         api={api}
         groupId={group.groupId}
@@ -351,14 +348,13 @@ const GroupAdminPage = ({api, adminToken, reloadAdminTransactions, group}) => {
 const GroupAdmin = ({api, group, token, reloadAdminTransactions, setToken}) => {
   const [loadingState, setLoadingState] = useState(LoadingState.INIT)
   const [errorMessage, setErrorMessage] = useState('')
-  const loadAdminTransactions = async(tokenName) => {
+  const loadAdminTransactions = async() => {
     if (loadingState !== LoadingState.INIT) { return }
     setLoadingState(LoadingState.LOADING)
 
     try {
       setToken({
         updatedAt: new Date().getTime(),
-        holdings: await api.getHoldings(tokenName),
       })
     } catch(err) {
       setErrorMessage(err.message)
@@ -374,7 +370,6 @@ const GroupAdmin = ({api, group, token, reloadAdminTransactions, setToken}) => {
   return (
     <GroupAdminPage
       api={api}
-      adminToken={token}
       reloadAdminTransactions={reloadAdminTransactions}
       group={group}
     />
