@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Modal from 'react-modal'
 import { Button, Table, Form } from 'react-bootstrap';
 import {CopyToClipboard} from 'react-copy-to-clipboard'
@@ -10,20 +10,6 @@ import { UserLoadingState } from '../../../actions/index.js';
 
 Modal.setAppElement('#root')
 
-const GroupAdmin = ({api, group, adminToken, adminTokenLoadingState, loadAdminTransactions, reloadAdminTransactions}) => {
-  if (adminTokenLoadingState === UserLoadingState.NOT_LOADED) {
-    loadAdminTransactions(group.groupId)
-  }
-
-  return (
-    <GroupAdminPage
-      api={api}
-      adminToken={adminToken}
-      reloadAdminTransactions={reloadAdminTransactions}
-      group={group}
-    />
-  )
-}
 
 const GroupAdminPage = ({api, adminToken, reloadAdminTransactions, group}) => {
   const holdings = adminToken ? adminToken.holdings : {}
@@ -327,6 +313,46 @@ const TransactionSection = ({members, transactionHistory}) => {
         </tbody>
       </Table>
     </section>
+  )
+}
+
+const LoadingState = {
+  INIT: 'INIT',
+  LOADING: 'LOADING',
+  COMPLETE: 'COMPLETE',
+}
+
+const GroupAdmin = ({api, group, token, reloadAdminTransactions, setToken}) => {
+  const [loadingState, setLoadingState] = useState(LoadingState.INIT)
+  const [errorMessage, setErrorMessage] = useState('')
+  const loadAdminTransactions = async(tokenName) => {
+    if (loadingState !== LoadingState.INIT) { return }
+    setLoadingState(LoadingState.LOADING)
+
+    try {
+      setToken({
+        updatedAt: new Date().getTime(),
+        holdings: await api.getHoldings(tokenName),
+        allTransactions: await api.loadAllTransactions(tokenName)
+      })
+    } catch(err) {
+      setErrorMessage(err.message)
+    } finally {
+      setLoadingState(LoadingState.COMPLETE)
+    }
+  }
+
+  if (!token) {
+    loadAdminTransactions(group.groupId)
+  }
+
+  return (
+    <GroupAdminPage
+      api={api}
+      adminToken={token}
+      reloadAdminTransactions={reloadAdminTransactions}
+      group={group}
+    />
   )
 }
 
