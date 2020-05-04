@@ -1,24 +1,36 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react'
 import { Alert, Button } from 'react-bootstrap'
-import { UserLoadingState } from '../../../actions'
 import SendTokenButton from './SendTokenButton.js'
 import TransactionHistory from './TransactionHistory.js'
 import './GroupIndex.css'
 
 
-const GroupIndex = ({group, api, token, tokenLoadingState, setTokenLoadingState, loadTransactions}) => {
-  // FIXME: Move to transaction history
-  if (tokenLoadingState === UserLoadingState.ERROR) {
-    return (<Alert>ERROR: {token.error}</Alert>)
+const GroupIndex = ({group, api, token, setToken}) => {
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isLoading, setLoading] = useState(false)
+  const loadToken = async(groupId, userId) => {
+    if (isLoading) { return }
+    setLoading(true)
+
+    try {
+      setToken({
+        updatedAt: new Date().getTime(),
+        holding: await api.getHolding(groupId, userId),
+        transactions: await api.loadTransactions(groupId, userId)
+      })
+    } catch(e) {
+      setErrorMessage(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  if (tokenLoadingState === UserLoadingState.LOADING) {
-    return (<h1>Loading...</h1>)
+  if (errorMessage) {
+    return (<Alert>ERROR: {errorMessage}</Alert>)
   }
 
-  if (tokenLoadingState === UserLoadingState.NOT_LOADED) {
-    loadTransactions(group.groupId, group.memberId)
+  if (!token) {
+    loadToken(group.groupId, group.memberId)
     return (<h1>Loading...</h1>)
   }
 
@@ -42,7 +54,7 @@ const GroupIndex = ({group, api, token, tokenLoadingState, setTokenLoadingState,
           memberId={group.memberId}
           members={group.members}
           api={api}
-          callback={() => {setTokenLoadingState(UserLoadingState.NOT_LOADED)}}
+          callback={() => { setToken(null) }}
         />
       </section>
 

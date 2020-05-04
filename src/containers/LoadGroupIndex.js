@@ -1,42 +1,17 @@
 import { connect } from 'react-redux'
-import {
-  UserLoadingState,
-  setToken,
-  setTokenLoadingState,
-} from '../actions'
+import { setToken } from '../actions'
 import GroupIndex from '../components/private/groups/GroupIndex.js'
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
   return {
-    tokenLoadingState: state.tokenLoadingState,
-    token: state.token,
+    token: state.group.token,
   }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    loadTransactions: (tokenName, userId) => {
-      dispatch(setTokenLoadingState(UserLoadingState.LOADING))
-
-      const loadToken = async(api, tokenName, userId) => {
-        return {
-          holding: await api.getHolding(tokenName, userId),
-          transactions: await api.loadTransactions(tokenName, userId)
-        }
-      }
-
-      loadToken(ownProps.api, tokenName, userId)
-        .then(token => {
-          dispatch(setToken(token))
-          dispatch(setTokenLoadingState(UserLoadingState.LOADED))
-        })
-        .catch(err => {
-          dispatch(setToken({error: err.message}))
-          dispatch(setTokenLoadingState(UserLoadingState.ERROR))
-        })
-    },
-    setTokenLoadingState(state) {
-      dispatch(setTokenLoadingState(state))
+    setToken: (data) => {
+      dispatch(setToken(data))
     },
   }
 }
