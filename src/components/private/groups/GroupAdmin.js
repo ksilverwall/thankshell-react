@@ -11,38 +11,6 @@ import { UserLoadingState } from '../../../actions/index.js';
 Modal.setAppElement('#root')
 
 
-const GroupAdminPage = ({api, adminToken, reloadAdminTransactions, group}) => {
-  const holdings = adminToken ? adminToken.holdings : {}
-  const transactionHistory = adminToken ? adminToken.allTransactions : []
-
-  return (
-    <article className="container-fluid">
-      <h1>管理フォーム</h1>
-
-      <Holdings
-        holdings={holdings}
-        api={api}
-        reloadAdminTransactions={reloadAdminTransactions}
-      />
-
-      <section>
-        <p className="text-center text-danger">送金後の取り消しはできませんのでご注意ください</p>
-        <ControlMemberTokenButton
-          api={api}
-          callback={reloadAdminTransactions.bind(this)}
-        />
-      </section>
-
-      <HoldingStatusSection holdings={holdings} group={group} api={api}/>
-      <TransactionSection
-        transactionHistory={transactionHistory}
-        members={group.members}
-      />
-
-    </article>
-  )
-}
-
 const Holdings = ({holdings, api, reloadAdminTransactions}) => {
   const totalPublished = Object.values(holdings).reduce((prev, item) => prev + item, 0)
   return (
@@ -267,6 +235,11 @@ class HoldingStatusSection extends React.Component {
   }
 }
 
+const LoadingState = {
+  INIT: 'INIT',
+  LOADING: 'LOADING',
+  COMPLETE: 'COMPLETE',
+}
 
 const getTimeString = timestamp => {
   let d = new Date(timestamp);
@@ -284,42 +257,95 @@ const getDisplayName = (members, name) => {
   return Object.keys(members).includes(name) ? members[name].displayName : name
 }
 
-const TransactionSection = ({members, transactionHistory}) => {
+const TransactionSection = ({api, groupId, members}) => {
+  const [transactions, setTransactions] = useState()
+  const [errorMessage, setErrorMessage] = useState()
+  const [loadingState, setLoadingState] = useState(LoadingState.INIT)
+
+  const loadTransactions = async() => {
+    if (loadingState !== LoadingState.INIT) { return }
+    setLoadingState(LoadingState.LOADING)
+
+    try {
+      setTransactions(await api.loadAllTransactions(groupId))
+    } catch(err) {
+      setErrorMessage(err.message)
+    } finally {
+      setLoadingState(LoadingState.COMPLETE)
+    }
+  }
+
+  if (!transactions) {
+    loadTransactions()
+  }
+
   return (
     <section className="transaction-log">
       <h3>取引履歴</h3>
-      <Table>
-        <thead>
-          <tr>
-            <th scope="col">取引日時</th>
-            <th scope="col">FROM</th>
-            <th scope="col">TO</th>
-            <th scope="col" className="text-right">金額(selan)</th>
-            <th scope="col" className="text-left">コメント</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            transactionHistory.sort((a, b) => { return b.timestamp - a.timestamp; }).map((record)=> (
-              <tr key={record.timestamp}>
-                <td>{getTimeString(record.timestamp)}</td>
-                <td>{getDisplayName(members, record.from_account)}</td>
-                <td>{getDisplayName(members, record.to_account)}</td>
-                <td className="text-right">{record.amount.toLocaleString()}</td>
-                <td className="text-left">{record.comment ? record.comment : ''}</td>
+      {
+        errorMessage ? (<p>{errorMessage}</p>)
+        : (!transactions) ? (<p>Loading</p>)
+        : (
+          <Table>
+            <thead>
+              <tr>
+                <th scope="col">取引日時</th>
+                <th scope="col">FROM</th>
+                <th scope="col">TO</th>
+                <th scope="col" className="text-right">金額(selan)</th>
+                <th scope="col" className="text-left">コメント</th>
               </tr>
-            ))
-          }
-        </tbody>
-      </Table>
+            </thead>
+            <tbody>
+              {
+                transactions.sort((a, b) => { return b.timestamp - a.timestamp; }).map((record)=> (
+                  <tr key={record.timestamp}>
+                    <td>{getTimeString(record.timestamp)}</td>
+                    <td>{getDisplayName(members, record.from_account)}</td>
+                    <td>{getDisplayName(members, record.to_account)}</td>
+                    <td className="text-right">{record.amount.toLocaleString()}</td>
+                    <td className="text-left">{record.comment ? record.comment : ''}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </Table>
+        )
+      }
     </section>
   )
 }
 
-const LoadingState = {
-  INIT: 'INIT',
-  LOADING: 'LOADING',
-  COMPLETE: 'COMPLETE',
+const GroupAdminPage = ({api, adminToken, reloadAdminTransactions, group}) => {
+  const holdings = adminToken ? adminToken.holdings : {}
+
+  return (
+    <article className="container-fluid">
+      <h1>管理フォーム</h1>
+
+      <Holdings
+        holdings={holdings}
+        api={api}
+        reloadAdminTransactions={reloadAdminTransactions}
+      />
+
+      <section>
+        <p className="text-center text-danger">送金後の取り消しはできませんのでご注意ください</p>
+        <ControlMemberTokenButton
+          api={api}
+          callback={reloadAdminTransactions.bind(this)}
+        />
+      </section>
+
+      <HoldingStatusSection holdings={holdings} group={group} api={api}/>
+      <TransactionSection
+        api={api}
+        groupId={group.groupId}
+        members={group.members}
+      />
+
+    </article>
+  )
 }
 
 const GroupAdmin = ({api, group, token, reloadAdminTransactions, setToken}) => {
@@ -333,7 +359,6 @@ const GroupAdmin = ({api, group, token, reloadAdminTransactions, setToken}) => {
       setToken({
         updatedAt: new Date().getTime(),
         holdings: await api.getHoldings(tokenName),
-        allTransactions: await api.loadAllTransactions(tokenName)
       })
     } catch(err) {
       setErrorMessage(err.message)

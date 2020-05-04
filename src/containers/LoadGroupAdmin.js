@@ -4,7 +4,7 @@ import GroupAdmin from '../components/private/groups/GroupAdmin.js'
 
 const mapStateToProps = (state) => {
   return {
-    adminToken: state.group.token,
+    token: state.group.token,
   }
 }
 
