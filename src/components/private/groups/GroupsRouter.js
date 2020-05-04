@@ -26,11 +26,16 @@ const GroupMain = ({
   setGroup,
 }) => {
   const [groupLoadingErrorMessage, setGroupLoadingErrorMessage] = useState('')
+  const [isLoading, setLoading] = useState(false)
   const loadGroup = async() => {
+    if (isLoading) { return }
+    setLoading(true)
     try {
       setGroup(await api.getGroup(groupId))
+      setLoading(false)
     } catch(err) {
       setGroupLoadingErrorMessage(err.message)
+      setLoading(false)
     }
   }
 
