@@ -48,11 +48,23 @@ const groupLoadingState = (state = UserLoadingState.NOT_LOADED, action) => {
   }
 }
 
+const groupToken = (state = null, action) => {
+  switch (action.type) {
+    case SET_TOKEN:
+      return action.transactions
+    default:
+      return state
+  }
+}
+
 const group = (state = null, action) => {
   switch (action.type) {
     case SET_GROUP:
       return action.group
     default:
+      if (state) {
+        state.token = groupToken(state.token, action)
+      }
       return state
   }
 }
