@@ -117,28 +117,55 @@ const HistoryTable = ({group, transactionHistory}) => (
   </Table>
 )
 
-const TransactionHistory = ({group, transactionHistory}) => {
+const LoadingState = {
+  INIT: 'INIT',
+  LOADING: 'LOADING',
+  COMPLETE: 'COMPLETE',
+}
+
+const TransactionHistory = ({group, api}) => {
+  const [loadingState, setLoadingState] = useState(LoadingState.INIT)
+  const [transactions, setTransactions] = useState()
+
   const getListMode = () => window.innerWidth < 600
   const [isListMode, setListMode] = useState(getListMode())
+
+  const loadTransactions = async()=> {
+    if (loadingState !== LoadingState.INIT) { return }
+    setLoadingState(LoadingState.LOADING)
+    try {
+      setTransactions(await api.loadTransactions(group.groupId, group.memberId))
+    } catch(err) {
+      console.log(err)
+    } finally {
+      setLoadingState(LoadingState.COMPLETE)
+    }
+  }
+
+  if(!transactions) {
+    loadTransactions()
+  }
 
   return (
     <section className="transaction-log">
       <h3>取引履歴</h3>
       <EventListener target="window" onResize={()=>setListMode(getListMode())} />
       {
-        isListMode ? (
-          <HistoryList
-            transactionHistory={transactionHistory}
-            userId={group.memberId}
-            group={group}
-          />
-        ) : (
-          <HistoryTable
-            transactionHistory={transactionHistory}
-            userId={group.memberId}
-            group={group}
-          />
-        )
+        transactions?
+          isListMode ? (
+            <HistoryList
+              transactionHistory={transactions}
+              userId={group.memberId}
+              group={group}
+            />
+          ) : (
+            <HistoryTable
+              transactionHistory={transactions}
+              userId={group.memberId}
+              group={group}
+            />
+          )
+        : (<h2>Loading</h2>)
       }
     </section>
   )

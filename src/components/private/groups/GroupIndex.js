@@ -4,24 +4,53 @@ import SendTokenButton from './SendTokenButton.js'
 import TransactionHistory from './TransactionHistory.js'
 import './GroupIndex.css'
 
+const LoadingState = {
+  INIT: 'INIT',
+  LOADING: 'LOADING',
+  COMPLETE: 'COMPLETE',
+}
+
+const HoldingSection = ({groupId, memberId, api, tokenUpdatedAt}) => {
+  const [loadingState, setLoadingState] = useState(LoadingState.INIT)
+  const [holding, setHolding] = useState()
+
+  const loadHoldings = async() => {
+    if (loadingState !== LoadingState.INIT) { return }
+    setLoadingState(LoadingState.LOADING)
+    try {
+      setHolding(await api.getHolding(groupId, memberId))
+    } catch(err) {
+      console.log(err)
+    } finally {
+      setLoadingState(LoadingState.COMPLETE)
+    }
+  }
+
+  if(!holding) { loadHoldings() }
+
+  return (
+    <section>
+      <h1 className="text-right">残高<u>{holding ? holding: '---'} Selan</u></h1>
+    </section>
+  )
+}
 
 const GroupIndex = ({group, api, token, setToken}) => {
   const [errorMessage, setErrorMessage] = useState('')
-  const [isLoading, setLoading] = useState(false)
+  const [loadingState, setLoadingState] = useState(LoadingState.INIT)
+
   const loadToken = async(groupId, userId) => {
-    if (isLoading) { return }
-    setLoading(true)
+    if (loadingState !== LoadingState.INIT) { return }
+    setLoadingState(LoadingState.LOADING)
 
     try {
       setToken({
         updatedAt: new Date().getTime(),
-        holding: await api.getHolding(groupId, userId),
-        transactions: await api.loadTransactions(groupId, userId)
       })
     } catch(err) {
       setErrorMessage(err.message)
     } finally {
-      setLoading(false)
+      setLoadingState(LoadingState.COMPLETE)
     }
   }
 
@@ -44,13 +73,17 @@ const GroupIndex = ({group, api, token, setToken}) => {
         <img src="/images/logo.png" className="row col-6 col-sm-2 offset-3 offset-sm-5 img-fluid" alt="selan-logo" />
       </section>
 
-      <section>
-        <h1 className="text-right">残高<u>{token.holding ? token.holding: '---'} Selan</u></h1>
-      </section>
+      <HoldingSection
+        groupId={group.groupId}
+        memberId={group.memberId}
+        api={api}
+        tokenUpdatedAt={token.updatedAt}
+      />
 
       <section>
         <p className="warning-text">送金後の取り消しはできませんのでご注意ください</p>
         <SendTokenButton
+          groupId={group.groupId}
           memberId={group.memberId}
           members={group.members}
           api={api}
@@ -60,7 +93,7 @@ const GroupIndex = ({group, api, token, setToken}) => {
 
       <TransactionHistory
         group={group}
-        transactionHistory={token.transactions}
+        api={api}
       />
     </article>
   )
