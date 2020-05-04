@@ -145,28 +145,6 @@ export class ThankshellApi {
         return await this.restApi.get('/user/')
     }
 
-    async createUser(userId) {
-        // FIXME: should be post
-        const data = await this.restApi.put('/user/', {id: userId})
-        const responseBody = data.body;
-        switch (data.status) {
-          case 200:
-            break;
-          case 403:
-            switch (responseBody.code) {
-              case 'AUTHINFO_ALREADY_REGISTERD':
-                break
-              default:
-                throw new Error(responseBody.message)
-            }
-            break
-          default:
-            throw new Error(responseBody.message)
-        }
-
-        return data
-    }
-
     async updateUser(userId, user) {
         await this.restApi.patch(`/user/${userId}`, user)
     }
