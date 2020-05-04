@@ -32,8 +32,8 @@ const SubmitButton = ({onClick}) => {
   )
 }
 
-const ErrorMessage = ({message}) => message && len(message) ? (
-  <Alert variant="danger">{errorMessage}</Alert>
+const ErrorMessage = ({message}) => message && message.length ? (
+  <Alert variant="danger">{message}</Alert>
 ) : null
 
 // FIXME: LogoutButton must not be in this component

@@ -18,7 +18,7 @@ const GroupIndex = ({group, api, token, setToken}) => {
         holding: await api.getHolding(groupId, userId),
         transactions: await api.loadTransactions(groupId, userId)
       })
-    } catch(e) {
+    } catch(err) {
       setErrorMessage(err.message)
     } finally {
       setLoading(false)
