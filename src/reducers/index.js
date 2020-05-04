@@ -28,26 +28,16 @@ const group = (state = null, action) => {
     case SET_GROUP:
       return action.group
     default:
-      if (state) {
-        state.token = groupToken(state.token, action)
+      return {
+        ...state,
+        token: state ? groupToken(state.token, action) : null,
       }
-      return state
-  }
-}
-
-const token = (state = null, action) => {
-  switch (action.type) {
-    case SET_TOKEN:
-      return action.transactions
-    default:
-      return state
   }
 }
 
 const appReducer = combineReducers({
   user,
   group,
-  token,
 })
 
 export default appReducer
