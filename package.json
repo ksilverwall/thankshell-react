@@ -29,7 +29,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "build:production": "npm run build",
-    "build:staging": "./node_modules/.bin/env-cmd -f .env.staging npm run build"
+    "build:staging": "./node_modules/.bin/env-cmd -f .env.staging npm run build",
+    "create-version-file": "echo \"{\\\"version\\\": \\\"$(node -pe 'require(\"./package.json\").version')\\\"}\" > public/revision.json"
   },
   "eslintConfig": {
     "extends": "react-app"
