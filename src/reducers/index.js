@@ -1,9 +1,19 @@
 import { combineReducers } from 'redux'
 import {
+  SET_VERSION,
   SET_USER,
   SET_GROUP,
   SET_TOKEN,
 } from '../actions'
+
+const version = (state = null, action) => {
+  switch (action.type) {
+    case SET_VERSION:
+      return action.version
+    default:
+      return state
+  }
+}
 
 const user = (state = null, action) => {
   switch (action.type) {
@@ -36,6 +46,7 @@ const group = (state = null, action) => {
 }
 
 const appReducer = combineReducers({
+  version,
   user,
   group,
 })
