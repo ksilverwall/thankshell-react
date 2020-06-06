@@ -62,6 +62,7 @@ const UserConfig = ({ memberId, memberDetail, auth, api, reloadMembers }) => {
                     await api.updateUser(memberId, {displayName: editBuffer})
                     reloadMembers()
                   } catch(err) {
+                    console.log(err);
                     setErrorMessage(err.message)
                   }
                 }

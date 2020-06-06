@@ -49,12 +49,13 @@ const GroupMain = ({
     return (<h1>Loading...</h1>)
   }
 
+  const displayedAdminPage = ['admin', 'owner'].includes(group.permission);
   return (
     <main>
       <RoutedTabs startPathWith={`/groups/${groupId}`}>
         <NavTab exact to='/'>ホーム</NavTab>
         {
-          (group.permission === 'admin') ? (
+          displayedAdminPage ? (
             <NavTab to='/admin'>管理</NavTab>
           ) : null
         }
@@ -112,7 +113,7 @@ const GroupMain = ({
           render={() =>
             (group.permission === 'visitor') ? (
               <VisitorArticle groupId={groupId}/>
-            ) : (group.permission !== 'admin') ? (
+            ) : !displayedAdminPage ? (
               <h1>アクセス権限がありません</h1>
             ) : (
               <LoadGroupAdmin
