@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Alert, Button } from 'react-bootstrap'
 import SendTokenButton from './SendTokenButton.js'
 import TransactionHistory from './TransactionHistory.js'
+import ErrorMessage from '../../ErrorMessage.js'
 import './GroupIndex.css'
 
 const LoadingState = {
@@ -10,7 +11,7 @@ const LoadingState = {
   COMPLETE: 'COMPLETE',
 }
 
-const HoldingSection = ({groupId, memberId, api, tokenUpdatedAt}) => {
+const HoldingSection = ({groupId, memberId, api, tokenUpdatedAt, onError}) => {
   const [loadingState, setLoadingState] = useState(LoadingState.INIT)
   const [holding, setHolding] = useState()
 
@@ -20,7 +21,7 @@ const HoldingSection = ({groupId, memberId, api, tokenUpdatedAt}) => {
     try {
       setHolding(await api.getHolding(groupId, memberId))
     } catch(err) {
-      console.log(err)
+      onError(err.message)
     } finally {
       setLoadingState(LoadingState.COMPLETE)
     }
@@ -37,6 +38,7 @@ const HoldingSection = ({groupId, memberId, api, tokenUpdatedAt}) => {
 
 const GroupIndex = ({group, api, token, setToken}) => {
   const [errorMessage, setErrorMessage] = useState('')
+  const [generalErrorMessage, setGeneralErrorMessage] = useState('')
   const [loadingState, setLoadingState] = useState(LoadingState.INIT)
 
   const loadToken = async(groupId, userId) => {
@@ -65,6 +67,7 @@ const GroupIndex = ({group, api, token, setToken}) => {
 
   return (
     <article className="container-fluid">
+      <ErrorMessage message={generalErrorMessage}/>
       <section>
         <Button className="row" href="https://sketch-life-academy.com/selan-help/">ヘルプ</Button>
       </section>
@@ -78,6 +81,7 @@ const GroupIndex = ({group, api, token, setToken}) => {
         memberId={group.memberId}
         api={api}
         tokenUpdatedAt={token.updatedAt}
+        onError={(message) => setGeneralErrorMessage(message)}
       />
 
       <section>
