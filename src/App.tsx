@@ -3,8 +3,8 @@ import { Provider } from 'react-redux'
 import { createStore } from 'redux'
 
 import appReducer from './reducers'
-import RootRoutes from './components/RootRoute.js'
-import CheckRevision from './containers/CheckRevision.js'
+import RootRoutes from './components/RootRoute'
+import CheckRevision from './containers/CheckRevision'
 
 import './App.css'
 

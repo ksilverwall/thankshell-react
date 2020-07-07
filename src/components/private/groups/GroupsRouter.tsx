@@ -2,11 +2,11 @@ import React, {useState} from 'react';
 import { Route, Switch, Link, Redirect } from 'react-router-dom'
 import { Button, Alert, Dropdown, DropdownButton, ButtonGroup } from 'react-bootstrap'
 import { RoutedTabs, NavTab } from "react-router-tabs"
-import { NotFoundPage } from '../../public/Error.js'
-import LoadGroupIndex from '../../../containers/LoadGroupIndex.js'
-import LoadGroupAdmin from '../../../containers/LoadGroupAdmin.js'
-import UpdateUser from '../../../containers/UpdateUser.js'
-import EntryToGroup from '../../../containers/EntryToGroup.js'
+import { NotFoundPage } from '../../public/Error'
+import LoadGroupIndex from '../../../containers/LoadGroupIndex'
+import LoadGroupAdmin from '../../../containers/LoadGroupAdmin'
+import UpdateUser from '../../../containers/UpdateUser'
+import EntryToGroup from '../../../containers/EntryToGroup'
 import "react-router-tabs/styles/react-router-tabs.css";
 
 

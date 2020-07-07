@@ -1,5 +1,5 @@
 import React from 'react';
-import { GetCognitoAuth } from '../../libs/auth.js'
+import { GetCognitoAuth } from '../../libs/auth'
 
 class LoginCallback extends React.Component {
   constructor(props) {

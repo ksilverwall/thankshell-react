@@ -3,7 +3,7 @@ import {
   setGroup,
   setUser,
 } from '../actions'
-import GroupsRouter from '../components/private/groups/GroupsRouter.js'
+import GroupsRouter from '../components/private/groups/GroupsRouter'
 
 const mapStateToProps = (state) => {
   return {

@@ -1,18 +1,18 @@
 import { connect } from 'react-redux'
-import GroupEntry from '../components/private/groups/GroupEntry.js'
+import UserConfig from '../components/private/user/UserConfig'
 import { setGroup } from '../actions'
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onEntry: () => {
+    reloadMembers: () => {
       dispatch(setGroup(null))
     },
   }
 }
 
-const EntryToGroup = connect(
+const UpdateUser = connect(
   () => { return {} },
   mapDispatchToProps
-)(GroupEntry)
+)(UserConfig)
 
-export default EntryToGroup
+export default UpdateUser

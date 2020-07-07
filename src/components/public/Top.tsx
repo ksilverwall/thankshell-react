@@ -1,6 +1,6 @@
 import React from 'react';
 import './Top.css';
-import SignInButton from '../SignInButton.js'
+import SignInButton from '../SignInButton'
 
 
 export default function Top({location}) {

@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import { setToken } from '../actions'
-import GroupAdmin from '../components/private/groups/GroupAdmin.js'
+import GroupAdmin from '../components/private/groups/GroupAdmin'
 
 const mapStateToProps = (state) => {
   return {

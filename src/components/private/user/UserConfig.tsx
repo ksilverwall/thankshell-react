@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Alert } from 'react-bootstrap'
 import { ReactSVG } from 'react-svg'
-import LogoutButton from './LogoutButton.js'
+import LogoutButton from './LogoutButton'
 import { css } from 'glamor'
 
 const EditButton = ({onClick}) => {

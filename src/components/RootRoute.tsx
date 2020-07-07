@@ -1,15 +1,15 @@
 import React from 'react'
 import { BrowserRouter, Route, Switch, Link } from 'react-router-dom'
 
-import Top from './public/Top.js'
-import LoginCallback from './public/LoginCallback.js'
-import { NotFoundPage } from './public/Error.js'
-import { Tos, PrivacyPolicy } from './public/Constants.js'
-import PrivateArea from './private/PrivateArea.js'
+import Top from './public/Top'
+import LoginCallback from './public/LoginCallback'
+import { NotFoundPage } from './public/Error'
+import { Tos, PrivacyPolicy } from './public/Constants'
+import PrivateArea from './private/PrivateArea'
 
-import { GetCognitoAuth } from '../libs/auth.js'
-import { ThankshellApi, RestApi, Session } from '../libs/thankshell.js'
-import LoadGroup from '../containers/LoadGroup.js'
+import { GetCognitoAuth } from '../libs/auth'
+import { ThankshellApi, RestApi, Session } from '../libs/thankshell'
+import LoadGroup from '../containers/LoadGroup'
 
 
 const RootRoutes = (props) => {

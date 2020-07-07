@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { Alert, Button } from 'react-bootstrap'
-import SendTokenButton from './SendTokenButton.js'
-import TransactionHistory from './TransactionHistory.js'
-import ErrorMessage from '../../ErrorMessage.js'
+import SendTokenButton from './SendTokenButton'
+import TransactionHistory from './TransactionHistory'
+import ErrorMessage from '../../ErrorMessage'
 import './GroupIndex.css'
 
 const LoadingState = {

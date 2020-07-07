@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import { setToken } from '../actions'
-import GroupIndex from '../components/private/groups/GroupIndex.js'
+import GroupIndex from '../components/private/groups/GroupIndex'
 
 const mapStateToProps = (state) => {
   return {

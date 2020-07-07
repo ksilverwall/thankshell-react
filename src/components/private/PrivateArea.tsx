@@ -1,6 +1,6 @@
 import React from 'react'
 import SignInButton from '../SignInButton'
-import { GetCognitoAuth } from '../../libs/auth.js'
+import { GetCognitoAuth } from '../../libs/auth'
 
 const PrivateArea = ({location, children}) => {
   const auth = GetCognitoAuth()

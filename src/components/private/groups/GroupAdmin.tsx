@@ -3,8 +3,8 @@ import Modal from 'react-modal'
 import { Button, Table, Form } from 'react-bootstrap';
 import {CopyToClipboard} from 'react-copy-to-clipboard'
 import { MDBDataTable } from 'mdbreact';
-import ControlMemberTokenButton from './ControlMemberTokenButton.js'
-import PublishTokenButton from './PublishTokenButton.js'
+import ControlMemberTokenButton from './ControlMemberTokenButton'
+import PublishTokenButton from './PublishTokenButton'
 import './GroupIndex.css'
 
 Modal.setAppElement('#root')

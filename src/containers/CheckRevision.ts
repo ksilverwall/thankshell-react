@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import RevisionUpdateMessage from '../components/RevisionUpdateMessage.js';
+import RevisionUpdateMessage from '../components/RevisionUpdateMessage';
 import { setVersion } from '../actions'
 
 const mapStateToProps = (state) => {
