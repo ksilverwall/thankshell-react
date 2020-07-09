@@ -1,10 +1,22 @@
+interface Auth {
+  userhandler: {},
+  getSession: () => {},
+};
+
+interface AuthSession {
+  idToken: {jwtToken: string},
+};
+
 export class Session {
-  constructor(auth) {
-    this.auth = auth
-    this.session = null
+  auth: Auth;
+  session: AuthSession | null;
+
+  constructor(auth: Auth) {
+    this.auth = auth;
+    this.session = null;
   }
 
-  getSession() {
+  getSession(): Promise<AuthSession> {
     return new Promise((resolve, reject) => {
       this.auth.userhandler = {
         onSuccess: resolve,
@@ -15,7 +27,7 @@ export class Session {
     })
   }
 
-  async reload() {
+  async reload(): Promise<void> {
     this.session = await this.getSession()
     if (!this.session) {
       throw Error('セッションの読み込みに失敗しました。再読込してください')
@@ -23,25 +35,33 @@ export class Session {
   }
 
   async getJwtToken() {
-    if (!this.session) { await this.reload() }
+    if (!this.session) {
+      await this.reload()
+    }
+    if (!this.session) {
+      throw Error('セッションの読み込みに失敗しました。再読込してください')
+    }
     return this.session.idToken.jwtToken
   }
 }
 
 export class RestApi {
-  constructor(session, basePath) {
+  session: Session;
+  basePath: string;
+
+  constructor(session: Session, basePath: string) {
     this.session = session
     this.basePath = basePath
   }
 
-  async getHeaders() {
+  async getHeaders(): Promise<{}> {
     return {
       "Content-Type": "application/json; charset=utf-8",
       Authorization: await this.session.getJwtToken()
     }
   }
 
-  async get(path) {
+  async get(path: string): Promise<{}> {
     const response = await fetch(this.basePath + path, {
       method: "GET",
       headers: await this.getHeaders(),
@@ -56,7 +76,7 @@ export class RestApi {
     return body
   }
 
-  async post(path, data) {
+  async post(path: string, data: {}): Promise<{}> {
     const response = await fetch(this.basePath + path, {
       method: "POST",
       headers: await this.getHeaders(),
@@ -72,7 +92,7 @@ export class RestApi {
     return body
   }
 
-  async put(path, data) {
+  async put(path: string, data: {}): Promise<{status: number, body: {}}> {
     const response = await fetch(this.basePath + path, {
       method: "PUT",
       headers: await this.getHeaders(),
@@ -85,7 +105,7 @@ export class RestApi {
     }
   }
 
-  async put2(path, data) {
+  async put2(path: string, data: {}): Promise<{}> {
     const response = await fetch(this.basePath + path, {
       method: "PUT",
       headers: await this.getHeaders(),
@@ -101,7 +121,7 @@ export class RestApi {
     return body
   }
   
-  async patch(path, data) {
+  async patch(path: string, data: {}): Promise<{}> {
     const response = await fetch(this.basePath + path, {
       method: "PATCH",
       headers: await this.getHeaders(),
@@ -117,7 +137,7 @@ export class RestApi {
     return body
   }
 
-  async delete(path) {
+  async delete(path: string): Promise<{}> {
     const response = await fetch(this.basePath + path, {
       method: "DELETE",
       headers: await this.getHeaders(),
@@ -134,92 +154,109 @@ export class RestApi {
 }
 
 export class ThankshellApi {
-    constructor(restApi) {
-        this.restApi = restApi
+  restApi: RestApi;
+
+  constructor(restApi: RestApi) {
+    this.restApi = restApi
+  }
+
+  //-------------------------------------------------
+  // Users
+
+  async getUser(): Promise<{}> {
+    return await this.restApi.get('/user/')
+  }
+
+  async updateUser(userId: string, user: {}): Promise<void> {
+    await this.restApi.patch(`/user/${userId}`, user)
+  }
+
+  //-------------------------------------------------
+  // Groups
+
+  async getGroup(groupId: string): Promise<{}> {
+    return await this.restApi.get(`/groups/${groupId}`)
+  }
+
+  async addUserToGroup(groupId: string, name: string): Promise<void> {
+    const result = await this.restApi.put(`/groups/${groupId}/members/${name}`, {})
+    if (result.status != 200) {
+      throw new Error(('message' in result.body) ? result.body['message'] : 'No message');
+    }
+  }
+
+  async deleteUserFromGroup(groupId: string, name: string) {
+    await this.restApi.delete(`/groups/${groupId}/members/${name}`)
+  }
+
+  async entryToGroup(groupId: string, params: {m: string, hash: string}): Promise<void> {
+    const memberId = params.m
+    const hash = params.hash
+    if (!memberId || !hash){
+      throw new Error("Invalid memberId")
+    }
+    await this.restApi.put2(`/groups/${groupId}/members/${memberId}/user`, {hash: hash})
+  }
+
+  //-------------------------------------------------
+  // Transactions
+
+  async createTransaction(groupId: string, data: {}): Promise<void> {
+    await this.restApi.post(`/token/${groupId}/transactions`, data)
+  }
+
+  async loadTransactions(groupId: string, userId: string): Promise<[]> {
+    const data = await this.restApi.get(`/token/${groupId}/transactions?user_id=${userId}`);
+    if (!('history' in data)) {
+      throw new Error("key 'history' is not in data");
+    }
+    const history = data['history'];
+    if (!('Items' in history)) {
+      throw new Error("key 'history' is not in data");
     }
 
-    //-------------------------------------------------
-    // Users
+    return history['Items'];
+  }
 
-    async getUser() {
-        return await this.restApi.get('/user/')
+  async loadAllTransactions(groupId: string): Promise<[]> {
+    const data = await this.restApi.get(`/token/${groupId}/transactions`);
+    if (!('history' in data)) {
+      throw new Error("key 'history' is not in data");
+    }
+    const history = data['history'];
+    if (!('Items' in history)) {
+      throw new Error("key 'history' is not in data");
     }
 
-    async updateUser(userId, user) {
-        await this.restApi.patch(`/user/${userId}`, user)
+    return history['Items'];
+  }
+
+  //-------------------------------------------------
+  // Publish
+
+  async publish(groupId: string, to: string, amount: string): Promise<{}> {
+    return await this.restApi.post(
+      `/token/${groupId}/published`,
+      {
+        to: to,
+        amount: amount,
+      }
+    );
+  }
+
+  //-------------------------------------------------
+  // Holdings
+
+  async getHoldings(groupId: string): Promise<{[id:string]: number}> {
+    return await this.restApi.get(`/token/${groupId}/holders`);
+  }
+
+  async getHolding(groupId: string, memberId: string): Promise<number> {
+    const holdings = await this.getHoldings(groupId);
+    if (!(memberId in holdings)) {
+      throw new Error(`${memberId}の保有情報を取得できませんでした`);
     }
 
-    //-------------------------------------------------
-    // Groups
-
-    async getGroup(groupName) {
-        return await this.restApi.get('/groups/' + groupName)
-    }
-
-    async addUserToGroup(groupId, name) {
-        const result = await this.restApi.put(`/groups/${groupId}/members/${name}`)
-        if (result.status != 200) {
-            throw new Error(result.body.message)
-        }
-    }
-
-    async deleteUserFromGroup(groupId, name) {
-        await this.restApi.delete(`/groups/${groupId}/members/${name}`)
-    }
-
-    async entryToGroup(groupId, params) {
-        const {m: memberId, hash} = params
-        if (!memberId || !hash){
-            throw new Error("Invalid memberId")
-        }
-        await this.restApi.put2(`/groups/${groupId}/members/${memberId}/user`, {hash: hash})
-    }
-
-    //-------------------------------------------------
-    // Transactions
-
-    async createTransaction(tokenName, data) {
-        await this.restApi.post('/token/' + tokenName + '/transactions', data)
-    }
-
-    async loadTransactions(tokenName, userId) {
-        const data = await this.restApi.get('/token/' + tokenName + '/transactions?user_id=' + userId)
-
-        return data.history.Items
-    }
-
-    async loadAllTransactions(tokenName) {
-        const data = await this.restApi.get('/token/' + tokenName + '/transactions')
-
-        return data.history.Items;
-    }
-
-    //-------------------------------------------------
-    // Publish
-
-    async publish(tokenName, to, amount) {
-        return await this.restApi.post(
-            '/token/' + tokenName + '/published',
-            {
-                to: to,
-                amount: amount,
-            }
-        )
-    }
-
-    //-------------------------------------------------
-    // Holdings
-
-    async getHoldings(tokenName) {
-        return await this.restApi.get('/token/' + tokenName + '/holders')
-    }
-
-    async getHolding(groupId: string, memberId: string): Promise<number> {
-        const holdings = await this.getHoldings(groupId);
-        if (!(memberId in holdings)) {
-            throw new Error(`${memberId}の保有情報を取得できませんでした`);
-        }
-
-        return holdings[memberId];
-    }
+    return holdings[memberId];
+  }
 }
