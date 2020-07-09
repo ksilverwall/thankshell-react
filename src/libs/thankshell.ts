@@ -214,7 +214,12 @@ export class ThankshellApi {
         return await this.restApi.get('/token/' + tokenName + '/holders')
     }
 
-    async getHolding(tokenName, userId) {
-        return (await this.getHoldings(tokenName))[userId]
+    async getHolding(groupId: string, memberId: string): Promise<number> {
+        const holdings = await this.getHoldings(groupId);
+        if (!(memberId in holdings)) {
+            throw new Error(`${memberId}の保有情報を取得できませんでした`);
+        }
+
+        return holdings[memberId];
     }
 }
