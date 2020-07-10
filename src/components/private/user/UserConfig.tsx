@@ -1,8 +1,16 @@
 import React, { useState } from 'react'
-import { Alert } from 'react-bootstrap'
+import { Alert, Button } from 'react-bootstrap'
 import { ReactSVG } from 'react-svg'
 import LogoutButton from './LogoutButton'
 import { css } from 'glamor'
+
+const ClearLocalStorageButton = () => {
+  return (
+    <Button variant="outline-success" onClick={()=>localStorage.clear()}>
+      ClearCache
+    </Button>
+  )
+};
 
 const EditButton = ({onClick}) => {
   const styles = css({
@@ -78,6 +86,7 @@ const UserConfig = ({ memberId, memberDetail, auth, api, reloadMembers }) => {
         }
       </div>
       <p>ID: {memberId ? memberId : '-----'}</p>
+      <ClearLocalStorageButton/>
       <LogoutButton auth={auth} />
     </section>
   )
