@@ -164,25 +164,24 @@ export class ThankshellApi {
   // Users
 
   async getUser(): Promise<{}> {
-    return await this.restApi.get('/user/')
+    const groupId = 'sla';
+    return await this.restApi.get(`/groups/${groupId}/members/self`);
   }
 
   async updateUser(userId: string, user: {}): Promise<void> {
-    await this.restApi.patch(`/user/${userId}`, user)
+    const groupId = 'sla';
+    await this.restApi.patch(`/groups/${groupId}/members/${userId}`, user);
   }
 
   //-------------------------------------------------
   // Groups
 
   async getGroup(groupId: string): Promise<{}> {
-    return await this.restApi.get(`/groups/${groupId}`)
+    return await this.restApi.get(`/groups/${groupId}`);
   }
 
   async addUserToGroup(groupId: string, name: string): Promise<void> {
-    const result = await this.restApi.put(`/groups/${groupId}/members/${name}`, {})
-    if (result.status != 200) {
-      throw new Error(('message' in result.body) ? result.body['message'] : 'No message');
-    }
+    await this.restApi.post(`/groups/${groupId}/members`, {memberId: name});
   }
 
   async deleteUserFromGroup(groupId: string, name: string) {
@@ -193,20 +192,26 @@ export class ThankshellApi {
     const memberId = params.m
     const hash = params.hash
     if (!memberId || !hash){
-      throw new Error("Invalid memberId")
+      throw new Error("Invalid memberId");
     }
-    await this.restApi.put2(`/groups/${groupId}/members/${memberId}/user`, {hash: hash})
+    await this.restApi.post(`/groups/${groupId}/entry`, {memberId: memberId, hash: hash});
   }
 
   //-------------------------------------------------
   // Transactions
 
-  async createTransaction(groupId: string, data: {}): Promise<void> {
-    await this.restApi.post(`/token/${groupId}/transactions`, data)
+  async createTransaction(tokenName: string, data: any): Promise<void> {
+    const groupId = 'sla';
+    await this.restApi.post(`/groups/${groupId}/token/transactions`, {
+      type: 'send',
+      toMemberId: data.to,
+      fromMemberId: data.from,
+      ...data
+    });
   }
 
   async loadTransactions(groupId: string, userId: string): Promise<[]> {
-    const data = await this.restApi.get(`/token/${groupId}/transactions?user_id=${userId}`);
+    const data = await this.restApi.get(`/groups/${groupId}/token/transactions?user_id=${userId}`);
     if (!('history' in data)) {
       throw new Error("key 'history' is not in data");
     }
@@ -219,7 +224,7 @@ export class ThankshellApi {
   }
 
   async loadAllTransactions(groupId: string): Promise<[]> {
-    const data = await this.restApi.get(`/token/${groupId}/transactions`);
+    const data = await this.restApi.get(`/groups/${groupId}/token/transactions`);
     if (!('history' in data)) {
       throw new Error("key 'history' is not in data");
     }
@@ -234,21 +239,20 @@ export class ThankshellApi {
   //-------------------------------------------------
   // Publish
 
-  async publish(groupId: string, to: string, amount: string): Promise<{}> {
-    return await this.restApi.post(
-      `/token/${groupId}/published`,
-      {
-        to: to,
-        amount: amount,
-      }
-    );
+  async publish(tokenName: string, to: string, amount: string): Promise<{}> {
+    const groupId = 'sla';
+    return await this.restApi.post(`/groups/${groupId}/token/transactions`, {
+      type: 'publish',
+      to: to,
+      amount: amount,
+    })
   }
 
   //-------------------------------------------------
   // Holdings
 
   async getHoldings(groupId: string): Promise<{[id:string]: number}> {
-    return await this.restApi.get(`/token/${groupId}/holders`);
+    return await this.restApi.get(`/groups/${groupId}/token/holders`);
   }
 
   async getHolding(groupId: string, memberId: string): Promise<number> {
