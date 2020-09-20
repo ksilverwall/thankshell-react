@@ -1,0 +1,18 @@
+.box {
+    border-style: solid;
+    border-radius: 5pt;
+    border-color: #CCCCCC;
+    color: #CCCCCC;
+    height: 32pt;
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    margin: 4px;
+}
+
+.text {
+    margin: auto auto auto 16px;
+    text-align: left;
+}

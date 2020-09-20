@@ -1,0 +1,20 @@
+.container {
+  background: #78BBE6;
+  display: flex;
+}
+
+.logo {
+  margin: 8px 8px 8px 32px;
+  width: 24px;
+  height: 24px;
+}
+
+.text {
+  margin: auto auto auto 0px;
+  color: white;
+}
+
+.user {
+  margin: auto 24px auto auto;
+  color: white;
+}

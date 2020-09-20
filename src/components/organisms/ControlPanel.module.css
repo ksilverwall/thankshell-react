@@ -1,0 +1,18 @@
+.container {
+  background: #1B435D;
+  color: white;
+  padding: 24px 32px;
+}
+
+.inline_container {
+  display: flex;
+  align-items: flex-end;
+}
+
+.info {
+  margin-left: auto;
+}
+
+.send_button {
+  margin: 24px 0px;
+}

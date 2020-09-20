@@ -10,12 +10,13 @@ import PrivateArea from './private/PrivateArea'
 import { GetCognitoAuth } from '../libs/auth'
 import { ThankshellApi, RestApi, Session } from '../libs/thankshell'
 import LoadGroup from '../containers/LoadGroup'
+import GroupIndexPage from './pages/GroupIndexPage'
 
 
-const RootRoutes = (props) => {
+const LegacyRoutes = (props) => {
   const auth = GetCognitoAuth()
   return (
-    <BrowserRouter>
+    <>
       <Switch>
         <Route
           path='/groups/:id'
@@ -67,8 +68,21 @@ const RootRoutes = (props) => {
         <Link to="/tos">利用規約</Link>
         <Link to="/privacy-policy">プライバシーポリシー</Link>
       </footer>
-    </BrowserRouter>
+    </>
   )
 }
 
-export default RootRoutes 
+export default () => {
+  return (
+    <BrowserRouter>
+      <Switch>
+        <Route
+          path='/groups/:id'
+          exact={true}
+          component={GroupIndexPage}
+        />
+        <LegacyRoutes/>
+      </Switch>
+    </BrowserRouter>
+  );
+};
