@@ -5,7 +5,7 @@ import ReceiveHistoryRecord from 'components/molecules/ReceiveHistoryRecord';
 
 type TransactionType = 'send' | 'receive';
 
-interface Record {
+export interface Record {
   type: TransactionType,
   memberName: string,
   amount: number,

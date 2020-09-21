@@ -5,16 +5,16 @@ import InfoIcon from 'components/atoms/InfoIcon';
 import SendTokenButton from 'components/atoms/SendTokenButton';
 import SearchBox from 'components/molecules/SearchBox';
 
-export default () => (
+export default (props: {balance: number, tokenName: string}) => (
   <div className={style.container}>
     <div className={style.inline_container}>
-      <BalanceView balance={8000} tokenName='selan'/>
+      <BalanceView balance={props.balance} tokenName={props.tokenName}/>
       <div className={style.info}>
         <InfoIcon width="24px" height="24px"/>
       </div>
     </div>
     <div className={style.send_button}>
-      <SendTokenButton tokenName='selan'/>
+      <SendTokenButton tokenName={props.tokenName}/>
     </div>
     <SearchBox/>
   </div>
