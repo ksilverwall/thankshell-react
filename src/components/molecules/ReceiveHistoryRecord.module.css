@@ -1,0 +1,33 @@
+
+.title {
+    font-size: 15pt;
+    font-weight: bold;
+}
+
+.internal_container {
+    display: flex;
+}
+
+.comment {
+    font-size: 15pt;
+    width: 50%;
+}
+
+.amount {
+    color: #21CE99;
+    font-size: 15pt;
+    font-weight: bold;
+    margin: 0 0 auto auto;
+}
+
+.sign {
+    color: #21CE99;
+    font-size: 15pt;
+    font-weight: bold;
+    width: 16px;
+    margin: 0 0 auto 8px;
+}
+
+.date {
+    color: #BBBBBB;
+}

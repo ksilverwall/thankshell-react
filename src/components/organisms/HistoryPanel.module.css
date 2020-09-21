@@ -1,0 +1,16 @@
+.container {
+    background: white;
+}
+
+.group_label {
+    background: #F4F4F4;
+    color: #BBBBBB;
+}
+
+.group_label > p {
+    margin-left: 32px;
+}
+
+.item {
+    margin: 16px 32px;
+}

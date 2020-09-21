@@ -9,6 +9,37 @@ interface PropTypes {
 };
 
 export default (props: PropTypes) => {
+  const records = [
+    {
+      type: 'receive',
+      memberName: "田中",
+      amount: 100,
+      comment: "あああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ",
+      datetime: new Date('2020-09-15 10:10:10'),
+    },
+    {
+      type: 'send',
+      memberName: "田中",
+      amount: 100,
+      comment: "XXXXXX",
+      datetime: new Date('2020-09-15 03:00:00'),
+    },
+    {
+      type: 'receive',
+      memberName: "田中",
+      amount: 100,
+      comment: "Yes I do",
+      datetime: new Date('2020-08-15 10:10:10'),
+    },
+    {
+      type: 'send',
+      memberName: "田中",
+      amount: 100,
+      comment: "XXXXXX",
+      datetime: new Date('2020-08-15 03:00:00'),
+    },
+  ];
+
   return (
     <>
       <header>
@@ -22,7 +53,7 @@ export default (props: PropTypes) => {
           <ControlPanel/>
         </section>
         <section>
-          <HistoryPanel/>
+          <HistoryPanel records={records}/>
         </section>
       </article>
       <footer>
