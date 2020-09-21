@@ -4,7 +4,7 @@
     flex-direction: column;
 }
 
-footer {
+.footer {
     text-align: center;
     bottom: 0px;
     width: 100%;
@@ -12,7 +12,7 @@ footer {
     padding: 5px;
 }
 
-footer a {
+.footer a {
     color: white;
     margin: 10px;
 }

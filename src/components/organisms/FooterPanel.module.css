@@ -1,0 +1,17 @@
+.container {
+    background: #78BBE6;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+}
+
+.links {
+    display: flex;
+    margin: auto;
+}
+
+.links > * {
+    margin: 8px;
+    color: white;
+    font-size: 11pt;
+}
