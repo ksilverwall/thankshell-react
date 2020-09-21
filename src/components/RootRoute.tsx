@@ -82,6 +82,7 @@ export default () => {
           component={GroupIndexPage}
         />
         <LegacyRoutes/>
+        <Route path='*' component={NotFoundPage} />
       </Switch>
     </BrowserRouter>
   );

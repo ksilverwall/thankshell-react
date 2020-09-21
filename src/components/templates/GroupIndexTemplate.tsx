@@ -8,7 +8,7 @@ interface PropTypes {
   groupName: string,
   tokenName: string,
   records: Record[],
-  balance: number,
+  balance: number|null,
   logoUri: string,
 };
 

@@ -5,7 +5,7 @@ import InfoIcon from 'components/atoms/InfoIcon';
 import SendTokenButton from 'components/atoms/SendTokenButton';
 import SearchBox from 'components/molecules/SearchBox';
 
-export default (props: {balance: number, tokenName: string}) => (
+export default (props: {balance: number|null, tokenName: string}) => (
   <div className={style.container}>
     <div className={style.inline_container}>
       <BalanceView balance={props.balance} tokenName={props.tokenName}/>
