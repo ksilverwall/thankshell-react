@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import HeaderPanel from 'components/organisms/HeaderPanel';
 import FooterPanel from 'components/organisms/FooterPanel';
 import ControlPanel from 'components/organisms/ControlPanel';
@@ -10,6 +10,7 @@ interface PropTypes {
   records: Record[],
   balance: number|null,
   logoUri: string,
+  sendTokenButton: JSX.Element,
 };
 
 export default (props: PropTypes) => {
@@ -23,7 +24,11 @@ export default (props: PropTypes) => {
       </header>
       <article>
         <section>
-          <ControlPanel balance={props.balance} tokenName={props.tokenName}/>
+          <ControlPanel
+            balance={props.balance}
+            tokenName={props.tokenName}
+            sendTokenButton={props.sendTokenButton}
+          />
         </section>
         <section>
           <HistoryPanel records={props.records}/>
