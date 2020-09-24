@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import GroupIndexTemplate from 'components/templates/GroupIndexTemplate';
-import { Record } from 'components/organisms/HistoryPanel';
 import { GetCognitoAuth } from 'libs/auth';
 import { RestApi, Session, ThankshellApi } from 'libs/thankshell';
 import SignInButton from 'components/SignInButton';
 import SendTokenForm from 'components/organisms/SendTokenForm';
 import SendTokenButton from 'components/atoms/SendTokenButton';
+import SendHistoryRecord from 'components/molecules/SendHistoryRecord';
+import ReceiveHistoryRecord from 'components/molecules/ReceiveHistoryRecord';
 
 Modal.setAppElement('#root');
+
+type TransactionType = 'send' | 'receive';
+
+interface Record {
+  type: TransactionType,
+  memberName: string,
+  amount: number,
+  comment: string,
+  datetime: Date,
+}
 
 const getType = (memberId: string, fromMemberId: string, toMemberId: string) => {
   if (memberId === fromMemberId) {
@@ -139,6 +150,53 @@ export default (props: PropTypes) => {
     />
   );
 
+  const getYm = (datetime: Date) => {
+    return new Date(datetime.getFullYear(), datetime.getMonth(), 1);
+  }
+
+  const getNextYm = (ym: Date) => {
+    const month = ym.getMonth();
+
+    return new Date(ym.getFullYear() + Math.floor(month/12), (month+1) % 12, 1);
+  }
+
+  const getPreviousYm = (ym: Date) => {
+    let month = ym.getMonth();
+
+    return new Date(ym.getFullYear() - ((month === 0) ? 1 : 0), (month - 1 + 12) % 12, 1);
+  }
+
+  const getBlocks = (records: Record[]) => {
+    const minYm = getYm(new Date(Math.min(...records.map((record)=> record.datetime.getTime()))));
+    const maxYm = getYm(new Date(Math.max(...records.map((record)=> record.datetime.getTime()))));
+
+    const list = [];
+    for (let targetYm = maxYm; minYm <= targetYm; targetYm = getPreviousYm(targetYm)) {
+      const blockRecords = records.filter((record)=> targetYm <= record.datetime && record.datetime < getNextYm(targetYm));
+      list.push({
+        ym: targetYm, 
+        items: blockRecords.sort((a, b)=>b.datetime.getTime() - a.datetime.getTime()).map(record => {
+          return record.type === 'send'
+            ? <SendHistoryRecord
+              memberName={record.memberName}
+              amount={record.amount}
+              comment={record.comment}
+              datetime={record.datetime}
+            />
+            : <ReceiveHistoryRecord
+              memberName={record.memberName}
+              amount={record.amount}
+              comment={record.comment}
+              datetime={record.datetime}
+            />
+          }
+        ),
+      });
+    }
+
+    return list;
+  };
+
   return (
     <GroupIndexTemplate
       groupId={groupId}
@@ -146,8 +204,8 @@ export default (props: PropTypes) => {
       tokenName={groupBase.tokenName}
       logoUri={groupBase.logoUri}
       balance={balance}
-      records={records}
       sendTokenButton={sendTokenButton}
+      blocks={getBlocks(records)}
     />
   );
 };

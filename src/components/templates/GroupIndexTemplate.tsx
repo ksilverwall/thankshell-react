@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import HeaderPanel from 'components/organisms/HeaderPanel';
 import FooterPanel from 'components/organisms/FooterPanel';
 import ControlPanel from 'components/organisms/ControlPanel';
-import HistoryPanel, {Record} from 'components/organisms/HistoryPanel';
+import HistoryPanel from 'components/organisms/HistoryPanel';
 
 interface PropTypes {
   groupId: string,
   groupName: string,
   tokenName: string,
-  records: Record[],
   balance: number|null,
   logoUri: string,
   sendTokenButton: JSX.Element,
+  blocks: { ym: Date; items: JSX.Element[]; }[],
 };
 
 export default (props: PropTypes) => {
@@ -33,7 +33,7 @@ export default (props: PropTypes) => {
           />
         </section>
         <section>
-          <HistoryPanel records={props.records}/>
+          <HistoryPanel blocks={props.blocks}/>
         </section>
       </article>
       <footer>
