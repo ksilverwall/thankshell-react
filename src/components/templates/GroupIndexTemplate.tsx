@@ -5,6 +5,7 @@ import ControlPanel from 'components/organisms/ControlPanel';
 import HistoryPanel, {Record} from 'components/organisms/HistoryPanel';
 
 interface PropTypes {
+  groupId: string,
   groupName: string,
   tokenName: string,
   records: Record[],
@@ -18,6 +19,7 @@ export default (props: PropTypes) => {
     <>
       <header>
         <HeaderPanel
+          groupId={props.groupName}
           groupName={props.groupName}
           logoUri={props.logoUri}
       />

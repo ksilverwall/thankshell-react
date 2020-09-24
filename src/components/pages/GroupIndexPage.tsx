@@ -141,6 +141,7 @@ export default (props: PropTypes) => {
 
   return (
     <GroupIndexTemplate
+      groupId={groupId}
       groupName={groupBase.groupName}
       tokenName={groupBase.tokenName}
       logoUri={groupBase.logoUri}
