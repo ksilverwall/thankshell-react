@@ -7,6 +7,20 @@ interface AuthSession {
   idToken: {jwtToken: string},
 };
 
+
+export interface ApiGroup {
+  memberId: string,
+  members: {},
+}
+
+export interface ApiRecord {
+  from_account: string,
+  to_account: string,
+  amount: number,
+  comment: string,
+  timestamp: number,
+}
+
 export class Session {
   auth: Auth;
   session: AuthSession | null;
@@ -176,7 +190,7 @@ export class ThankshellApi {
   //-------------------------------------------------
   // Groups
 
-  async getGroup(groupId: string): Promise<{}> {
+  async getGroup(groupId: string): Promise<any> {
     return await this.restApi.get(`/groups/${groupId}`);
   }
 

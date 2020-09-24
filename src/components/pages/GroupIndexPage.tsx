@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import History from 'history';
 import Modal from 'react-modal';
 import GroupIndexTemplate from 'components/templates/GroupIndexTemplate';
 import { GetCognitoAuth } from 'libs/auth';
-import { RestApi, Session, ThankshellApi } from 'libs/thankshell';
+import { ApiGroup, ApiRecord, RestApi, Session, ThankshellApi } from 'libs/thankshell';
 import SignInButton from 'components/SignInButton';
 import SendTokenForm from 'components/organisms/SendTokenForm';
 import SendTokenButton from 'components/atoms/SendTokenButton';
@@ -37,7 +38,7 @@ const getMemberName = (memberId: string, members: {[key: string]: {displayName: 
   return members[memberId] ? members[memberId].displayName : memberId
 };
 
-const convertRecord = (record, group) => {
+const convertRecord = (record: ApiRecord, group: ApiGroup): Record => {
   const transactionType = getType(group.memberId, record.from_account, record.to_account);
   return (transactionType === 'send') ? {
     type: transactionType,
@@ -54,15 +55,11 @@ const convertRecord = (record, group) => {
   }
 };
 
-const convert = (records: [], group): Record[] => {
+const convert = (records: [], group: ApiGroup): Record[] => {
   return records.map((record)=>convertRecord(record, group));
 }
 
-interface PropTypes {
-  match: {params: {id: string}},
-};
-
-const SendTokenButtonEx = (props: {tokenName: string, members: string[], onSend: any}) => {
+const SendTokenButtonEx = (props: {tokenName: string, members: {}, onSend: any}) => {
   const [isModalOpening, setModalOpening] = useState<boolean>(false);
   const onSend = async(toMemberId: string, amount: number, comment: string) => {
     await props.onSend(toMemberId, amount, comment);
@@ -82,14 +79,23 @@ const SendTokenButtonEx = (props: {tokenName: string, members: string[], onSend:
   );
 };
 
+interface PropTypes {
+  match: {params: {id: string}},
+  location: History.Location<History.LocationState>,
+};
+
 export default (props: PropTypes) => {
   const groupId = props.match.params.id;
   const [balance, setBalance] = useState<number|null>(null);
   const [records, setRecords] = useState<Record[]>([]);
-  const [group, setGroup] = useState<{}|null>(null);
+  const [group, setGroup] = useState<ApiGroup|null>(null);
 
   const auth = GetCognitoAuth(null, null);
   const isSignedIn = auth.isUserSignedIn();
+
+  if (!process.env.REACT_APP_THANKSHELL_API_URL) {
+    return <p>Application Error: process.env.REACT_APP_THANKSHELL_API_URL is not set</p>;
+  }
 
   const api = new ThankshellApi(
     new RestApi(new Session(auth), process.env.REACT_APP_THANKSHELL_API_URL)
@@ -108,19 +114,19 @@ export default (props: PropTypes) => {
     });
   };
 
-  const loadGroup = async(groupId: string) => {
-    const group = await api.getGroup(groupId);
-    setGroup(group);
-    const balance = await api.getHolding(groupId, group.memberId);
-    setBalance(balance);
-    const records = await api.loadTransactions(groupId, group.memberId);
-    setRecords(convert(records, group));
-  };
-
   useEffect(()=>{
+    const loadGroup = async(groupId: string) => {
+      const group: ApiGroup = await api.getGroup(groupId);
+      setGroup(group);
+      const balance = await api.getHolding(groupId, group.memberId);
+      setBalance(balance);
+      const records = await api.loadTransactions(groupId, group.memberId);
+      setRecords(convert(records, group));
+    };
+
     if (!isSignedIn) { return; }
     loadGroup(groupId);
-  }, []);
+  }, [isSignedIn, groupId, api]);
 
   // FIXME: load from api
   const groupBase = {
@@ -133,7 +139,7 @@ export default (props: PropTypes) => {
     return (
       <div>
         <h2>サインインされていません</h2>
-        <SignInButton callbackPath={location.pathname + location.search} />
+        <SignInButton callbackPath={props.location.pathname + props.location.search} />
       </div>
     );
   }

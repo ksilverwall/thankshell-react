@@ -66,7 +66,7 @@ const FromAddressInput = (props: {
   );
 };
 
-const SendTokenForm = (props: {members: string[], isSending: boolean, onSend: any}) => {
+const SendTokenForm = (props: {members: {}, isSending: boolean, onSend: any}) => {
   const [sendTo, setSendingTo] = useState<string>('');
   const [sendAmount, setSendingAmount] = useState<number>(0);
   const [sendComment, setSendingComment] = useState<string>('');
@@ -93,7 +93,7 @@ const SendTokenForm = (props: {members: string[], isSending: boolean, onSend: an
           type="text"
           placeholder="Comment"
           value={sendComment}
-          onChange={e=>setSendingComment(e.target.value)}
+          onChange={(e: any)=>setSendingComment(e.target.value)}
         />
       </Form.Group>
       <Button variant="primary"
@@ -111,7 +111,7 @@ const SendTokenForm = (props: {members: string[], isSending: boolean, onSend: an
 }
 
 interface PropTypes {
-  members: string[],
+  members: {},
   onSend: (toMemberId: string, amount: number, comment: string) => Promise<void>,
 };
 
