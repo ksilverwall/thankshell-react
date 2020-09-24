@@ -25,7 +25,9 @@ export default (props: PropTypes) => {
       <div className={style.send_button}>
         {props.sendTokenButton}
       </div>
-      <SearchBox/>
+      <div className={style.search_box}>
+        <SearchBox/>
+      </div>
     </div>
   )
 };

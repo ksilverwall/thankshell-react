@@ -14,5 +14,9 @@
 }
 
 .send_button {
-  margin: 24px 0px;
+  margin: 24px 0 0 0;
+}
+.search_box {
+  display: none;
+  margin: 24px 0 0 0;
 }
