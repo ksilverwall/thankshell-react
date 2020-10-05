@@ -1,7 +1,8 @@
 import React from 'react';
-import styles from './HeaderPanel.module.css';
 import PersonIcon from 'components/atoms/PersonIcon';
-import { useHistory } from 'react-router-dom';
+import styles from './HeaderPanel.module.css';
+import MemberSettingsView from './MemberSettingsView';
+import ModalOpenButton from './ModalOpenButton';
 
 interface PropTypes {
   groupId: string,
@@ -10,15 +11,28 @@ interface PropTypes {
 };
 
 export default (props: PropTypes) => {
-  const history = useHistory();
+  // FIXME: implement here
+  const memberId = 'DUMMY_MEMBER_ID'
+  const memberName = 'DUMMY_MEMBER_NAME';
+  const onLogout = () => console.log('not implemented');
+  const onUpdateMemberName = () => console.log('not implemented');
 
   return (
     <div className={styles.container}>
       <img className={styles.logo} src={props.logoUri} alt="group-logo" />
       <p className={styles.text}>{props.groupName}</p>
-      <div className={styles.user} onClick={()=>{history.push(`/groups/${props.groupId}/user`)}}>
-        <PersonIcon width="32px" height="32px"/>
-      </div>
+      <ModalOpenButton
+        className={styles.user} 
+        buttonElement={<PersonIcon width="32px" height="32px"/>}
+        modalElement={
+          <MemberSettingsView
+            memberId={memberId}
+            memberName={memberName}
+            onUpdateMemberName={onUpdateMemberName}
+            onLogout={onLogout}
+          />
+        }
+      />
     </div>
   )
 };

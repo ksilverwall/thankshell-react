@@ -1,0 +1,23 @@
+.const {
+    background: #F4F4F4;
+    border-radius: 5pt;
+    display: flex;
+}
+
+.editting {
+    background:#F99F48;
+    border-radius: 5pt;
+    display: flex;
+}
+
+.text {
+    background: inherit;
+    margin: 8px;
+    width: 100%;
+    border: none;
+    font-size: 15pt;
+}
+
+.icon {
+    margin: auto 16px auto auto;
+}

@@ -1,0 +1,23 @@
+.area {
+    margin: 0;
+}
+
+.area > label {
+    font-size: 11pt;
+    color: #1B435D;
+}
+
+.text {
+    font-size: 15pt;
+    color: #1B435D;
+}
+
+.button {
+    font-size: 18pt;
+    color: #1B435D;
+    background: inherit;
+    border-radius: 10pt;
+    border-color: #1B435D;
+    width: 100%;
+    height: 40pt;
+}
