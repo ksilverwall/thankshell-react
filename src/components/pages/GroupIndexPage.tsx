@@ -5,23 +5,25 @@ import GroupIndexTemplate from 'components/templates/GroupIndexTemplate';
 import { GetCognitoAuth } from 'libs/auth';
 import { ApiGroup, ApiRecord, RestApi, Session, ThankshellApi } from 'libs/thankshell';
 import SignInButton from 'components/SignInButton';
-import SendTokenForm from 'components/organisms/SendTokenForm';
-import SendTokenButton from 'components/atoms/SendTokenButton';
-import SendHistoryRecord from 'components/molecules/SendHistoryRecord';
-import ReceiveHistoryRecord from 'components/molecules/ReceiveHistoryRecord';
 import MemberSettingsView from 'components/organisms/MemberSettingsView';
+import HistoryPanel from 'components/organisms/HistoryPanel';
+import SendTokenButtonEx from 'components/organisms/SendTokenButtonEx';
+import { valid } from 'glamor';
 
 Modal.setAppElement('#root');
 
 type TransactionType = 'send' | 'receive';
 
-interface Record {
+export interface Record {
   type: TransactionType,
   memberName: string,
   amount: number,
   comment: string,
   datetime: Date,
 }
+
+//-----------------------------------------------------------------------------
+// Util functions for loading record
 
 const getType = (memberId: string, fromMemberId: string, toMemberId: string) => {
   if (memberId === fromMemberId) {
@@ -60,25 +62,8 @@ const convert = (records: [], group: ApiGroup): Record[] => {
   return records.map((record)=>convertRecord(record, group));
 }
 
-const SendTokenButtonEx = (props: {tokenName: string, members: {}, onSend: any}) => {
-  const [isModalOpening, setModalOpening] = useState<boolean>(false);
-  const onSend = async(toMemberId: string, amount: number, comment: string) => {
-    await props.onSend(toMemberId, amount, comment);
-    setModalOpening(false);
-  }
-
-  return (
-    <>
-      <Modal isOpen={isModalOpening} onRequestClose={()=>setModalOpening(false)}>
-        <SendTokenForm
-          members={props.members}
-          onSend={onSend}
-        />
-      </Modal>
-      <SendTokenButton tokenName={props.tokenName} onClick={()=>setModalOpening(true)}/>
-    </>
-  );
-};
+//-----------------------------------------------------------------------------
+// Components
 
 interface PropTypes {
   match: {params: {id: string}},
@@ -90,6 +75,12 @@ export default (props: PropTypes) => {
   const [balance, setBalance] = useState<number|null>(null);
   const [records, setRecords] = useState<Record[]>([]);
   const [group, setGroup] = useState<ApiGroup|null>(null);
+  // FIXME: load from api
+  const groupBase = {
+    groupName: 'sla',
+    tokenName: 'selan',
+    logoUri: "/images/logo.png",
+  };
 
   const auth = GetCognitoAuth(null, null);
   const isSignedIn = auth.isUserSignedIn();
@@ -102,16 +93,21 @@ export default (props: PropTypes) => {
     new RestApi(new Session(auth), process.env.REACT_APP_THANKSHELL_API_URL)
   );
 
-  const onSend = async(toMemberId: string, amount: number, comment: string) => {
-    if (!group) {
-      throw new Error('group is not loaded');
-    }
-
+  //
+  // callback functions
+  //
+  const onSend = async(fromMemberId: string, toMemberId: string, amount: number, comment: string) => {
     await api.createTransaction('selan', {
-      from:    group.memberId,
+      from:    fromMemberId,
       to:      toMemberId,
       amount:  amount,
       comment: comment,
+    });
+  };
+
+  const onUpdateMemberName = (groupId: string, value: string) => {
+    api.updateUser(groupId, {displayName: value}).catch((error)=>{
+      console.log(error);
     });
   };
 
@@ -129,13 +125,6 @@ export default (props: PropTypes) => {
     loadGroup(groupId);
   }, [isSignedIn, groupId, api]);
 
-  // FIXME: load from api
-  const groupBase = {
-    groupName: 'sla',
-    tokenName: 'selan',
-    logoUri: "/images/logo.png",
-  };
-
   if (!isSignedIn) {
     return (
       <div>
@@ -149,68 +138,6 @@ export default (props: PropTypes) => {
     return (<p>loading...</p>);
   }
 
-  const sendTokenButton = (
-    <SendTokenButtonEx
-      tokenName={groupBase.tokenName}
-      members={group.members}
-      onSend={onSend}
-    />
-  );
-
-  const getYm = (datetime: Date) => {
-    return new Date(datetime.getFullYear(), datetime.getMonth(), 1);
-  }
-
-  const getNextYm = (ym: Date) => {
-    const month = ym.getMonth();
-
-    return new Date(ym.getFullYear() + Math.floor(month/12), (month+1) % 12, 1);
-  }
-
-  const getPreviousYm = (ym: Date) => {
-    let month = ym.getMonth();
-
-    return new Date(ym.getFullYear() - ((month === 0) ? 1 : 0), (month - 1 + 12) % 12, 1);
-  }
-
-  const getBlocks = (records: Record[]) => {
-    const minYm = getYm(new Date(Math.min(...records.map((record)=> record.datetime.getTime()))));
-    const maxYm = getYm(new Date(Math.max(...records.map((record)=> record.datetime.getTime()))));
-
-    const list = [];
-    for (let targetYm = maxYm; minYm <= targetYm; targetYm = getPreviousYm(targetYm)) {
-      const blockRecords = records.filter((record)=> targetYm <= record.datetime && record.datetime < getNextYm(targetYm));
-      list.push({
-        ym: targetYm, 
-        items: blockRecords.sort((a, b)=>b.datetime.getTime() - a.datetime.getTime()).map(record => {
-          return record.type === 'send'
-            ? <SendHistoryRecord
-              memberName={record.memberName}
-              amount={record.amount}
-              comment={record.comment}
-              datetime={record.datetime}
-            />
-            : <ReceiveHistoryRecord
-              memberName={record.memberName}
-              amount={record.amount}
-              comment={record.comment}
-              datetime={record.datetime}
-            />
-          }
-        ),
-      });
-    }
-
-    return list;
-  };
-
-  const onLogout = () => auth.signOut();
-  const onUpdateMemberName = (value: string) => {
-    api.updateUser(groupId, {displayName: value}).catch((error)=>{
-      console.log(error);
-    });
-  };
-
   return (
     <GroupIndexTemplate
       groupId={groupId}
@@ -218,16 +145,26 @@ export default (props: PropTypes) => {
       tokenName={groupBase.tokenName}
       logoUri={groupBase.logoUri}
       balance={balance}
-      sendTokenButton={sendTokenButton}
+      sendTokenButton={
+        <SendTokenButtonEx
+          tokenName={groupBase.tokenName}
+          members={group.members}
+          onSend={async(toMemberId: string, amount: number, comment: string)=>{
+            await onSend(group.memberId, toMemberId, amount, comment);
+          }}
+        />
+      }
       memberSettingsView={
         <MemberSettingsView
           memberId={group.memberId}
           memberName={group.members[group.memberId].displayName}
-          onUpdateMemberName={onUpdateMemberName}
-          onLogout={onLogout}
+          onUpdateMemberName={(value) => onUpdateMemberName(groupId, value)}
+          onLogout={()=>auth.signOut()}
         />
       }
-      blocks={getBlocks(records)}
+      historyPanel={
+        <HistoryPanel records={records}/>
+      }
     />
   );
 };

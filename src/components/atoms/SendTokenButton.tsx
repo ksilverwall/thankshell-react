@@ -3,7 +3,7 @@ import style from './SendTokenButton.module.css';
 
 interface PropTypes {
   tokenName: string,
-  onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void,
+  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void,
 };
 
 export default (props: PropTypes) => (

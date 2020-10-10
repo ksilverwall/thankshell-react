@@ -2,8 +2,6 @@ import React from 'react';
 import HeaderPanel from 'components/organisms/HeaderPanel';
 import FooterPanel from 'components/organisms/FooterPanel';
 import ControlPanel from 'components/organisms/ControlPanel';
-import HistoryPanel from 'components/organisms/HistoryPanel';
-import MemberSettingsView from 'components/organisms/MemberSettingsView';
 
 interface PropTypes {
   groupId: string,
@@ -13,7 +11,7 @@ interface PropTypes {
   logoUri: string,
   sendTokenButton: JSX.Element,
   memberSettingsView: JSX.Element,
-  blocks: { ym: Date; items: JSX.Element[]; }[],
+  historyPanel: JSX.Element,
 };
 
 export default (props: PropTypes) => {
@@ -36,7 +34,7 @@ export default (props: PropTypes) => {
           />
         </section>
         <section>
-          <HistoryPanel blocks={props.blocks}/>
+          {props.historyPanel}
         </section>
       </article>
       <footer>
