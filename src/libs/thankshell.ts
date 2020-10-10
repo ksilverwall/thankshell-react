@@ -1,6 +1,7 @@
 interface Auth {
   userhandler: {},
   getSession: () => {},
+  signOut: () => void,
 };
 
 interface AuthSession {
@@ -56,6 +57,10 @@ export class Session {
       throw Error('セッションの読み込みに失敗しました。再読込してください')
     }
     return this.session.idToken.jwtToken
+  }
+
+  close() {
+    this.auth.signOut();
   }
 }
 

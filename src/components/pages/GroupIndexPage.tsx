@@ -8,7 +8,6 @@ import SignInButton from 'components/SignInButton';
 import MemberSettingsView from 'components/organisms/MemberSettingsView';
 import HistoryPanel from 'components/organisms/HistoryPanel';
 import SendTokenButtonEx from 'components/organisms/SendTokenButtonEx';
-import { valid } from 'glamor';
 
 Modal.setAppElement('#root');
 
@@ -22,110 +21,191 @@ export interface Record {
   datetime: Date,
 }
 
-//-----------------------------------------------------------------------------
-// Util functions for loading record
-
-const getType = (memberId: string, fromMemberId: string, toMemberId: string) => {
-  if (memberId === fromMemberId) {
-    return 'send';
-  }
-  if (memberId === toMemberId) {
-    return 'receive';
-  }
-
-  // FIXME
-  return 'send';
-};
-
-const getMemberName = (memberId: string, members: {[key: string]: {displayName: string}}) => {
-  return members[memberId] ? members[memberId].displayName : memberId
-};
-
-const convertRecord = (record: ApiRecord, group: ApiGroup): Record => {
-  const transactionType = getType(group.memberId, record.from_account, record.to_account);
-  return (transactionType === 'send') ? {
-    type: transactionType,
-    memberName: getMemberName(record.to_account, group.members),
-    amount: record.amount,
-    comment: record.comment,
-    datetime: new Date(record.timestamp),
-  } : {
-    type: transactionType,
-    memberName: getMemberName(record.from_account, group.members),
-    amount: record.amount,
-    comment: record.comment,
-    datetime: new Date(record.timestamp),
-  }
-};
-
-const convert = (records: [], group: ApiGroup): Record[] => {
-  return records.map((record)=>convertRecord(record, group));
+interface Group {
+  memberId: string,
+  members: {[key: string]: {state: string, displayName: string}},
+  groupName: string,
+  tokenName: string,
+  logoUri: string,
 }
 
-//-----------------------------------------------------------------------------
-// Components
+class Controller {
+  groupId: string;
+  api: ThankshellApi;
 
-interface PropTypes {
-  match: {params: {id: string}},
-  location: History.Location<History.LocationState>,
-};
-
-export default (props: PropTypes) => {
-  const groupId = props.match.params.id;
-  const [balance, setBalance] = useState<number|null>(null);
-  const [records, setRecords] = useState<Record[]>([]);
-  const [group, setGroup] = useState<ApiGroup|null>(null);
-  // FIXME: load from api
-  const groupBase = {
-    groupName: 'sla',
-    tokenName: 'selan',
-    logoUri: "/images/logo.png",
-  };
-
-  const auth = GetCognitoAuth(null, null);
-  const isSignedIn = auth.isUserSignedIn();
-
-  if (!process.env.REACT_APP_THANKSHELL_API_URL) {
-    return <p>Application Error: process.env.REACT_APP_THANKSHELL_API_URL is not set</p>;
+  constructor(groupId: string, api: RestApi) {
+    this.groupId = groupId;
+    this.api = new ThankshellApi(api);
   }
 
-  const api = new ThankshellApi(
-    new RestApi(new Session(auth), process.env.REACT_APP_THANKSHELL_API_URL)
-  );
-
-  //
-  // callback functions
-  //
-  const onSend = async(fromMemberId: string, toMemberId: string, amount: number, comment: string) => {
-    await api.createTransaction('selan', {
+  async send(fromMemberId: string, toMemberId: string, amount: number, comment: string): Promise<void> {
+    await this.api.createTransaction('selan', {
       from:    fromMemberId,
       to:      toMemberId,
       amount:  amount,
       comment: comment,
     });
+  }
+
+  async updateMemberName(value: string): Promise<void> {
+    await this.api.updateUser(this.groupId, {displayName: value});
+  }
+
+  async getGroup(): Promise<Group> {
+    const apiGroup = await this.api.getGroup(this.groupId);
+
+    return {
+      groupName: 'sla',
+      logoUri: "/images/logo.png",
+      ...apiGroup,
+    };
+  }
+
+  async getHolding(memberId: string): Promise<number> {
+    return await this.api.getHolding(this.groupId, memberId);
+  }
+
+  async getTransactions(group: any, memberId: string): Promise<Record[]> {
+    const records = await this.api.loadTransactions(this.groupId, memberId);
+
+    return this.__convert(records, group);
+  } 
+
+  __convert (records: [], group: ApiGroup): Record[] {
+    return records.map((record)=>this.convertRecord(record, group));
+  }
+
+  getType (memberId: string, fromMemberId: string, toMemberId: string) {
+    if (memberId === fromMemberId) {
+      return 'send';
+    }
+    if (memberId === toMemberId) {
+      return 'receive';
+    }
+
+    // FIXME
+    return 'send';
   };
 
-  const onUpdateMemberName = (groupId: string, value: string) => {
-    api.updateUser(groupId, {displayName: value}).catch((error)=>{
-      console.log(error);
-    });
+  getMemberName (memberId: string, members: {[key: string]: {displayName: string}}) {
+    return members[memberId] ? members[memberId].displayName : memberId
   };
+
+  convertRecord (record: ApiRecord, group: ApiGroup): Record {
+    const transactionType = this.getType(group.memberId, record.from_account, record.to_account);
+    return (transactionType === 'send') ? {
+      type: transactionType,
+      memberName: this.getMemberName(record.to_account, group.members),
+      amount: record.amount,
+      comment: record.comment,
+      datetime: new Date(record.timestamp),
+    } : {
+      type: transactionType,
+      memberName: this.getMemberName(record.from_account, group.members),
+      amount: record.amount,
+      comment: record.comment,
+      datetime: new Date(record.timestamp),
+    }
+  };
+}
+
+//-----------------------------------------------------------------------------
+// Components
+
+interface InnerPropsType {
+  groupId: string,
+  controller: Controller,
+  group: Group,
+  onLogout: () => void,
+};
+
+const GroupIndexPage = (props: InnerPropsType) => {
+  const [balance, setBalance] = useState<number|null>(null);
+  const [records, setRecords] = useState<Record[]>([]);
+
+  const loadTransactions = async() => {
+    setBalance(await props.controller.getHolding(props.group.memberId));
+    setRecords(await props.controller.getTransactions(props.group, props.group.memberId));
+  }
 
   useEffect(()=>{
-    const loadGroup = async(groupId: string) => {
-      const group: ApiGroup = await api.getGroup(groupId);
-      setGroup(group);
-      const balance = await api.getHolding(groupId, group.memberId);
-      setBalance(balance);
-      const records = await api.loadTransactions(groupId, group.memberId);
-      setRecords(convert(records, group));
+    loadTransactions();
+  }, []);
+
+  const onUpdateMemberName = async(value: string) => {
+    try {
+      props.controller.updateMemberName(value);
+    } catch(error) {
+      console.log(error);
+    }
+  };
+
+  return (
+    <GroupIndexTemplate
+      groupId={props.groupId}
+      groupName={props.group.groupName}
+      tokenName={props.group.tokenName}
+      logoUri={props.group.logoUri}
+      balance={balance}
+      sendTokenButton={
+        <SendTokenButtonEx
+          tokenName={props.group.tokenName}
+          members={props.group.members}
+          onSend={async(toMemberId: string, amount: number, comment: string)=>{
+            await props.controller.send(props.group.memberId, toMemberId, amount, comment);
+            loadTransactions();
+          }}
+        />
+      }
+      memberSettingsView={
+        <MemberSettingsView
+          memberId={props.group.memberId}
+          memberName={props.group.members[props.group.memberId].displayName}
+          onUpdateMemberName={onUpdateMemberName}
+          onLogout={()=>props.onLogout}
+        />
+      }
+      historyPanel={
+        <HistoryPanel records={records}/>
+      }
+    />
+  );
+};
+
+interface LoadingPropsType {
+  groupId: string,
+  controller: Controller,
+  onLogout: () => void,
+};
+
+const GroupIndexLoadingPage = (props: LoadingPropsType) => {
+  const [group, setGroup] = useState<Group|null>(null);
+
+  useEffect(()=>{
+    const loadGroup = async() => {
+      setGroup(await props.controller.getGroup());
     };
 
-    if (!isSignedIn) { return; }
-    loadGroup(groupId);
-  }, [isSignedIn, groupId, api]);
+    loadGroup();
+  }, [props.controller]);
 
-  if (!isSignedIn) {
+  if (!group) {
+    return (<p>loading...</p>);
+  }
+
+  return <GroupIndexPage group={group} {...props}/>
+}
+ 
+interface PropsType {
+  match: {params: {id: string}},
+  location: History.Location<History.LocationState>,
+};
+
+export default (props: PropsType) => {
+  const groupId = props.match.params.id;
+  const auth = GetCognitoAuth(null, null);
+
+  if (!auth.isUserSignedIn()) {
     return (
       <div>
         <h2>サインインされていません</h2>
@@ -134,37 +214,18 @@ export default (props: PropTypes) => {
     );
   }
 
-  if (!group) {
-    return (<p>loading...</p>);
+  if (!process.env.REACT_APP_THANKSHELL_API_URL) {
+    return <p>Application Error: process.env.REACT_APP_THANKSHELL_API_URL is not set</p>;
   }
 
+  const session = new Session(auth);
+  const api = new RestApi(session, process.env.REACT_APP_THANKSHELL_API_URL);
+
   return (
-    <GroupIndexTemplate
+    <GroupIndexLoadingPage
       groupId={groupId}
-      groupName={groupBase.groupName}
-      tokenName={groupBase.tokenName}
-      logoUri={groupBase.logoUri}
-      balance={balance}
-      sendTokenButton={
-        <SendTokenButtonEx
-          tokenName={groupBase.tokenName}
-          members={group.members}
-          onSend={async(toMemberId: string, amount: number, comment: string)=>{
-            await onSend(group.memberId, toMemberId, amount, comment);
-          }}
-        />
-      }
-      memberSettingsView={
-        <MemberSettingsView
-          memberId={group.memberId}
-          memberName={group.members[group.memberId].displayName}
-          onUpdateMemberName={(value) => onUpdateMemberName(groupId, value)}
-          onLogout={()=>auth.signOut()}
-        />
-      }
-      historyPanel={
-        <HistoryPanel records={records}/>
-      }
+      controller={new Controller(groupId, api)}
+      onLogout={()=>session.close()}
     />
   );
 };
