@@ -205,7 +205,11 @@ export default (props: PropTypes) => {
   };
 
   const onLogout = () => auth.signOut();
-  const onUpdateMemberName = (value: string) => api.updateUser(group.memberId, {displayName: value});
+  const onUpdateMemberName = (value: string) => {
+    api.updateUser(groupId, {displayName: value}).catch((error)=>{
+      console.log(error);
+    });
+  };
 
   return (
     <GroupIndexTemplate

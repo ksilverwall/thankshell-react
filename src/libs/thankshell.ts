@@ -182,9 +182,8 @@ export class ThankshellApi {
     return await this.restApi.get(`/groups/${groupId}/members/self`);
   }
 
-  async updateUser(userId: string, user: {}): Promise<void> {
-    const groupId = 'sla';
-    await this.restApi.patch(`/groups/${groupId}/members/${userId}`, user);
+  async updateUser(groupId: string, user: {}): Promise<void> {
+    await this.restApi.patch(`/groups/${groupId}/members/self`, user);
   }
 
   //-------------------------------------------------
