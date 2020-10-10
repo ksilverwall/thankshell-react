@@ -3,6 +3,7 @@ import HeaderPanel from 'components/organisms/HeaderPanel';
 import FooterPanel from 'components/organisms/FooterPanel';
 import ControlPanel from 'components/organisms/ControlPanel';
 import HistoryPanel from 'components/organisms/HistoryPanel';
+import MemberSettingsView from 'components/organisms/MemberSettingsView';
 
 interface PropTypes {
   groupId: string,
@@ -11,6 +12,7 @@ interface PropTypes {
   balance: number|null,
   logoUri: string,
   sendTokenButton: JSX.Element,
+  memberSettingsView: JSX.Element,
   blocks: { ym: Date; items: JSX.Element[]; }[],
 };
 
@@ -22,6 +24,7 @@ export default (props: PropTypes) => {
           groupId={props.groupName}
           groupName={props.groupName}
           logoUri={props.logoUri}
+          memberSettingsView={props.memberSettingsView}
       />
       </header>
       <article>

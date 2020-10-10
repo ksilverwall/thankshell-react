@@ -8,15 +8,10 @@ interface PropTypes {
   groupId: string,
   groupName: string,
   logoUri: string,
+  memberSettingsView: JSX.Element,
 };
 
 export default (props: PropTypes) => {
-  // FIXME: implement here
-  const memberId = 'DUMMY_MEMBER_ID'
-  const memberName = 'DUMMY_MEMBER_NAME';
-  const onLogout = () => console.log('not implemented');
-  const onUpdateMemberName = () => console.log('not implemented');
-
   return (
     <div className={styles.container}>
       <img className={styles.logo} src={props.logoUri} alt="group-logo" />
@@ -24,14 +19,7 @@ export default (props: PropTypes) => {
       <ModalOpenButton
         className={styles.user} 
         buttonElement={<PersonIcon width="32px" height="32px"/>}
-        modalElement={
-          <MemberSettingsView
-            memberId={memberId}
-            memberName={memberName}
-            onUpdateMemberName={onUpdateMemberName}
-            onLogout={onLogout}
-          />
-        }
+        modalElement={props.memberSettingsView}
       />
     </div>
   )

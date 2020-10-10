@@ -9,6 +9,7 @@ import SendTokenForm from 'components/organisms/SendTokenForm';
 import SendTokenButton from 'components/atoms/SendTokenButton';
 import SendHistoryRecord from 'components/molecules/SendHistoryRecord';
 import ReceiveHistoryRecord from 'components/molecules/ReceiveHistoryRecord';
+import MemberSettingsView from 'components/organisms/MemberSettingsView';
 
 Modal.setAppElement('#root');
 
@@ -203,6 +204,9 @@ export default (props: PropTypes) => {
     return list;
   };
 
+  const onLogout = () => auth.signOut();
+  const onUpdateMemberName = (value: string) => api.updateUser(group.memberId, {displayName: value});
+
   return (
     <GroupIndexTemplate
       groupId={groupId}
@@ -211,6 +215,14 @@ export default (props: PropTypes) => {
       logoUri={groupBase.logoUri}
       balance={balance}
       sendTokenButton={sendTokenButton}
+      memberSettingsView={
+        <MemberSettingsView
+          memberId={group.memberId}
+          memberName={group.members[group.memberId].displayName}
+          onUpdateMemberName={onUpdateMemberName}
+          onLogout={onLogout}
+        />
+      }
       blocks={getBlocks(records)}
     />
   );

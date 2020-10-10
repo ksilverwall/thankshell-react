@@ -10,7 +10,7 @@ interface AuthSession {
 
 export interface ApiGroup {
   memberId: string,
-  members: {},
+  members: {[key: string]: {state: string, displayName: string}},
 }
 
 export interface ApiRecord {
