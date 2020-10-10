@@ -162,7 +162,7 @@ const GroupIndexPage = (props: InnerPropsType) => {
           memberId={props.group.memberId}
           memberName={props.group.members[props.group.memberId].displayName}
           onUpdateMemberName={onUpdateMemberName}
-          onLogout={()=>props.onLogout}
+          onLogout={props.onLogout}
         />
       }
       historyPanel={
