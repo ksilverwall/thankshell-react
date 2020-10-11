@@ -120,6 +120,7 @@ interface InnerPropsType {
 };
 
 const GroupIndexPage = (props: InnerPropsType) => {
+  const [message, setMessage] = useState<string>('');
   const [balance, setBalance] = useState<number|null>(null);
   const [records, setRecords] = useState<Record[]>([]);
 
@@ -134,14 +135,15 @@ const GroupIndexPage = (props: InnerPropsType) => {
 
   const onUpdateMemberName = async(value: string) => {
     try {
-      props.controller.updateMemberName(value);
+      await props.controller.updateMemberName(value);
     } catch(error) {
-      console.log(error);
+      setMessage(error.message);
     }
   };
 
   return (
     <GroupIndexTemplate
+      message={message}
       groupId={props.groupId}
       groupName={props.group.groupName}
       tokenName={props.group.tokenName}

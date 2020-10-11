@@ -2,8 +2,10 @@ import React from 'react';
 import HeaderPanel from 'components/organisms/HeaderPanel';
 import FooterPanel from 'components/organisms/FooterPanel';
 import ControlPanel from 'components/organisms/ControlPanel';
+import ErrorMessage from 'components/ErrorMessage';
 
 interface PropTypes {
+  message: string,
   groupId: string,
   groupName: string,
   tokenName: string,
@@ -17,6 +19,7 @@ interface PropTypes {
 export default (props: PropTypes) => {
   return (
     <>
+      <ErrorMessage message={props.message}/>
       <header>
         <HeaderPanel
           groupId={props.groupName}
