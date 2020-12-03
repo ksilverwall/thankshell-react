@@ -83,7 +83,7 @@ const SendTokenForm = (props: {members: {}, isSending: boolean, onSend: any}) =>
         <Form.Control
           type="number"
           min="1"
-          value={sendAmount.toLocaleString()}
+          value={sendAmount.toString()}
           onChange={(e: any)=>setSendingAmount(parseInt(e.target.value))}
         />
       </Form.Group>
