@@ -16,12 +16,18 @@ const SeparateList = (props: {separater: React.FunctionComponent, children: JSX.
   );
 };
 
+const GroupLabel = (props: {datetime: Date}) => {
+  return (
+    <div className={style.group_label}>
+      <p>{props.datetime.getFullYear()}年{props.datetime.getMonth()+1}月</p>
+    </div>
+  )
+};
+
 const GroupList = (props: {datetime: Date, items: JSX.Element[]}) => {
   return (
     <>
-      <div className={style.group_label}>
-        <p>{props.datetime.toLocaleString()}</p>
-      </div>
+      <GroupLabel datetime={props.datetime}/>
       <SeparateList separater={Separater}>
         {
           props.items.map((item, index) => (
