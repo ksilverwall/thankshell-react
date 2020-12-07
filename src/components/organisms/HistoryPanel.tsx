@@ -74,31 +74,32 @@ const getRecordElement = (record: Record) => {
   }
 ;
 
-const getBlocks = (records: Record[]) => {
+const getBlocks = (records: Record[]): JSX.Element[] => {
   const minYm = getYm(new Date(Math.min(...records.map((record)=> record.datetime.getTime()))));
   const maxYm = getYm(new Date(Math.max(...records.map((record)=> record.datetime.getTime()))));
 
   const list = [];
   for (let targetYm = maxYm; minYm <= targetYm; targetYm = getPreviousYm(targetYm)) {
     const blockRecords = records.filter((record)=> targetYm <= record.datetime && record.datetime < getNextYm(targetYm));
-    list.push({
-      ym: targetYm, 
-      items: blockRecords.sort((a, b)=>b.datetime.getTime() - a.datetime.getTime()).map(getRecordElement),
-    });
+    if (blockRecords.length) {
+      list.push(
+        <GroupList
+          key={targetYm.toTimeString()}
+          datetime={targetYm}
+          items={blockRecords.sort((a, b)=>b.datetime.getTime() - a.datetime.getTime()).map(getRecordElement)}
+        />
+      )
+    }
   }
 
   return list;
 };
 
 export default (props: {records: Record[]}) => {
-  const blocks = getBlocks(props.records);
+  const elements = getBlocks(props.records);
   return (
     <div className={style.container}>
-      {
-        blocks.map((block, index)=>(
-          <GroupList key={index} datetime={block.ym} items={block.items}/>
-        ))
-      }
+      {elements}
     </div>
   );
 };
