@@ -48,7 +48,7 @@ const getYm = (datetime: Date) => {
 const getNextYm = (ym: Date) => {
   const month = ym.getMonth();
 
-  return new Date(ym.getFullYear() + Math.floor(month/12), (month+1) % 12, 1);
+  return new Date(ym.getFullYear() + Math.floor((month+1)/12), (month+1) % 12, 1);
 }
 
 const getPreviousYm = (ym: Date) => {
