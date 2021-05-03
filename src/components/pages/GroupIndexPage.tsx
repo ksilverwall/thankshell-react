@@ -112,122 +112,152 @@ class Controller {
 //-----------------------------------------------------------------------------
 // Components
 
-interface InnerPropsType {
-  groupId: string,
+type LoadTransactionsProps = {
   controller: Controller,
   group: Group,
-  onLogout: () => void,
+  render: (value: {balance: number|null, records: Record[], onUpdated: ()=>void}) => JSX.Element
 };
 
-const GroupIndexPage = (props: InnerPropsType) => {
-  const [message, setMessage] = useState<string>('');
+const LoadTransactions = ({controller, group, render}: LoadTransactionsProps) => {
   const [balance, setBalance] = useState<number|null>(null);
   const [records, setRecords] = useState<Record[]>([]);
 
   const loadTransactions = async() => {
-    setBalance(await props.controller.getHolding(props.group.memberId));
-    setRecords(await props.controller.getTransactions(props.group, props.group.memberId));
+    setBalance(await controller.getHolding(group.memberId));
+    setRecords(await controller.getTransactions(group, group.memberId));
   }
 
   useEffect(()=>{
     loadTransactions();
   }, []);
 
-  const onUpdateMemberName = async(value: string) => {
-    try {
-      await props.controller.updateMemberName(value);
-    } catch(error) {
-      setMessage(error.message);
-    }
-  };
+  return render({
+    balance,
+    records,
+    onUpdated: loadTransactions,
+  });
+}
+
+const GroupIndexPage = ({api, groupId, onSignOut}: {api: RestApi, groupId: string, onSignOut: ()=>void})=>{
+  const [message, setMessage] = useState<string>('');
+
+  const controller = new Controller(groupId, api);
 
   return (
-    <GroupIndexTemplate
-      message={message}
-      groupId={props.groupId}
-      groupName={props.group.groupName}
-      tokenName={props.group.tokenName}
-      logoUri={props.group.logoUri}
-      balance={balance}
-      sendTokenButton={
-        <SendTokenButtonEx
-          tokenName={props.group.tokenName}
-          members={props.group.members}
-          onSend={async(toMemberId: string, amount: number, comment: string)=>{
-            await props.controller.send(props.group.memberId, toMemberId, amount, comment);
-            loadTransactions();
-          }}
+    <LoadGroup
+      controller={controller}
+      onLoading={()=><p>loading...</p>}
+      onLoaded={(group)=>(
+        <LoadTransactions
+          controller={controller}
+          group={group}
+          render={({balance, records, onUpdated})=>(
+            <GroupIndexTemplate
+              message={message}
+              groupId={groupId}
+              groupName={group.groupName}
+              tokenName={group.tokenName}
+              logoUri={group.logoUri}
+              balance={balance}
+              sendTokenButton={
+                <SendTokenButtonEx
+                  tokenName={group.tokenName}
+                  members={group.members}
+                  onSend={async(toMemberId: string, amount: number, comment: string)=>{
+                    await controller.send(group.memberId, toMemberId, amount, comment);
+                    onUpdated();
+                  }}
+                />
+              }
+              memberSettingsView={
+                <MemberSettingsView
+                  memberId={group.memberId}
+                  memberName={group.members[group.memberId].displayName}
+                  onUpdateMemberName={async(value)=>{
+                    try {
+                      await controller.updateMemberName(value);
+                    } catch(error) {
+                      setMessage(error.message);
+                    }
+                  }}
+                  onLogout={onSignOut}
+                />
+              }
+              historyPanel={
+                <HistoryPanel records={records}/>
+              }
+            />
+          )}
         />
-      }
-      memberSettingsView={
-        <MemberSettingsView
-          memberId={props.group.memberId}
-          memberName={props.group.members[props.group.memberId].displayName}
-          onUpdateMemberName={onUpdateMemberName}
-          onLogout={props.onLogout}
-        />
-      }
-      historyPanel={
-        <HistoryPanel records={records}/>
-      }
+      )}
     />
   );
-};
+}
 
-interface LoadingPropsType {
-  groupId: string,
+interface LoadGroupProps {
   controller: Controller,
-  onLogout: () => void,
+  onLoading: () => JSX.Element,
+  onLoaded:(group: Group) => JSX.Element,
 };
 
-const GroupIndexLoadingPage = (props: LoadingPropsType) => {
-  const [group, setGroup] = useState<Group|null>(null);
+const LoadGroup = ({controller, onLoading, onLoaded}: LoadGroupProps) => {
+  const [group, setGroup] = useState<Group>();
 
   useEffect(()=>{
-    const loadGroup = async() => {
-      setGroup(await props.controller.getGroup());
-    };
+    controller.getGroup().then(setGroup).catch(()=>console.error("Fail to load"));
+  }, [controller]);
 
-    loadGroup();
-  }, [props.controller]);
-
-  if (!group) {
-    return (<p>loading...</p>);
-  }
-
-  return <GroupIndexPage group={group} {...props}/>
+  return group ? onLoaded(group) : onLoading();
 }
  
-interface PropsType {
-  match: {params: {id: string}},
-  location: History.Location<History.LocationState>,
-};
-
-export default (props: PropsType) => {
-  const groupId = props.match.params.id;
+const UseSession = ({callbackPath, render}: {callbackPath: string, render: (params: {session: Session, onSignOut: ()=>void})=>JSX.Element}) => {
   const auth = GetCognitoAuth(null, null);
 
   if (!auth.isUserSignedIn()) {
     return (
       <div>
         <h2>サインインされていません</h2>
-        <SignInButton callbackPath={props.location.pathname + props.location.search} />
+        <SignInButton callbackPath={callbackPath} />
       </div>
     );
   }
+  const session = new Session(auth);
 
+  return render({session, onSignOut: session.close});
+};
+
+type EnvironmentVariables = {
+  apiUrl: string,
+}
+
+const LoadEnv = ({render}: {render: (env: EnvironmentVariables)=>JSX.Element}) => {
   if (!process.env.REACT_APP_THANKSHELL_API_URL) {
-    return <p>Application Error: process.env.REACT_APP_THANKSHELL_API_URL is not set</p>;
+    throw new Error("Application Error: process.env.REACT_APP_THANKSHELL_API_URL is not set");
   }
 
-  const session = new Session(auth);
-  const api = new RestApi(session, process.env.REACT_APP_THANKSHELL_API_URL);
+  return render({
+    apiUrl: process.env.REACT_APP_THANKSHELL_API_URL,
+  });
+}
 
+interface PropsType {
+  match: {params: {id: string}},
+  location: History.Location<History.LocationState>,
+};
+
+export default (props: PropsType) => {
   return (
-    <GroupIndexLoadingPage
-      groupId={groupId}
-      controller={new Controller(groupId, api)}
-      onLogout={()=>session.close()}
-    />
+    <LoadEnv render={(env)=>(
+      <UseSession
+        callbackPath={props.location.pathname + props.location.search}
+        render={({session, onSignOut})=> (
+          <GroupIndexPage
+            api={new RestApi(session, env.apiUrl)}
+            groupId={props.match.params.id}
+            onSignOut={onSignOut}
+          />
+        )}
+      />
+    )}/>
   );
 };
