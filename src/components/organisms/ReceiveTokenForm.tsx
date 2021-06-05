@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Form } from 'react-bootstrap'
 import QRCode from "qrcode.react"
 
@@ -12,6 +12,11 @@ interface PropTypes {
 
 export default ({origin, groupId, memberId, onClose}: PropTypes) => {
   const [sendAmount, setSendingAmount] = useState<number>(0);
+  const [url, setUrl] = useState<string>('');
+
+  useEffect(()=>{
+    setUrl(`${origin}/groups/${groupId}?mode=send&to_member_id=${memberId}&amount=${sendAmount}`);
+  }, [sendAmount])
 
   return (
     <>
@@ -31,7 +36,13 @@ export default ({origin, groupId, memberId, onClose}: PropTypes) => {
         <div>
           <p>{memberId}</p>
           <p>{sendAmount}</p>
-          <QRCode value={`${origin}/groups/${groupId}?mode=send&to_member_id=${memberId}&amount=${sendAmount}`} />
+          <QRCode value={url}/>
+          <Form.Group controlId="formAmount">
+            <Form.Control
+              type="text"
+              value={url}
+            />
+          </Form.Group>
         </div>
         <Button variant="primary" onClick={onClose}>
           閉じる
