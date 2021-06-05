@@ -8,6 +8,10 @@ import SignInButton from 'components/SignInButton';
 import MemberSettingsView from 'components/organisms/MemberSettingsView';
 import HistoryPanel from 'components/organisms/HistoryPanel';
 import SendTokenButtonEx from 'components/organisms/SendTokenButtonEx';
+import HeaderPanel from 'components/organisms/HeaderPanel';
+import FooterPanel from 'components/organisms/FooterPanel';
+import ControlPanel from 'components/organisms/ControlPanel';
+import ErrorMessage from 'components/ErrorMessage';
 
 Modal.setAppElement('#root');
 
@@ -153,39 +157,48 @@ const GroupIndexPage = ({api, groupId, onSignOut}: {api: RestApi, groupId: strin
           group={group}
           render={({balance, records, onUpdated})=>(
             <GroupIndexTemplate
-              message={message}
-              groupId={groupId}
-              groupName={group.groupName}
-              tokenName={group.tokenName}
-              logoUri={group.logoUri}
-              balance={balance}
-              sendTokenButton={
-                <SendTokenButtonEx
-                  tokenName={group.tokenName}
-                  members={group.members}
-                  onSend={async(toMemberId: string, amount: number, comment: string)=>{
-                    await controller.send(group.memberId, toMemberId, amount, comment);
-                    onUpdated();
-                  }}
+              errorMessageElement={<ErrorMessage message={message}/>}
+              headerElement={
+                <HeaderPanel
+                  groupId={group.groupName}
+                  groupName={group.groupName}
+                  logoUri={group.logoUri}
+                  memberSettingsView={(
+                    <MemberSettingsView
+                      memberId={group.memberId}
+                      memberName={group.members[group.memberId].displayName}
+                      onUpdateMemberName={async(value)=>{
+                        try {
+                          await controller.updateMemberName(value);
+                        } catch(error) {
+                          setMessage(error.message);
+                        }
+                      }}
+                      onLogout={onSignOut}
+                    />
+                  )}
                 />
               }
-              memberSettingsView={
-                <MemberSettingsView
-                  memberId={group.memberId}
-                  memberName={group.members[group.memberId].displayName}
-                  onUpdateMemberName={async(value)=>{
-                    try {
-                      await controller.updateMemberName(value);
-                    } catch(error) {
-                      setMessage(error.message);
-                    }
-                  }}
-                  onLogout={onSignOut}
+              controlPanelElement={
+                <ControlPanel
+                  balance={balance}
+                  tokenName={group.tokenName}
+                  sendTokenButton={
+                    <SendTokenButtonEx
+                      tokenName={group.tokenName}
+                      members={group.members}
+                      onSend={async(toMemberId: string, amount: number, comment: string)=>{
+                        await controller.send(group.memberId, toMemberId, amount, comment);
+                        onUpdated();
+                      }}
+                    />
+                  }
                 />
               }
               historyPanel={
                 <HistoryPanel records={records}/>
               }
+              footerElement={<FooterPanel/>}
             />
           )}
         />
