@@ -14,13 +14,15 @@ const getServerVersionAsync = async() => {
 };
 
 const RevisionUpdateMessage = ({localVersion, remoteVersion, setRemoteVersion}) => {
-  useEffect(async()=>{
-    setRemoteVersion(await getServerVersionAsync())
-    const interval = setInterval(async()=>{
+  useEffect(()=>{
+    (async()=>{
       setRemoteVersion(await getServerVersionAsync())
-    }, 30 * 1000);
+      const interval = setInterval(async()=>{
+        setRemoteVersion(await getServerVersionAsync())
+      }, 30 * 1000);
 
-    return () => clearInterval(interval);
+      return () => clearInterval(interval);
+    })();
   }, [])
 
   if (!localVersion || !remoteVersion) {
