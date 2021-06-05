@@ -6,6 +6,7 @@ interface PropTypes {
   headerElement: JSX.Element,
   controlPanelElement: JSX.Element,
   historyPanel: JSX.Element,
+  modalElement: JSX.Element|null,
   footerElement: JSX.Element,
 };
 
@@ -23,6 +24,9 @@ export default (props: PropTypes) => {
         <section>
           {props.historyPanel}
         </section>
+        <aside>
+          {props.modalElement}
+        </aside>
       </main>
       <footer>
         {props.footerElement}

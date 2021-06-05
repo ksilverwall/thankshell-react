@@ -13,22 +13,23 @@ import LoadGroup from '../containers/LoadGroup'
 import GroupIndexPage from './pages/GroupIndexPage'
 
 
-const LegacyRoutes = (props) => {
-  const auth = GetCognitoAuth()
+const LegacyRoutes = () => {
+  const auth = GetCognitoAuth(undefined, undefined);
+
   return (
     <>
       <Switch>
         <Route
           path='/groups/:id'
           render={(props) => (
-            <PrivateArea auth={auth} location={props.location}>
+            <PrivateArea location={props.location}>
               <LoadGroup
                 {...props}
                 auth={auth}
                 groupId={props.match.params.id}
                 api={
                   new ThankshellApi(
-                    new RestApi(new Session(auth), process.env.REACT_APP_THANKSHELL_API_URL)
+                    new RestApi(new Session(auth), process.env.REACT_APP_THANKSHELL_API_URL||'')
                   )
                 }
               />
