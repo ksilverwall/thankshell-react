@@ -14,6 +14,7 @@
     "env-cmd": "^9.0.3",
     "glamor": "^2.20.40",
     "mdbreact": "^4.24.0",
+    "qrcode.react": "^1.0.1",
     "react": "^16.13.1",
     "react-bootstrap": "^1.0.0-beta.16",
     "react-copy-to-clipboard": "^5.0.2",
