@@ -1,6 +1,6 @@
 {
   "name": "thankshell_react",
-  "version": "1.17.9",
+  "version": "1.18.0",
   "private": true,
   "dependencies": {
     "@types/react-modal": "^3.10.6",
