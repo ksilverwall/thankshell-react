@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import History from 'history';
+import React, { useState } from 'react';
 import Modal from 'react-modal';
 import GroupIndexTemplate from 'components/templates/GroupIndexTemplate';
-import { RestApi } from 'libs/thankshell';
 import MemberSettingsView from 'components/organisms/MemberSettingsView';
 import HistoryPanel from 'components/organisms/HistoryPanel';
 import HeaderPanel from 'components/organisms/HeaderPanel';
@@ -11,41 +9,10 @@ import ControlPanel from 'components/organisms/ControlPanel';
 import ErrorMessage from 'components/ErrorMessage';
 import SendTokenForm from 'components/organisms/SendTokenForm';
 import SendTokenButton from 'components/atoms/SendTokenButton';
-import LoadEnv from 'components/app/LoadEnv';
-import UseSession from 'components/app/UseSession';
-import LoadGroup from 'components/app/LoadGroup';
-import GroupRepository, { Group, Record } from 'libs/GroupRepository';
+import { Group, Record } from 'libs/GroupRepository';
+
 
 Modal.setAppElement('#root');
-
-//-----------------------------------------------------------------------------
-// Components
-
-type LoadTransactionsProps = {
-  controller: GroupRepository,
-  group: Group,
-  render: (value: {balance: number|null, records: Record[], onUpdated: ()=>void}) => JSX.Element
-};
-
-const LoadTransactions = ({controller, group, render}: LoadTransactionsProps) => {
-  const [balance, setBalance] = useState<number|null>(null);
-  const [records, setRecords] = useState<Record[]>([]);
-
-  const loadTransactions = async() => {
-    setBalance(await controller.getHolding(group.memberId));
-    setRecords(await controller.getTransactions(group, group.memberId));
-  }
-
-  useEffect(()=>{
-    loadTransactions();
-  }, []);
-
-  return render({
-    balance,
-    records,
-    onUpdated: loadTransactions,
-  });
-}
 
 
 const GroupIndexPage = ({message, group, balance, records, onUpdateMemberName, onSendToken, onSignOut}:{
@@ -106,61 +73,4 @@ const GroupIndexPage = ({message, group, balance, records, onUpdateMemberName, o
   );
 };
 
-
-interface PropsType {
-  match: {params: {id: string}},
-  location: History.Location<History.LocationState>,
-};
-
-export default (props: PropsType) => {
-  const [message, setMessage] = useState<string>('');
-
-  return (
-    <LoadEnv render={(env)=>(
-      <UseSession
-        callbackPath={props.location.pathname + props.location.search}
-        render={({session, onSignOut})=> {
-          const controller = new GroupRepository(props.match.params.id, new RestApi(session, env.apiUrl));
-
-          return (
-            <LoadGroup
-              groupRepository={controller}
-              render={({group})=>group
-                ? (
-                  <LoadTransactions
-                    controller={controller}
-                    group={group}
-                    render={({balance, records, onUpdated})=>{
-                      const onSendToken = async(memberId: string, toMemberId: string, amount: number, comment: string) => {
-                        await controller.send(memberId, toMemberId, amount, comment);
-                        onUpdated();
-                      }
-                      const onUpdateMemberName = async(value: string)=>{
-                        try {
-                          await controller.updateMemberName(value);
-                        } catch(error) {
-                          setMessage(error.message);
-                        }
-                      }
-
-                      return <GroupIndexPage {...{
-                        message,
-                        group,
-                        balance,
-                        records,
-                        onUpdateMemberName,
-                        onSendToken,
-                        onSignOut,
-                      }}/>
-                    }}
-                  />
-                )
-                : <p>Loading ...</p>
-              }
-            />
-          );
-        }}
-      />
-    )}/>
-  );
-};
+export default GroupIndexPage;

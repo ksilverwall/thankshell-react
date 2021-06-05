@@ -1,19 +1,18 @@
 import React from 'react'
-import { BrowserRouter, Route, Switch, Link } from 'react-router-dom'
+import { Route, Switch, Link } from 'react-router-dom'
 
-import Top from './public/Top'
-import LoginCallback from './public/LoginCallback'
-import { NotFoundPage } from './public/Error'
-import { Tos, PrivacyPolicy } from './public/Constants'
-import PrivateArea from './private/PrivateArea'
+import Top from '../../public/Top'
+import LoginCallback from '../../public/LoginCallback'
+import { NotFoundPage } from '../../public/Error'
+import { Tos, PrivacyPolicy } from '../../public/Constants'
+import PrivateArea from '../../private/PrivateArea'
 
-import { GetCognitoAuth } from '../libs/auth'
-import { ThankshellApi, RestApi, Session } from '../libs/thankshell'
-import LoadGroup from '../containers/LoadGroup'
-import GroupIndexPage from './pages/GroupIndexPage'
+import { GetCognitoAuth } from '../../../libs/auth'
+import { ThankshellApi, RestApi, Session } from '../../../libs/thankshell'
+import LoadGroup from '../../../containers/LoadGroup'
 
 
-const LegacyRoutes = () => {
+const LegacyRoute = () => {
   const auth = GetCognitoAuth(undefined, undefined);
 
   return (
@@ -71,20 +70,6 @@ const LegacyRoutes = () => {
       </footer>
     </>
   )
-}
-
-export default () => {
-  return (
-    <BrowserRouter>
-      <Switch>
-        <Route
-          path='/groups/:id'
-          exact={true}
-          component={GroupIndexPage}
-        />
-        <LegacyRoutes/>
-        <Route path='*' component={NotFoundPage} />
-      </Switch>
-    </BrowserRouter>
-  );
 };
+
+export default LegacyRoute;
