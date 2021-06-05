@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { Route, Switch, Link, Redirect } from 'react-router-dom'
+import { Route, Switch, Link, Redirect, useLocation, useHistory } from 'react-router-dom'
 import { Button, Alert, Dropdown, DropdownButton, ButtonGroup } from 'react-bootstrap'
 import { RoutedTabs, NavTab } from "react-router-tabs"
 import { NotFoundPage } from '../../public/Error'
@@ -8,6 +8,7 @@ import LoadGroupAdmin from '../../../containers/LoadGroupAdmin'
 import UpdateUser from '../../../containers/UpdateUser'
 import EntryToGroup from '../../../containers/EntryToGroup'
 import "react-router-tabs/styles/react-router-tabs.css";
+import FooterPanel from 'components/organisms/FooterPanel';
 
 
 const VisitorArticle = ({groupId}) => (
@@ -133,8 +134,7 @@ const GroupsRouter = ({
   auth,
   groupId,
   api,
-  location,
-  history,
+  onSignOut,
   // Loaded status from container
   user,
   group,
@@ -142,6 +142,8 @@ const GroupsRouter = ({
   setUser,
   setGroup,
 }) => {
+  const location = useLocation();
+  const history = useHistory();
   const [userLoadingErrorMessage, setUserLoadingErrorMessage] = useState('')
 
   const loadUser = async() => {
@@ -179,6 +181,9 @@ const GroupsRouter = ({
         group={group}
         setGroup={setGroup}
       />
+      <footer>
+        <FooterPanel/>
+      </footer>
     </React.Fragment>
   )
 }

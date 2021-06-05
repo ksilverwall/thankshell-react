@@ -1,5 +1,6 @@
-type EnvironmentVariables = {
+export type EnvironmentVariables = {
   apiUrl: string,
+  version?: string,
 }
 
 const LoadEnv = ({render}: {render: (env: EnvironmentVariables)=>JSX.Element}) => {
@@ -9,6 +10,7 @@ const LoadEnv = ({render}: {render: (env: EnvironmentVariables)=>JSX.Element}) =
 
   return render({
     apiUrl: process.env.REACT_APP_THANKSHELL_API_URL,
+    version: process.env.REACT_APP_VERSION,
   });
 };
 

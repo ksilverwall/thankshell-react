@@ -1,9 +1,9 @@
 import React from 'react'
 import { Button } from 'react-bootstrap'
 
-export default function LogoutButton(props) {
+export default function LogoutButton({onClick}: {onClick: ()=>void}) {
   return (
-    <Button variant="primary" onClick={() => {props.auth.signOut()}}>
+    <Button variant="primary" onClick={onClick}>
       ログアウト
     </Button>
   )

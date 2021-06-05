@@ -87,7 +87,7 @@ const UserConfig = ({ memberId, memberDetail, auth, api, reloadMembers }) => {
       </div>
       <p>ID: {memberId ? memberId : '-----'}</p>
       <ClearLocalStorageButton/>
-      <LogoutButton auth={auth} />
+      <LogoutButton onClick={()=>auth.signOut()}/>
     </section>
   )
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './FooterPanel.module.css';
 import { Link } from 'react-router-dom';
 
-export default () => (
+const FooterPanel = () => (
   <div className={styles.container}>
     <div className={styles.links}>
       <Link to="/">TOP</Link>
@@ -13,3 +13,5 @@ export default () => (
     </div>
   </div>
 );
+
+export default FooterPanel;
