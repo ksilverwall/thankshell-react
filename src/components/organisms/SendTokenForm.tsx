@@ -5,7 +5,7 @@ import { css } from 'glamor'
 
 Modal.setAppElement('#root')
 
-const SendToCandidate = ({word, members, onSelected}) => {
+const SendToCandidate = ({word, members, onSelected}: {word: string, members: {[key: string]: any}, onSelected: (memberId: string)=>void}) => {
   const styles = css({
     color: "gray",
   })
@@ -66,7 +66,7 @@ const FromAddressInput = (props: {
   );
 };
 
-const SendTokenForm = (props: {defaultValue: {toMemberId?: string, amount?: number}, members: {}, isSending: boolean, onSend: any}) => {
+const SendTokenFormView = (props: {defaultValue: {toMemberId?: string, amount?: number}, members: {}, isSending: boolean, onSend: any}) => {
   const [sendTo, setSendingTo] = useState<string>(props.defaultValue.toMemberId || '');
   const [sendAmount, setSendingAmount] = useState<number>(props.defaultValue.amount || 0);
   const [sendComment, setSendingComment] = useState<string>('');
@@ -116,7 +116,7 @@ interface PropTypes {
   onSend: (toMemberId: string, amount: number, comment: string) => Promise<void>,
 };
 
-export default ({defaultValue, members, onSend}: PropTypes) => {
+const SendTokenForm = ({defaultValue, members, onSend}: PropTypes) => {
   const [message, setMessage] = useState<string>('');
   const [isSending, setSending] = useState<boolean>(false);
 
@@ -125,7 +125,7 @@ export default ({defaultValue, members, onSend}: PropTypes) => {
       <h4>Selanを送る</h4>
       <Form>
         <p className="warning-text">{message}</p>
-        <SendTokenForm
+        <SendTokenFormView
           defaultValue={defaultValue}
           members={members}
           isSending={isSending}
@@ -147,3 +147,5 @@ export default ({defaultValue, members, onSend}: PropTypes) => {
     </>
   )
 };
+
+export default SendTokenForm;
