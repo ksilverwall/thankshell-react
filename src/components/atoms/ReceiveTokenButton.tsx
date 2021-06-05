@@ -1,13 +1,13 @@
 import React from 'react';
-import style from './SendTokenButton.module.css';
+import style from './ReceiveTokenButton.module.css';
 
 interface PropTypes {
-  tokenName: string,
+  text: string,
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void,
 };
 
 const SendTokenButton = (props: PropTypes) => (
-  <button className={style.button} onClick={props.onClick}>{props.tokenName}を送る</button>
+  <button className={style.button} onClick={props.onClick}>{props.text}</button>
 );
 
 export default SendTokenButton;

@@ -66,9 +66,9 @@ const FromAddressInput = (props: {
   );
 };
 
-const SendTokenForm = (props: {members: {}, isSending: boolean, onSend: any}) => {
-  const [sendTo, setSendingTo] = useState<string>('');
-  const [sendAmount, setSendingAmount] = useState<number>(0);
+const SendTokenForm = (props: {defaultValue: {toMemberId?: string, amount?: number}, members: {}, isSending: boolean, onSend: any}) => {
+  const [sendTo, setSendingTo] = useState<string>(props.defaultValue.toMemberId || '');
+  const [sendAmount, setSendingAmount] = useState<number>(props.defaultValue.amount || 0);
   const [sendComment, setSendingComment] = useState<string>('');
 
   return (
@@ -111,11 +111,12 @@ const SendTokenForm = (props: {members: {}, isSending: boolean, onSend: any}) =>
 }
 
 interface PropTypes {
+  defaultValue: {toMemberId?: string, amount?: number},
   members: {},
   onSend: (toMemberId: string, amount: number, comment: string) => Promise<void>,
 };
 
-export default (props: PropTypes) => {
+export default ({defaultValue, members, onSend}: PropTypes) => {
   const [message, setMessage] = useState<string>('');
   const [isSending, setSending] = useState<boolean>(false);
 
@@ -125,14 +126,15 @@ export default (props: PropTypes) => {
       <Form>
         <p className="warning-text">{message}</p>
         <SendTokenForm
-          members={props.members}
+          defaultValue={defaultValue}
+          members={members}
           isSending={isSending}
           onSend={async(toMemberId: string, amount: number, comment: string)=>{
             try {
               setSending(true);
               setMessage('処理中...');
 
-              await props.onSend(toMemberId, amount, comment);
+              await onSend(toMemberId, amount, comment);
             } catch(error) {
               setMessage('ERROR: ' + error.message);
             } finally {
