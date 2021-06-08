@@ -45,7 +45,7 @@ const ErrorMessage = ({message}) => message && message.length ? (
 ) : null
 
 // FIXME: LogoutButton must not be in this component
-const UserConfig = ({ memberId, memberDetail, auth, api, reloadMembers }) => {
+const UserConfig = ({ memberId, memberDetail, auth, api, setGroup }) => {
   const flex = css({
     display: '-webkit-flex',
     display: 'flex',
@@ -54,6 +54,8 @@ const UserConfig = ({ memberId, memberDetail, auth, api, reloadMembers }) => {
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [editBuffer, setEditBuffer] = useState(memberDetail ? memberDetail.displayName : '-----')
+
+  const reloadMembers = () => setGroup(null);
 
   return (
     <section>

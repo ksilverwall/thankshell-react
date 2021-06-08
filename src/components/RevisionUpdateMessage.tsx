@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Button } from 'react-bootstrap';
 
 const getServerVersionAsync = async() => {
@@ -13,7 +13,9 @@ const getServerVersionAsync = async() => {
   }
 };
 
-const RevisionUpdateMessage = ({localVersion, remoteVersion, setRemoteVersion}) => {
+const RevisionUpdateMessage = ({localVersion}: {localVersion: string}) => {
+  const [remoteVersion, setRemoteVersion] = useState();
+
   useEffect(()=>{
     (async()=>{
       setRemoteVersion(await getServerVersionAsync())
@@ -36,7 +38,7 @@ const RevisionUpdateMessage = ({localVersion, remoteVersion, setRemoteVersion}) 
   return (
     <Alert variant='warning'>
       新規バージョン {remoteVersion} が利用できます
-      <Button onClick={()=>window.location.reload(true)}>更新</Button>
+      <Button onClick={()=>window.location.reload()}>更新</Button>
     </Alert>
   )
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import queryString from 'query-string'
 import { Alert, Button } from 'react-bootstrap'
 
@@ -28,35 +28,28 @@ class EntryButton extends React.Component {
   }
 }
 
-class GroupEntry extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      errorMessage: null,
-    }
-  }
 
-  render() {
-    const {location, groupId, api, onEntry} = this.props
+const GroupEntry = ({location, groupId, api, setGroup}: any) => {
+  const onEntry = () => setGroup(null);
+  const [errorMessage, setErrorMessage] = useState<string>();
 
-    return (
-      <article>
-        {
-          (this.state.errorMessage) ? (
-            <Alert variant="danger">{this.state.errorMessage}</Alert>
-          ) : null
-        }
-        <p>グループ『{groupId}』に招待されています</p>
-        <EntryButton
-          api={api}
-          groupId={groupId}
-          params={queryString.parse(location.search)}
-          onComplete={onEntry}
-          onFailed={message => this.setState({errorMessage: message})}
-        />
-      </article>
-    )
-  }
-}
+  return (
+    <article>
+      {
+        (errorMessage) ? (
+          <Alert variant="danger">{errorMessage}</Alert>
+        ) : null
+      }
+      <p>グループ『{groupId}』に招待されています</p>
+      <EntryButton
+        api={api}
+        groupId={groupId}
+        params={queryString.parse(location.search)}
+        onComplete={onEntry}
+        onFailed={(message: string) => setErrorMessage(message)}
+      />
+    </article>
+  );
+};
 
 export default GroupEntry

@@ -5,7 +5,7 @@ import GroupIndexPage from 'components/pages/GroupIndexPage'
 import { EnvironmentVariables } from 'components/app/LoadEnv';
 import LoadGroup from 'components/app/LoadGroup';
 import LoadTransactions from 'components/app/LoadTransactions';
-import LoadGroupLegacy from 'containers/LoadGroup'
+import GroupsRouter from 'components/private/groups/GroupsRouter';
 
 import GroupRepository from 'libs/GroupRepository';
 import { RestApi, Session, ThankshellApi } from 'libs/thankshell';
@@ -66,7 +66,7 @@ const GroupPageRoute = ({env, groupId, session, onSignOut}: {
           );
         }}
       />
-      <LoadGroupLegacy
+      <GroupsRouter
         auth={session.auth}
         groupId={groupId}
         api={new ThankshellApi(restApi)}

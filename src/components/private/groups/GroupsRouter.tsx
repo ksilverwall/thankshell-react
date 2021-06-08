@@ -1,17 +1,17 @@
-import React, {useState} from 'react';
-import { Route, Switch, Link, Redirect, useLocation, useHistory } from 'react-router-dom'
-import { Button, Alert, Dropdown, DropdownButton, ButtonGroup } from 'react-bootstrap'
+import React, { useEffect, useState } from 'react';
+import { Route, Switch, Redirect, useLocation } from 'react-router-dom'
+import { Alert } from 'react-bootstrap'
 import { RoutedTabs, NavTab } from "react-router-tabs"
-import { NotFoundPage } from '../../public/Error'
-import LoadGroupIndex from '../../../containers/LoadGroupIndex'
-import LoadGroupAdmin from '../../../containers/LoadGroupAdmin'
-import UpdateUser from '../../../containers/UpdateUser'
-import EntryToGroup from '../../../containers/EntryToGroup'
-import "react-router-tabs/styles/react-router-tabs.css";
+import { NotFoundPage } from 'components/public/Error'
+import GroupAdmin from 'components/private/groups/GroupAdmin'; 
+import UserConfig from 'components/private/user/UserConfig';
 import FooterPanel from 'components/organisms/FooterPanel';
 
+import "react-router-tabs/styles/react-router-tabs.css";
+import GroupEntry from './GroupEntry';
 
-const VisitorArticle = ({groupId}) => (
+
+const VisitorArticle = ({groupId}: {groupId: string}) => (
   <article>
     <p>{groupId}はプライベートグループです</p>
     <p>招待リンクを使用して参加してください</p>
@@ -22,12 +22,12 @@ const GroupMain = ({
   auth,
   groupId,
   api,
-  location,
-  group,
-  setGroup,
-}) => {
-  const [groupLoadingErrorMessage, setGroupLoadingErrorMessage] = useState('')
-  const [isLoading, setLoading] = useState(false)
+}: any) => {
+  const location = useLocation();
+  const [group, setGroup] = useState();
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setLoading] = useState(false);
+
   const loadGroup = async() => {
     if (isLoading) { return }
     setLoading(true)
@@ -35,13 +35,13 @@ const GroupMain = ({
       setGroup(await api.getGroup(groupId))
       setLoading(false)
     } catch(err) {
-      setGroupLoadingErrorMessage(err.message)
+      setErrorMessage(`ERROR: ${err.message}`)
       setLoading(false)
     }
   }
 
-  if (groupLoadingErrorMessage) {
-    return (<Alert>ERROR: {groupLoadingErrorMessage}</Alert>)
+  if (errorMessage) {
+    return (<Alert>{errorMessage}</Alert>)
   }
 
   if (!group || group.groupId !== groupId) {
@@ -65,13 +65,14 @@ const GroupMain = ({
       <Switch>
         <Route
           path='/groups/:id/entry'
-          extract={true}
+          exact={true}
           render={() =>
             (group.permission === 'visitor') ? (
-              <EntryToGroup
+              <GroupEntry
                 location={location}
                 groupId={groupId}
                 api={api}
+                setGroup={setGroup}
               />
             ) : (
               <Redirect to={`/groups/${groupId}`}/>
@@ -80,30 +81,17 @@ const GroupMain = ({
         />
         <Route
           path='/groups/:id/user'
-          extract={true}
+          exact={true}
           render={(props) =>
             (group.permission === 'visitor') ? (
               <VisitorArticle groupId={groupId}/>
             ) : (
-              <UpdateUser
+              <UserConfig
                 memberId={group.memberId}
                 memberDetail={group.members[group.memberId]}
                 auth={auth}
                 api={api}
-              />
-            )
-          }
-        />
-        <Route
-          exact
-          path='/groups/:id'
-          render={() =>
-            (group.permission === 'visitor') ? (
-              <VisitorArticle groupId={groupId}/>
-            ) : (
-              <LoadGroupIndex
-                api={api}
-                group={group}
+                setGroup={setGroup}
               />
             )
           }
@@ -117,15 +105,15 @@ const GroupMain = ({
             ) : !displayedAdminPage ? (
               <h1>アクセス権限がありません</h1>
             ) : (
-              <LoadGroupAdmin
-                api={api}
-                group={group}
-              />
+              <GroupAdmin api={api} group={group}/>
             )
           }
         />
         <Route path='*' component={NotFoundPage} />
       </Switch>
+      <footer>
+        <FooterPanel/>
+      </footer>
     </main>
   )
 }
@@ -135,56 +123,32 @@ const GroupsRouter = ({
   groupId,
   api,
   onSignOut,
-  // Loaded status from container
-  user,
-  group,
-  // Callback function to conteiner
-  setUser,
-  setGroup,
-}) => {
-  const location = useLocation();
-  const history = useHistory();
-  const [userLoadingErrorMessage, setUserLoadingErrorMessage] = useState('')
+}: any) => {
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [user, setUser] = useState();
 
   const loadUser = async() => {
     try {
-      setUser(await api.getUser())
+      setUser(await api.getUser());
     } catch(err) {
-      setUserLoadingErrorMessage(err.message)
+      setErrorMessage(`User Load Error: ${err.message}`);
     }
   }
 
-  if (userLoadingErrorMessage) {
-    return (<Alert>User Load Error: {userLoadingErrorMessage}</Alert>)
+  useEffect(()=>{
+    if (!user) { loadUser() }
+  }, [user]);
+
+  if (errorMessage) {
+    return (<Alert>{errorMessage}</Alert>)
   }
 
-  if (!user) { loadUser() }
-
   return (
-    <React.Fragment>
-      <header>
-        <DropdownButton title={groupId}>
-          {
-            user && user.groups
-              ? user.groups.map((gId, index) => (
-                <Dropdown.Item key={index} onClick={()=>history.push(`/groups/${gId}`)}>{gId}</Dropdown.Item>
-              ))
-              : null
-          }
-        </DropdownButton>
-      </header>
-      <GroupMain
-        auth={auth}
-        groupId={groupId}
-        api={api}
-        location={location}
-        group={group}
-        setGroup={setGroup}
-      />
-      <footer>
-        <FooterPanel/>
-      </footer>
-    </React.Fragment>
+    <GroupMain
+      auth={auth}
+      groupId={groupId}
+      api={api}
+    />
   )
 }
 

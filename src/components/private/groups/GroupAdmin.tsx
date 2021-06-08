@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal'
 import { Button, Table, Form } from 'react-bootstrap';
 import {CopyToClipboard} from 'react-copy-to-clipboard'
@@ -345,10 +345,16 @@ const GroupAdminPage = ({api, reloadAdminTransactions, group}) => {
   )
 }
 
-const GroupAdmin = ({api, group, token, reloadAdminTransactions, setToken}) => {
-  const [loadingState, setLoadingState] = useState(LoadingState.INIT)
-  const [errorMessage, setErrorMessage] = useState('')
-  const loadAdminTransactions = async() => {
+const GroupAdmin = ({api, group}: any) => {
+  const [loadingState, setLoadingState] = useState(LoadingState.INIT);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [token, setToken] = useState<{updatedAt: number}|null>();
+
+  const reloadAdminTransactions = () => {
+    setToken(null);
+  };
+
+  const loadAdminTransactions = async(groupId: string) => {
     if (loadingState !== LoadingState.INIT) { return }
     setLoadingState(LoadingState.LOADING)
 
@@ -363,9 +369,11 @@ const GroupAdmin = ({api, group, token, reloadAdminTransactions, setToken}) => {
     }
   }
 
-  if (!token) {
-    loadAdminTransactions(group.groupId)
-  }
+  useEffect(()=>{
+    if (!token) {
+      loadAdminTransactions(group.groupId);
+    }
+  }, []);
 
   return (
     <GroupAdminPage
