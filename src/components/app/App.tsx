@@ -4,13 +4,17 @@ import RootRoutes from './routing/RootRoute'
 import LoadEnv from './LoadEnv'
 import './App.css'
 import RevisionUpdateMessage from 'components/RevisionUpdateMessage'
+import { BrowserRouter } from 'react-router-dom'
+
 
 const App = () => {
   return (
     <LoadEnv render={(env)=>(
       <>
         <RevisionUpdateMessage localVersion={env.version || ''} />
-        <RootRoutes env={env}/>
+        <BrowserRouter>
+          <RootRoutes env={env}/>
+        </BrowserRouter>
       </>
     )}/>
   )

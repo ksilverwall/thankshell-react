@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Route, Switch, Redirect, useLocation } from 'react-router-dom'
 import { Alert } from 'react-bootstrap'
 import { RoutedTabs, NavTab } from "react-router-tabs"
-import { NotFoundPage } from 'components/public/Error'
+import NotFoundPage from 'components/pages/NotFoundPage'
 import GroupAdmin from 'components/private/groups/GroupAdmin'; 
 import UserConfig from 'components/private/user/UserConfig';
 import FooterPanel from 'components/organisms/FooterPanel';
