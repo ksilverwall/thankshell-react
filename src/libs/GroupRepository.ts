@@ -1,14 +1,30 @@
 import { ApiGroup, ApiRecord, RestApi, ThankshellApi } from "./thankshell";
 
 
-export interface Group {
-  memberId: string,
-  members: {[key: string]: {state: string, displayName: string}},
+export type GroupWithoutPermission = {
   groupName: string,
-  tokenName: string,
   logoUri: string,
+  // from API
+  groupId: string,
+  permission: 'owner'|'admin'|'member',
+  owner: string,
+  memberId: string,
+  admins: string[],
+  bankId: string,
+  tokenName: string,
+  members: {},
 }
 
+export type GroupWithPermission = {
+  groupName: string,
+  logoUri: string,
+  // from API
+  groupId: string,
+  permission: 'visitor',
+  owner: string,
+}
+
+export type Group = GroupWithoutPermission | GroupWithPermission;
 
 export type TransactionType = 'send' | 'receive';
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Route, Switch } from 'react-router-dom'
+import { Redirect, Route, Switch } from 'react-router-dom'
 
+import GroupVisitorPage from 'components/pages/GroupVisitorPage';
 import GroupIndexPage from 'components/pages/GroupIndexPage'
 import { EnvironmentVariables } from 'components/app/LoadEnv';
 import LoadGroup from 'components/app/LoadGroup';
@@ -20,18 +21,19 @@ const GroupPageRoute = ({env, groupId, session, onSignOut}: {
   const [message, setMessage] = useState<string>('');
   const restApi = new RestApi(session, env.apiUrl);
   const controller = new GroupRepository(groupId, restApi);
+  const pathPrefix = `/groups/${groupId}`;
 
   return (
     <Switch>
       <Route
-        path='/groups/:id'
+        path={pathPrefix}
         exact={true}
         render={()=>{
           return (
             <LoadGroup
               groupRepository={controller}
               render={({group})=>group
-                ? (
+                ? group.permission !== 'visitor' ? (
                   <LoadTransactions
                     controller={controller}
                     group={group}
@@ -59,13 +61,16 @@ const GroupPageRoute = ({env, groupId, session, onSignOut}: {
                       }}/>
                     }}
                   />
-                )
+                ) : <Redirect to={`${pathPrefix}/visitor`}/>
                 : <p>Loading ...</p>
               }
             />
           );
         }}
       />
+      <Route path={`${pathPrefix}/visitor`}>
+        <GroupVisitorPage/>
+      </Route>
       <GroupsRouter
         auth={session.auth}
         groupId={groupId}
