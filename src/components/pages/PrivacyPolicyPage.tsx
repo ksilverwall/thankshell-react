@@ -3,17 +3,17 @@ import ReactMarkdown from 'react-markdown';
 
 import ReadText from 'components/app/ReadText';
 import FooterPanel from 'components/organisms/FooterPanel';
+import TextPageTemplate from 'components/templates/TextPageTemplate';
 
 
 export default function PrivacyPolicyPage() {
-  return (
-    <main>
-      <article style={{ background: 'white', margin: '20px', padding: '10px' }}>
-        <ReadText path='/text/privacy-policy.md' render={(text) => <ReactMarkdown source={text} />} />
-      </article>
-      <footer>
-        <FooterPanel/>
-      </footer>
-    </main>
-  );
+  return <ReadText
+    path='/text/privacy-policy.md'
+    render={(text) => (
+      <TextPageTemplate
+        markdown={<ReactMarkdown source={text} />}
+        footer={<FooterPanel/>}
+      />
+    )}
+  />
 }
