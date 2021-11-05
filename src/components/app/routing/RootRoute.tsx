@@ -8,8 +8,7 @@ import GroupPageRoute from './GroupPageRoute';
 import { EnvironmentVariables } from 'components/app/LoadEnv';
 import UseSession from 'components/app/UseSession';
 
-import FooterPanel from 'components/organisms/FooterPanel';
-import LoginCallback from 'components/public/LoginCallback'
+import LoginCallbackPage from 'components/pages/LoginCallbackPage'
 
 import PrivacyPolicyPage from 'components/pages/PrivacyPolicyPage';
 import TosPage from 'components/pages/TosPage';
@@ -32,14 +31,9 @@ const RootRoute = ({env}: {env: EnvironmentVariables}) => {
       <Route path="/privacy-policy" exact>
         <PrivacyPolicyPage/>
       </Route>
-      <Route path='/login/callback' exact render={(routeProps)=>(
-        <>
-          <LoginCallback {...routeProps}/>
-          <footer>
-            <FooterPanel/>
-          </footer>
-        </>
-      )}/>
+      <Route path='/login/callback' exact>
+        <LoginCallbackPage/>
+      </Route>
       <Route path='/groups/:id' render={(routeProps)=>(
         <UseSession
           callbackPath={routeProps.location.pathname + routeProps.location.search}
