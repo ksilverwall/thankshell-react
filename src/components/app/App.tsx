@@ -1,23 +1,14 @@
 import React from 'react'
-
-import RootRoutes from './routing/RootRoute'
-import LoadEnv from './LoadEnv'
-import './App.css'
-import RevisionUpdateMessage from 'components/RevisionUpdateMessage'
 import { BrowserRouter } from 'react-router-dom'
 
+import RootRoutes from './routing/RootRoute'
+import './App.css'
 
-const App = () => {
-  return (
-    <LoadEnv render={(env)=>(
-      <>
-        <RevisionUpdateMessage localVersion={env.version || ''} />
-        <BrowserRouter>
-          <RootRoutes env={env}/>
-        </BrowserRouter>
-      </>
-    )}/>
-  )
-}
+
+const App = () => (
+  <BrowserRouter>
+    <RootRoutes/>
+  </BrowserRouter>
+);
 
 export default App;
