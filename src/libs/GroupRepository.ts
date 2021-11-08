@@ -1,7 +1,7 @@
 import { ApiGroup, ApiRecord, RestApi, ThankshellApi } from "./thankshell";
 
 
-export type GroupWithoutPermission = {
+export type GroupWithPermission = {
   groupName: string,
   logoUri: string,
   // from API
@@ -12,10 +12,10 @@ export type GroupWithoutPermission = {
   admins: string[],
   bankId: string,
   tokenName: string,
-  members: {},
+  members: {[key: string]: any},
 }
 
-export type GroupWithPermission = {
+export type GroupWithoutPermission = {
   groupName: string,
   logoUri: string,
   // from API

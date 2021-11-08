@@ -1,5 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Modal from 'react-modal';
+import { Redirect, useLocation } from 'react-router';
+
+import UseSession from 'components/app/UseSession';
+import LoadEnv from 'components/app/LoadEnv';
+import LoadGroup from 'components/app/LoadGroup';
+import LoadTransactions from 'components/app/LoadTransactions';
+import RevisionUpdateMessage from 'components/RevisionUpdateMessage';
+
 import GroupIndexTemplate from 'components/templates/GroupIndexTemplate';
 import MemberSettingsView from 'components/organisms/MemberSettingsView';
 import HistoryPanel from 'components/organisms/HistoryPanel';
@@ -10,13 +18,26 @@ import ErrorMessage from 'components/ErrorMessage';
 import SendTokenForm from 'components/organisms/SendTokenForm';
 import SendTokenButton from 'components/atoms/SendTokenButton';
 import ReceiveTokenButton from 'components/atoms/ReceiveTokenButton';
-import { Group, Record } from 'libs/GroupRepository';
+
+import { GroupWithPermission, Record } from 'libs/GroupRepository';
+import GroupRepository from 'libs/GroupRepository';
+import { RestApi } from 'libs/thankshell';
+
 import ReceiveTokenForm from 'components/organisms/ReceiveTokenForm';
-import { useLocation } from 'react-router';
 
 
 Modal.setAppElement('#root');
 
+
+type PageState = {
+  mode: 'send',
+  toMemberId?: string,
+  amount?: number,
+} | {
+  mode: 'index',
+} | {
+  mode: 'receive',
+};
 
 const parseSearchParameters = (search: string): {[key: string]: string} => {
   const buffer = search.split('?').slice(-1)[0];
@@ -31,92 +52,195 @@ const parseSearchParameters = (search: string): {[key: string]: string} => {
   return {};
 };
 
-const GroupIndexPage = ({message, group, balance, records, onUpdateMemberName, onSendToken, onSignOut}:{
+const CreateGroupIndexPageView = ({
+  localVersion,
+  message,
+  group,
+  balance,
+  records,
+  modalElement,
+  onSignOut,
+  onUpdateMemberName,
+  onOpenSendTokenModal,
+  onOpenRecieveTokenModal,
+}: {
+  localVersion: string,
   message: string,
-  group: Group,
+  group: GroupWithPermission,
   balance: number|null,
   records: Record[],
-  onUpdateMemberName: (value: string) => Promise<void>,
-  onSendToken: (memberId: string, toMemberId: string, amount: number, comment: string) => Promise<void>,
+  modalElement: JSX.Element|null,
   onSignOut: ()=>void,
+  onUpdateMemberName: (value: string)=>Promise<void>,
+  onOpenSendTokenModal: ()=>void,
+  onOpenRecieveTokenModal: ()=>void,
+}) => (
+  <GroupIndexTemplate
+    errorMessageElement={
+      <>
+        <ErrorMessage message={message}/>
+        <RevisionUpdateMessage localVersion={localVersion} />
+      </>
+    }
+    headerElement={
+      <HeaderPanel
+        groupId={group.groupName}
+        groupName={group.groupName}
+        logoUri={group.logoUri}
+        memberSettingsView={(
+          <MemberSettingsView
+            memberId={group.memberId}
+            memberName={group.members[group.memberId].displayName}
+            onUpdateMemberName={onUpdateMemberName}
+            onLogout={onSignOut}
+          />
+        )}
+      />
+    }
+    controlPanelElement={
+      <ControlPanel
+        balance={balance}
+        tokenName={group.tokenName}
+        sendTokenButton={
+          <>
+            <SendTokenButton tokenName={group.tokenName} onClick={()=>onOpenSendTokenModal()}/>
+            <ReceiveTokenButton text={`${group.tokenName}を受け取る`} onClick={onOpenRecieveTokenModal}/>
+          </>
+        }
+      />
+    }
+    historyPanel={<HistoryPanel records={records}/>}
+    modalElement={modalElement}
+    footerElement={<FooterPanel/>}
+  />
+);
+
+const CreateModal = ({pageState, group, onClose, onSendToken}: {
+  pageState: PageState,
+  group: GroupWithPermission,
+  onClose: ()=>void,
+  onSendToken: (memberId: string, toMemberId: string, amount: number, comment: string) => Promise<void>,
 }) => {
+  switch(pageState.mode) {
+    case 'receive':
+      return (
+        <Modal isOpen={true} onRequestClose={onClose}>
+          <ReceiveTokenForm
+            origin={window.location.origin}
+            groupId={group.groupName}
+            memberId={group.memberId}
+            onClose={onClose}
+          />
+        </Modal>
+      );
+    case 'send':
+      return (
+        <Modal isOpen={true} onRequestClose={onClose}>
+          <SendTokenForm
+            defaultValue={{
+              toMemberId: pageState.toMemberId,
+              amount: pageState.amount,
+            }}
+            members={group.members}
+            onSend={async(toMemberId, amount, comment)=>{
+              await onSendToken(group.memberId, toMemberId, amount, comment);
+              onClose();
+            }}
+          />
+        </Modal>
+      );
+    case 'index':
+      return null;
+    default:
+      throw new Error('Not implemented');
+  }
+};
+
+/**
+ * Use useSearchParams of react-router-dom v6 instead
+ */
+const useSearchParams = (): {[key: string]: string} => {
   const location = useLocation();
 
-  const [modalElement, setModalElement] = useState<JSX.Element|null>(null);
-  const [parameters, setParameters] = useState<{[key: string]: string}>({});
+  return parseSearchParameters(location.search);
+}
 
-  const onClose = ()=>setModalElement(null);
-  const onOpenSendTokenModal = (defaultValue: {toMemberId?: string, amount?: number} = {}) => setModalElement(
-    <Modal isOpen={true} onRequestClose={onClose}>
-      <SendTokenForm
-        defaultValue={defaultValue}
-        members={group.members}
-        onSend={async(toMemberId, amount, comment)=>{
-          await onSendToken(group.memberId, toMemberId, amount, comment);
-          onClose();
-        }}
-      />
-    </Modal>
-  );
-  const onOpenRecieveTokenModal = () => setModalElement(
-    <Modal isOpen={true} onRequestClose={onClose}>
-      <ReceiveTokenForm
-        origin={window.location.origin}
-        groupId={group.groupName}
-        memberId={group.memberId}
-        onClose={onClose}
-      />
-    </Modal>
-  );
-
-  useEffect(()=>{
-    setParameters(parseSearchParameters(location.search))
-  }, [location.search]);
-
-  useEffect(()=>{
-    if (parameters.mode === 'send') {
-      onOpenSendTokenModal({
-        toMemberId: parameters.to_member_id,
-        amount: parseInt(parameters.amount),
-      });
+const getDefaultState = (parameters: {[key: string]: string}): PageState => {
+  if (parameters.mode === 'send') {
+    return {
+      mode: 'send',
+      toMemberId: parameters.to_member_id,
+      amount: parseInt(parameters.amount),
     }
-  }, [parameters]);
+  }
 
-  return (
-    <GroupIndexTemplate
-      errorMessageElement={<ErrorMessage message={message}/>}
-      headerElement={
-        <HeaderPanel
-          groupId={group.groupName}
-          groupName={group.groupName}
-          logoUri={group.logoUri}
-          memberSettingsView={(
-            <MemberSettingsView
-              memberId={group.memberId}
-              memberName={group.members[group.memberId].displayName}
-              onUpdateMemberName={onUpdateMemberName}
-              onLogout={onSignOut}
-            />
-          )}
-        />
+  return {mode: 'index'};
+};
+
+const GroupIndexPage = ({groupId}: {groupId: string}) => {
+  const location = useLocation();
+  const searchParams = useSearchParams();
+  const [state, setState] = useState<PageState>(getDefaultState(searchParams));
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
+  return <LoadEnv render={(env)=>(
+    <UseSession
+      callbackPath={location.pathname + location.search}
+      render={({session, onSignOut})=> {
+        const restApi = new RestApi(session, env.apiUrl);
+        const controller = new GroupRepository(groupId, restApi);
+        const pathPrefix = `/groups/${groupId}`;
+
+        return (
+          <LoadGroup
+            groupRepository={controller}
+            render={({group})=>group
+              ? group.permission !== 'visitor' ? (
+                <LoadTransactions
+                  controller={controller}
+                  group={group}
+                  render={({balance, records, onUpdated})=>{
+                    const onSendToken = async(memberId: string, toMemberId: string, amount: number, comment: string) => {
+                      await controller.send(memberId, toMemberId, amount, comment);
+                      onUpdated();
+                    }
+                    const onUpdateMemberName = async(value: string)=>{
+                      try {
+                        await controller.updateMemberName(value);
+                      } catch(error) {
+                        setErrorMessage(error.message);
+                      }
+                    }
+
+                    return (
+                      <CreateGroupIndexPageView
+                        localVersion={env.version || ''}
+                        message={errorMessage}
+                        group={group}
+                        balance={balance}
+                        records={records}
+                        modalElement={<CreateModal
+                          pageState={state}
+                          group={group}
+                          onClose={()=>setState({mode: 'index'})}
+                          onSendToken={onSendToken}
+                        />}
+                        onSignOut={onSignOut}
+                        onUpdateMemberName={onUpdateMemberName}
+                        onOpenSendTokenModal={()=>setState({mode: 'send'})}
+                        onOpenRecieveTokenModal={()=>setState({mode: 'receive'})}
+                      />
+                    )
+                  }}
+                />
+              ) : <Redirect to={`${pathPrefix}/visitor`}/>
+              : <p>Loading ...</p>
+            }
+          />
+        );
       }
-      controlPanelElement={
-        <ControlPanel
-          balance={balance}
-          tokenName={group.tokenName}
-          sendTokenButton={
-            <>
-              <SendTokenButton tokenName={group.tokenName} onClick={()=>onOpenSendTokenModal()}/>
-              <ReceiveTokenButton text={`${group.tokenName}を受け取る`} onClick={onOpenRecieveTokenModal}/>
-            </>
-          }
-        />
-      }
-      historyPanel={<HistoryPanel records={records}/>}
-      modalElement={modalElement}
-      footerElement={<FooterPanel/>}
-    />
-  );
+    }/>
+  )}/>
 };
 
 export default GroupIndexPage;

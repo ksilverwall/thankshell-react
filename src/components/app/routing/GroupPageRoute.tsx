@@ -6,7 +6,6 @@ import UseSession from 'components/app/UseSession';
 import LoadEnv from 'components/app/LoadEnv';
 import LoadGroup from 'components/app/LoadGroup';
 import LoadUser from 'components/app/LoadUser';
-import LoadTransactions from 'components/app/LoadTransactions';
 import RevisionUpdateMessage from 'components/RevisionUpdateMessage';
 
 import GroupEntry from 'components/private/groups/GroupEntry';
@@ -33,65 +32,9 @@ const GroupPageRoute = ({groupId}: {groupId: string}) => {
 
   return (
     <Switch>
-      <Route
-        path={pathPrefix}
-        exact={true}
-        render={()=>{
-          return <LoadEnv render={(env)=>(
-            <UseSession
-              callbackPath={location.pathname + location.search}
-              render={({session, onSignOut})=> {
-                const restApi = new RestApi(session, env.apiUrl);
-                const controller = new GroupRepository(groupId, restApi);
-                const pathPrefix = `/groups/${groupId}`;
-
-                return (
-                  <LoadGroup
-                    groupRepository={controller}
-                    render={({group})=>group
-                      ? group.permission !== 'visitor' ? (
-                        <LoadTransactions
-                          controller={controller}
-                          group={group}
-                          render={({balance, records, onUpdated})=>{
-                            const onSendToken = async(memberId: string, toMemberId: string, amount: number, comment: string) => {
-                              await controller.send(memberId, toMemberId, amount, comment);
-                              onUpdated();
-                            }
-                            const onUpdateMemberName = async(value: string)=>{
-                              try {
-                                await controller.updateMemberName(value);
-                              } catch(error) {
-                                setErrorMessage(error.message);
-                              }
-                            }
-
-                            return (
-                              <>
-                                <RevisionUpdateMessage localVersion={env.version || ''} />
-                                <GroupIndexPage {...{
-                                  message: errorMessage,
-                                  group,
-                                  balance,
-                                  records,
-                                  onUpdateMemberName,
-                                  onSendToken,
-                                  onSignOut,
-                                }}/>
-                              </>
-                            )
-                          }}
-                        />
-                      ) : <Redirect to={`${pathPrefix}/visitor`}/>
-                      : <p>Loading ...</p>
-                    }
-                  />
-                );
-              }
-            }/>
-          )}/>
-        }}
-      />
+      <Route path={pathPrefix} exact={true}>
+        <GroupIndexPage groupId={groupId}/>
+      </Route>
       <Route path={`${pathPrefix}/visitor`}>
         <GroupVisitorPage/>
       </Route>
