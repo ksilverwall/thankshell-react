@@ -1,22 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Route, Switch, Redirect, useLocation } from 'react-router-dom'
 import { Alert } from 'react-bootstrap'
-import { RoutedTabs, NavTab } from "react-router-tabs"
 import NotFoundPage from 'components/pages/NotFoundPage'
 import GroupAdmin from 'components/private/groups/GroupAdmin'; 
-import UserConfig from 'components/private/user/UserConfig';
 import FooterPanel from 'components/organisms/FooterPanel';
 
 import "react-router-tabs/styles/react-router-tabs.css";
 import GroupEntry from './GroupEntry';
+import { Group } from 'libs/GroupRepository';
 
-
-const VisitorArticle = ({groupId}: {groupId: string}) => (
-  <article>
-    <p>{groupId}はプライベートグループです</p>
-    <p>招待リンクを使用して参加してください</p>
-  </article>
-)
 
 const GroupMain = ({
   auth,
@@ -24,7 +16,7 @@ const GroupMain = ({
   api,
 }: any) => {
   const location = useLocation();
-  const [group, setGroup] = useState();
+  const [group, setGroup] = useState<Group>();
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setLoading] = useState(false);
 
@@ -53,15 +45,6 @@ const GroupMain = ({
   const displayedAdminPage = ['admin', 'owner'].includes(group.permission);
   return (
     <main>
-      <RoutedTabs startPathWith={`/groups/${groupId}`}>
-        <NavTab exact to='/'>ホーム</NavTab>
-        {
-          displayedAdminPage ? (
-            <NavTab to='/admin'>管理</NavTab>
-          ) : null
-        }
-        <NavTab to='/user'>ユーザ</NavTab>
-      </RoutedTabs>
       <Switch>
         <Route
           path='/groups/:id/entry'
@@ -79,36 +62,16 @@ const GroupMain = ({
             )
           }
         />
-        <Route
-          path='/groups/:id/user'
-          exact={true}
-          render={(props) =>
-            (group.permission === 'visitor') ? (
-              <VisitorArticle groupId={groupId}/>
-            ) : (
-              <UserConfig
-                memberId={group.memberId}
-                memberDetail={group.members[group.memberId]}
-                auth={auth}
-                api={api}
-                setGroup={setGroup}
-              />
-            )
-          }
-        />
-        <Route
-          exact
-          path='/groups/:id/admin'
-          render={() =>
-            (group.permission === 'visitor') ? (
-              <VisitorArticle groupId={groupId}/>
-            ) : !displayedAdminPage ? (
-              <h1>アクセス権限がありません</h1>
-            ) : (
+        {
+          displayedAdminPage ? (
+            <Route
+              exact
+              path='/groups/:id/admin'
+            >
               <GroupAdmin api={api} group={group}/>
-            )
-          }
-        />
+            </Route>
+          ) : null
+        }
         <Route path='*' component={NotFoundPage} />
       </Switch>
       <footer>
