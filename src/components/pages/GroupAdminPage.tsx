@@ -1,11 +1,30 @@
 import React, { useEffect, useState } from 'react';
+import { Alert } from 'react-bootstrap'
 import Modal from 'react-modal'
 import { Button, Table, Form } from 'react-bootstrap';
 import {CopyToClipboard} from 'react-copy-to-clipboard'
 import { MDBDataTable } from 'mdbreact';
-import ControlMemberTokenButton from './ControlMemberTokenButton'
-import PublishTokenButton from './PublishTokenButton'
+
+import ControlMemberTokenButton from '../private/groups/ControlMemberTokenButton'
+import PublishTokenButton from '../private/groups/PublishTokenButton'
 import './GroupIndex.css'
+
+import UseSession from 'components/app/UseSession';
+import LoadEnv from 'components/app/LoadEnv';
+import LoadGroup from 'components/app/LoadGroup';
+import LoadUser from 'components/app/LoadUser';
+import RevisionUpdateMessage from 'components/RevisionUpdateMessage';
+
+import NotFoundPage from 'components/pages/NotFoundPage'
+import FooterPanel from 'components/organisms/FooterPanel';
+
+import UserRepository from 'libs/UserRepository';
+import GroupRepository from 'libs/GroupRepository';
+import { RestApi } from 'libs/thankshell';
+
+import "react-router-tabs/styles/react-router-tabs.css";
+import { useLocation } from 'react-router-dom';
+
 
 Modal.setAppElement('#root')
 
@@ -297,7 +316,7 @@ const TransactionSection = ({api, groupId, members}) => {
   )
 }
 
-const GroupAdminPage = ({api, reloadAdminTransactions, group}) => {
+const GroupAdminPageLegacy = ({api, reloadAdminTransactions, group}) => {
   const [holdings, setHoldings] = useState()
   const [loadingState, setLoadingState] = useState(LoadingState.INIT)
   const [errorMessage, setErrorMessage] = useState('')
@@ -376,7 +395,7 @@ const GroupAdmin = ({api, group}: any) => {
   }, []);
 
   return (
-    <GroupAdminPage
+    <GroupAdminPageLegacy
       api={api}
       reloadAdminTransactions={reloadAdminTransactions}
       group={group}
@@ -384,4 +403,56 @@ const GroupAdmin = ({api, group}: any) => {
   )
 }
 
-export default GroupAdmin
+const GroupAdminPage = ({groupId}: {groupId: string}) => {
+  const location = useLocation();
+
+  return (
+    <LoadEnv render={(env)=>(
+      <>
+        <RevisionUpdateMessage localVersion={env.version || ''} />
+        <UseSession
+          callbackPath={location.pathname + location.search}
+          render={({session})=> {
+            if (errorMessage) {
+              return (<Alert>{errorMessage}</Alert>)
+            }
+
+            const api = new RestApi(session, env.apiUrl);
+
+            return (
+              <LoadUser
+                repository={new UserRepository(groupId, api)}
+                onError={(msg)=>setErrorMessage(`User Load Error: ${msg}`)}
+                render={()=>(
+                  <LoadGroup
+                    groupRepository={new GroupRepository(groupId, api)}
+                    render={({group})=>{
+                      if (!group) {
+                        return <h1>Loading...</h1>;
+                      }
+
+                      return (
+                        <main>
+                          {
+                            ['admin', 'owner'].includes(group.permission) ? (
+                              <GroupAdmin api={api} group={group}/>
+                            ) : <NotFoundPage/>
+                          }
+                          <footer>
+                            <FooterPanel/>
+                          </footer>
+                        </main>
+                      );
+                    }
+                  }/>
+                )}
+              />
+            );
+          }}
+        />
+      </>
+    )}/>
+  );
+}
+
+export default GroupAdminPage;

@@ -24,6 +24,7 @@ import GroupRepository from 'libs/GroupRepository';
 import { RestApi } from 'libs/thankshell';
 
 import ReceiveTokenForm from 'components/organisms/ReceiveTokenForm';
+import { useSearchParams } from '../../libs/userHooks';
 
 
 Modal.setAppElement('#root');
@@ -39,7 +40,7 @@ type PageState = {
   mode: 'receive',
 };
 
-const parseSearchParameters = (search: string): {[key: string]: string} => {
+export const parseSearchParameters = (search: string): {[key: string]: string} => {
   const buffer = search.split('?').slice(-1)[0];
   
   if (buffer) {
@@ -155,15 +156,6 @@ const CreateModal = ({pageState, group, onClose, onSendToken}: {
       throw new Error('Not implemented');
   }
 };
-
-/**
- * Use useSearchParams of react-router-dom v6 instead
- */
-const useSearchParams = (): {[key: string]: string} => {
-  const location = useLocation();
-
-  return parseSearchParameters(location.search);
-}
 
 const getDefaultState = (parameters: {[key: string]: string}): PageState => {
   if (parameters.mode === 'send') {

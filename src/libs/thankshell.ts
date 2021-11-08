@@ -206,7 +206,7 @@ export class ThankshellApi {
     await this.restApi.delete(`/groups/${groupId}/members/${name}`)
   }
 
-  async entryToGroup(groupId: string, params: {m: string, hash: string}): Promise<void> {
+  async entryToGroup(groupId: string, params: {m?: string, hash?: string}): Promise<void> {
     const memberId = params.m
     const hash = params.hash
     if (!memberId || !hash){
