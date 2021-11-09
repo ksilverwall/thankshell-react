@@ -1,7 +1,6 @@
 import React from 'react';
 import PersonIcon from 'components/atoms/PersonIcon';
 import styles from './HeaderPanel.module.css';
-import MemberSettingsView from './MemberSettingsView';
 import ModalOpenButton from './ModalOpenButton';
 
 interface PropTypes {

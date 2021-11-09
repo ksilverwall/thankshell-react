@@ -16,7 +16,7 @@ export default ({origin, groupId, memberId, onClose}: PropTypes) => {
 
   useEffect(()=>{
     setUrl(`${origin}/groups/${groupId}?mode=send&to_member_id=${memberId}&amount=${sendAmount}`);
-  }, [sendAmount])
+  }, [origin, groupId, memberId, sendAmount])
 
   return (
     <>

@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { Session } from 'libs/thankshell';
-import { SignIn } from 'libs/auth';
 
 import PrimaryButton from 'components/atoms/PrimaryButton';
 import { useSession } from 'libs/userHooks';

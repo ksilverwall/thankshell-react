@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from 'react-bootstrap';
 
 const PrimaryButton = ({ text, onClick }: { text: string; onClick: () => void }) => {

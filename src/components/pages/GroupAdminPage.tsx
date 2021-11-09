@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-bootstrap'
 import Modal from 'react-modal'
 import { Button, Table, Form } from 'react-bootstrap';
@@ -24,6 +24,7 @@ import { RestApi } from 'libs/thankshell';
 
 import "react-router-tabs/styles/react-router-tabs.css";
 import { useLocation } from 'react-router-dom';
+import ErrorMessage from 'components/ErrorMessage';
 
 
 Modal.setAppElement('#root')
@@ -337,6 +338,7 @@ const GroupAdminPageLegacy = ({api, reloadAdminTransactions, group}) => {
 
   return (
     <article className="container-fluid">
+      <ErrorMessage message={errorMessage}/>
       <h1>管理フォーム</h1>
 
       <Holdings
@@ -373,7 +375,7 @@ const GroupAdmin = ({api, group}: any) => {
     setToken(null);
   };
 
-  const loadAdminTransactions = async(groupId: string) => {
+  const loadAdminTransactions = useCallback(async() => {
     if (loadingState !== LoadingState.INIT) { return }
     setLoadingState(LoadingState.LOADING)
 
@@ -386,20 +388,23 @@ const GroupAdmin = ({api, group}: any) => {
     } finally {
       setLoadingState(LoadingState.COMPLETE)
     }
-  }
+  }, [loadingState]);
 
   useEffect(()=>{
     if (!token) {
-      loadAdminTransactions(group.groupId);
+      loadAdminTransactions();
     }
-  }, []);
+  }, [token, loadAdminTransactions]);
 
   return (
-    <GroupAdminPageLegacy
-      api={api}
-      reloadAdminTransactions={reloadAdminTransactions}
-      group={group}
-    />
+    <>
+      <ErrorMessage message={errorMessage}/>
+      <GroupAdminPageLegacy
+        api={api}
+        reloadAdminTransactions={reloadAdminTransactions}
+        group={group}
+      />
+    </>
   )
 }
 

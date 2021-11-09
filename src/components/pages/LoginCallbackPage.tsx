@@ -27,7 +27,7 @@ const LoginCallbackPage = () => {
     } catch(err) {
       setMessage(`ERROR on parse ${responseToken}: ${err}`);
     }
-  }, []);
+  }, [history, location.search]);
 
   return (
     <main>

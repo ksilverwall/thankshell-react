@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import UserRepository from 'libs/UserRepository';
 
 const LoadUser = ({ repository, onError, render }: {
@@ -9,17 +9,17 @@ const LoadUser = ({ repository, onError, render }: {
 ) => {
   const [user, setUser] = useState<any>();
 
-  const loadUser = async () => {
+  const loadUser = useCallback(async()=>{
     try {
       setUser(await repository.getUser());
     } catch (err) {
       onError(err.message);
     }
-  };
+  }, [repository, onError]);
 
   useEffect(() => {
     if (!user) { loadUser(); }
-  }, [user]);
+  }, [user, loadUser]);
 
   return render();
 };

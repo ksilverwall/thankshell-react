@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import GroupRepository, { Group, Record } from 'libs/GroupRepository';
 
 
@@ -12,14 +12,14 @@ const LoadTransactions = ({controller, group, render}: LoadTransactionsProps) =>
   const [balance, setBalance] = useState<number|null>(null);
   const [records, setRecords] = useState<Record[]>([]);
 
-  const loadTransactions = async() => {
+  const loadTransactions = useCallback(async(group: Group) => {
     setBalance(await controller.getHolding(group.memberId));
     setRecords(await controller.getTransactions(group, group.memberId));
-  }
+  }, [controller])
 
   useEffect(()=>{
-    loadTransactions();
-  }, []);
+    loadTransactions(group);
+  }, [group, loadTransactions]);
 
   return render({
     balance,
