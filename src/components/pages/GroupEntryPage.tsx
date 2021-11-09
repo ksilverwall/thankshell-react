@@ -15,8 +15,6 @@ import GroupRepository from 'libs/GroupRepository';
 import { RestApi } from 'libs/thankshell';
 import { useEnvironmentVariable, useSearchParams, useSession } from 'libs/userHooks';
 
-import "react-router-tabs/styles/react-router-tabs.css";
-
 
 const GroupEntryPage = ({groupId}: {groupId: string}) => {
   const groupTopUrl = `/groups/${groupId}`;

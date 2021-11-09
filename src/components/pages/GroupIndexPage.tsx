@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
-import { Redirect, useLocation } from 'react-router';
+import { Redirect, useLocation } from 'react-router-dom';
 
 import UseSession from 'components/app/UseSession';
 import LoadEnv from 'components/app/LoadEnv';

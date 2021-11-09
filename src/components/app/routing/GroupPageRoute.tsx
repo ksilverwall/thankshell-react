@@ -7,8 +7,6 @@ import GroupEntryPage from 'components/pages/GroupEntryPage';
 import GroupAdminPage from 'components/pages/GroupAdminPage';
 import NotFoundPage from 'components/pages/NotFoundPage'
 
-import "react-router-tabs/styles/react-router-tabs.css";
-
 
 const GroupPageRoute = ({groupId}: {groupId: string}) => {
   const pathPrefix = `/groups/${groupId}`;

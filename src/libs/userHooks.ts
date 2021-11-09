@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 import { parseSearchParameters } from '../components/pages/GroupIndexPage';
 import { GetCognitoAuth, SignIn } from './auth';
 import { Session } from './thankshell';

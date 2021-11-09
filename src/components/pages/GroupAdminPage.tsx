@@ -22,7 +22,6 @@ import UserRepository from 'libs/UserRepository';
 import GroupRepository from 'libs/GroupRepository';
 import { RestApi } from 'libs/thankshell';
 
-import "react-router-tabs/styles/react-router-tabs.css";
 import { useLocation } from 'react-router-dom';
 import ErrorMessage from 'components/ErrorMessage';
 
