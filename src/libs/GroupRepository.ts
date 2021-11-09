@@ -116,4 +116,13 @@ export default class GroupRepository {
       datetime: new Date(record.timestamp),
     }
   };
+
+  async entryToGroup(params: {m?: string, hash?: string}): Promise<void> {
+    const memberId = params.m
+    const hash = params.hash
+    if (!memberId || !hash){
+      throw new Error("Invalid memberId");
+    }
+    await this.api.entryToGroup(this.groupId, params);
+  }
 };
