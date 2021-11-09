@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import EventListener from 'react-event-listener'
 import { Table } from 'react-bootstrap'
+import { useEffect } from 'react';
 
 function zeroPadding(num,length){
   return ('0000000000' + num).slice(-length);
@@ -142,6 +142,16 @@ const TransactionHistory = ({group, api}) => {
     }
   }
 
+  useEffect(()=>{
+    const registeredListener = () => {
+      setListMode(getListMode())
+    }
+
+    window.addEventListener('resize', registeredListener);
+
+    return () => window.removeEventListener('resize', registeredListener);
+  }, []);
+
   if(!transactions) {
     loadTransactions()
   }
@@ -149,7 +159,6 @@ const TransactionHistory = ({group, api}) => {
   return (
     <section className="transaction-log">
       <h3>取引履歴</h3>
-      <EventListener target="window" onResize={()=>setListMode(getListMode())} />
       {
         transactions?
           isListMode ? (
