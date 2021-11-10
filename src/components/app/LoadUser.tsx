@@ -13,7 +13,9 @@ const LoadUser = ({ repository, onError, render }: {
     try {
       setUser(await repository.getUser());
     } catch (err) {
-      onError(err.message);
+      if (err instanceof Error) {
+        onError(err.message);
+      }
     }
   }, [repository, onError]);
 

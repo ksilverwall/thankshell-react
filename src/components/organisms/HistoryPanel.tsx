@@ -2,7 +2,9 @@ import React from 'react';
 import style from './HistoryPanel.module.css';
 import ReceiveHistoryRecord from 'components/molecules/ReceiveHistoryRecord';
 import SendHistoryRecord from 'components/molecules/SendHistoryRecord';
-import { Record } from 'components/pages/GroupIndexPage';
+
+import { Record } from 'libs/GroupRepository';
+
 
 const Separater = () => <hr/>;
 

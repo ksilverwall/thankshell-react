@@ -19,8 +19,8 @@ import NotFoundPage from 'components/pages/NotFoundPage'
 import FooterPanel from 'components/organisms/FooterPanel';
 
 import UserRepository from 'libs/UserRepository';
-import GroupRepository from 'libs/GroupRepository';
-import { RestApi } from 'libs/thankshell';
+import GroupRepository, { GroupWithPermission } from 'libs/GroupRepository';
+import { RestApi, ThankshellApi } from 'libs/thankshell';
 
 import { useLocation, useMatch } from 'react-router-dom';
 import ErrorMessage from 'components/ErrorMessage';
@@ -29,7 +29,11 @@ import ErrorMessage from 'components/ErrorMessage';
 Modal.setAppElement('#root')
 
 
-const Holdings = ({holdings, api, reloadAdminTransactions}) => {
+const Holdings = ({holdings, api, reloadAdminTransactions}: {
+  holdings: {[key: string]: number},
+  api: ThankshellApi,
+  reloadAdminTransactions: ()=>void,
+}) => {
   const totalPublished = Object.values(holdings).reduce((prev, item) => prev + item, 0)
   return (
     <section className="card mb-3">
@@ -37,7 +41,7 @@ const Holdings = ({holdings, api, reloadAdminTransactions}) => {
         <h4>発行管理</h4>
       </div>
       <div className="card-body">
-        <PublishTokenButton onComplete={reloadAdminTransactions.bind(this)} api={api} />
+        <PublishTokenButton onComplete={reloadAdminTransactions} api={api} />
         <h4 className="text-right">総発行量 <u>{totalPublished} Selan</u></h4>
         <h4 className="text-right">銀行保有量 <u>{holdings['sla_bank']} Selan</u></h4>
         <h4 className="text-right">流通量 <u>{totalPublished - holdings['sla_bank']} Selan</u></h4>
@@ -46,8 +50,13 @@ const Holdings = ({holdings, api, reloadAdminTransactions}) => {
   )
 }
 
-class AddMemberForm extends React.Component {
-  constructor(props) {
+class AddMemberForm extends React.Component<{ api: ThankshellApi; groupId: string; userId: any; onComplete: () => void; }> {
+  state: {
+    message: string|null,
+    userId: string,
+  };
+
+  constructor(props: { api: ThankshellApi; groupId: string; userId: any; onComplete: () => void; }) {
     super(props);
     this.state = {
       message: null,
@@ -72,18 +81,24 @@ class AddMemberForm extends React.Component {
     )
   }
 
-  async addMember(name) {
+  async addMember(name: string) {
     try {
       await this.props.api.addUserToGroup(this.props.groupId, name)
       this.props.onComplete()
     } catch(error) {
-      this.setState({message: error.message})
+      if (error instanceof Error) {
+        this.setState({message: error.message})
+      }
     }
   }
 }
 
-class DeleteMemberForm extends React.Component {
-  constructor(props) {
+class DeleteMemberForm extends React.Component<{ api: ThankshellApi; groupId: string; userId: string; onComplete: () => void; }> {
+  state: {
+    message: string|null,
+  };
+
+  constructor(props: { api: ThankshellApi; groupId: string; userId: string; onComplete: () => void; }) {
     super(props);
     this.state = {
       message: null
@@ -100,18 +115,24 @@ class DeleteMemberForm extends React.Component {
     )
   }
 
-  async deleteMember(name) {
+  async deleteMember(name: string) {
     try {
       await this.props.api.deleteUserFromGroup(this.props.groupId, name)
       this.props.onComplete()
     } catch(error) {
-      this.setState({message: error.message})
+      if (error instanceof Error) {
+        this.setState({message: error.message})
+      }
     }
   }
 }
 
-class UnregisterUserButton extends React.Component {
-  constructor(props) {
+class UnregisterUserButton extends React.Component<{group: GroupWithPermission; api: ThankshellApi; name: string;}> {
+  state: {
+    isOpenning: boolean;
+  }
+
+  constructor(props: {group: GroupWithPermission; api: ThankshellApi; name: string;}) {
     super(props)
     this.state = {
       isOpenning: false,
@@ -146,8 +167,12 @@ class UnregisterUserButton extends React.Component {
   }
 }
 
-class RegisterUserButton extends React.Component {
-  constructor(props) {
+class RegisterUserButton extends React.Component<{ api: ThankshellApi; group: GroupWithPermission; name?: string}> {
+  state: {
+    isOpenning: boolean;
+  };
+
+  constructor(props: { api: ThankshellApi; group: GroupWithPermission; name?: string}) {
     super(props)
     this.state = {
       isOpenning: false,
@@ -182,7 +207,11 @@ class RegisterUserButton extends React.Component {
   }
 }
 
-const HoldingStatusSection = ({api, group, holdings}) => {
+const HoldingStatusSection = ({api, group, holdings}: {
+  api: ThankshellApi,
+  group: GroupWithPermission,
+  holdings: {[key: string]: number}
+}) => {
   const names = Object.keys(group.members)
   const data = {
     columns: [
@@ -241,7 +270,7 @@ const LoadingState = {
   COMPLETE: 'COMPLETE',
 }
 
-const getTimeString = timestamp => {
+const getTimeString = (timestamp: number) => {
   let d = new Date(timestamp);
   let year  = d.getFullYear();
   let month = d.getMonth() + 1;
@@ -253,14 +282,26 @@ const getTimeString = timestamp => {
   return ( year + '/' + month + '/' + day + ' ' + hour + ':' + min + ':' + sec );
 }
 
-const getDisplayName = (members, name) => {
+const getDisplayName = (members: {[key: string]: {displayName: string}}, name: string) => {
   return Object.keys(members).includes(name) ? members[name].displayName : name
 }
 
-const TransactionSection = ({api, groupId, members}) => {
-  const [transactions, setTransactions] = useState()
-  const [errorMessage, setErrorMessage] = useState()
-  const [loadingState, setLoadingState] = useState(LoadingState.INIT)
+type Transaction = {
+  timestamp: number,
+  from_account: string,
+  to_account: string,
+  amount: number,
+  comment?: string,
+} 
+
+const TransactionSection = ({api, groupId, members}: {
+  api: ThankshellApi,
+  groupId: string,
+  members: {[key: string]: any},
+}) => {
+  const [transactions, setTransactions] = useState<Transaction[]>();
+  const [errorMessage, setErrorMessage] = useState<string>();
+  const [loadingState, setLoadingState] = useState<string>(LoadingState.INIT)
 
   const loadTransactions = async() => {
     if (loadingState !== LoadingState.INIT) { return }
@@ -269,7 +310,9 @@ const TransactionSection = ({api, groupId, members}) => {
     try {
       setTransactions(await api.loadAllTransactions(groupId))
     } catch(err) {
-      setErrorMessage(err.message)
+      if (err instanceof Error) {
+        setErrorMessage(err.message)
+      }
     } finally {
       setLoadingState(LoadingState.COMPLETE)
     }
@@ -316,8 +359,12 @@ const TransactionSection = ({api, groupId, members}) => {
   )
 }
 
-const GroupAdminPageLegacy = ({api, reloadAdminTransactions, group}) => {
-  const [holdings, setHoldings] = useState()
+const GroupAdminPageLegacy = ({api, reloadAdminTransactions, group}: {
+  api: ThankshellApi,
+  reloadAdminTransactions: ()=>void,
+  group: GroupWithPermission,
+}) => {
+  const [holdings, setHoldings] = useState<{[key: string]: number}>()
   const [loadingState, setLoadingState] = useState(LoadingState.INIT)
   const [errorMessage, setErrorMessage] = useState('')
   const loadHoldings = async() => {
@@ -327,7 +374,9 @@ const GroupAdminPageLegacy = ({api, reloadAdminTransactions, group}) => {
     try {
       setHoldings(await api.getHoldings(group.groupId))
     } catch(err) {
-      setErrorMessage(err.message)
+      if (err instanceof Error) {
+        setErrorMessage(err.message)
+      }
     } finally {
       setLoadingState(LoadingState.COMPLETE)
     }
@@ -350,7 +399,7 @@ const GroupAdminPageLegacy = ({api, reloadAdminTransactions, group}) => {
         <p className="text-center text-danger">送金後の取り消しはできませんのでご注意ください</p>
         <ControlMemberTokenButton
           api={api}
-          callback={reloadAdminTransactions.bind(this)}
+          callback={reloadAdminTransactions}
         />
       </section>
 
@@ -365,8 +414,8 @@ const GroupAdminPageLegacy = ({api, reloadAdminTransactions, group}) => {
   )
 }
 
-const GroupAdmin = ({api, group}: any) => {
-  const [loadingState, setLoadingState] = useState(LoadingState.INIT);
+const GroupAdmin = ({api, group}: {api: ThankshellApi, group: GroupWithPermission}) => {
+  const [loadingState, setLoadingState] = useState<string>(LoadingState.INIT);
   const [errorMessage, setErrorMessage] = useState('');
   const [token, setToken] = useState<{updatedAt: number}|null>();
 
@@ -383,7 +432,9 @@ const GroupAdmin = ({api, group}: any) => {
         updatedAt: new Date().getTime(),
       })
     } catch(err) {
-      setErrorMessage(err.message)
+      if (err instanceof Error) {
+        setErrorMessage(err.message)
+      }
     } finally {
       setLoadingState(LoadingState.COMPLETE)
     }
@@ -408,6 +459,7 @@ const GroupAdmin = ({api, group}: any) => {
 }
 
 const GroupAdminPage = () => {
+  const [errorMessage, setErrorMessage] = useState<string>();
   const match = useMatch('/groups/:groupId');
   const groupId = match ? match.params.groupId : null;
   const location = useLocation();
@@ -445,7 +497,7 @@ const GroupAdminPage = () => {
                         <main>
                           {
                             ['admin', 'owner'].includes(group.permission) ? (
-                              <GroupAdmin api={api} group={group}/>
+                              <GroupAdmin api={new ThankshellApi(api)} group={group as GroupWithPermission}/>
                             ) : <NotFoundPage/>
                           }
                           <footer>

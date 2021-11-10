@@ -136,7 +136,9 @@ const SendTokenForm = ({defaultValue, members, onSend}: PropTypes) => {
 
               await onSend(toMemberId, amount, comment);
             } catch(error) {
-              setMessage('ERROR: ' + error.message);
+              if (error instanceof Error) {
+                setMessage('ERROR: ' + error.message);
+              }
             } finally {
               setSending(false);
             }

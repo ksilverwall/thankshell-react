@@ -231,7 +231,9 @@ const GroupIndexPage = () => {
       try {
         await controller.updateMemberName(value);
       } catch(error) {
-        setErrorMessage(error.message);
+        if (error instanceof Error) {
+          setErrorMessage(error.message);
+        }
       }
     }
 

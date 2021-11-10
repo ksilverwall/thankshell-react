@@ -1,11 +1,18 @@
 import React from 'react';
 import Modal from 'react-modal'
 import { Button } from 'react-bootstrap';
+import { ThankshellApi } from 'libs/thankshell';
 
 Modal.setAppElement('#root')
 
-class PublishTokenForm extends React.Component {
-  constructor(props) {
+class PublishTokenForm extends React.Component<{ api: ThankshellApi; onComplete: () => void; }> {
+  state: {
+    isSending: boolean;
+    message: string|null;
+    amount: number;
+  };
+
+  constructor(props: { api: ThankshellApi; onComplete: () => void; }) {
     super(props);
     this.state = {
       isSending: false,
@@ -48,16 +55,22 @@ class PublishTokenForm extends React.Component {
       await this.props.api.publish('selan', 'sla_bank', this.state.amount);
       this.props.onComplete()
     } catch(e) {
-      this.setState({
-        isSenging: false,
-        message: 'ERROR: ' + e.message,
-      })
+      if (e instanceof Error) {
+        this.setState({
+          isSenging: false,
+          message: 'ERROR: ' + e.message,
+        })
+      }
     }
   }
 }
 
-export default class PublishTokenButton extends React.Component {
-  constructor(props) {
+export default class PublishTokenButton extends React.Component<{ onComplete: () => void; api: ThankshellApi; }> {
+  state: {
+    modalIsOpen: boolean;
+  };
+
+  constructor(props: { onComplete: () => void; api: ThankshellApi; }) {
     super(props);
     this.state = {
       modalIsOpen: false,

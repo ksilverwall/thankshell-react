@@ -29,7 +29,7 @@ export const useEnvironmentVariable = (): EnvironmentVariables => {
   };
 };
 
-export const useSession = (): [Session|null, (callbackPath?: string)=>void] => {
+export const useSession = (): [Session|null, (callbackPath: string)=>void] => {
   const auth = GetCognitoAuth(null, null);
 
   if (!auth.isUserSignedIn()) {

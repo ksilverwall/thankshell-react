@@ -11,7 +11,7 @@ const PrivacyPolicyPage = () => {
     path='/text/privacy-policy.md'
     render={(text) => (
       <TextPageTemplate
-        markdown={<ReactMarkdown source={text} />}
+        markdown={<ReactMarkdown children={text} />}
         footer={<FooterPanel/>}
       />
     )}

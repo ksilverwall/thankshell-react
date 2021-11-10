@@ -1,7 +1,7 @@
-import { CognitoAuth } from 'amazon-cognito-auth-js/dist/amazon-cognito-auth';
+import { CognitoAuth, CognitoAuthOptions, CognitoAuthSession } from 'amazon-cognito-auth-js';
 
-export const AuthConfig = {
-  ClientId           : process.env.REACT_APP_COGNITO_AUTH_CLIENT_ID,
+export const AuthConfig: CognitoAuthOptions = {
+  ClientId           : process.env.REACT_APP_COGNITO_AUTH_CLIENT_ID || '',
   AppWebDomain       : 'auth2.thankshell.com',
   TokenScopesArray   : ['openid'],
   RedirectUriSignIn  : window.location.origin + '/login/callback',
@@ -9,7 +9,7 @@ export const AuthConfig = {
   IdentityProvider   : ''
 }
 
-export const GetCognitoAuth = (onSuccess, onFailure) => {
+export const GetCognitoAuth = (onSuccess: ((session: CognitoAuthSession)=>void)|null, onFailure: ((err: any)=>void)|null) => {
   let auth = new CognitoAuth(AuthConfig)
 
   auth.userhandler = {
@@ -29,11 +29,11 @@ export const GetCognitoAuth = (onSuccess, onFailure) => {
 }
 
 export const GetRedirectUri = () => {
-  const params = {
+  const params: {[key: string]: string} = {
     'redirect_uri': encodeURIComponent(AuthConfig.RedirectUriSignIn),
     'response_type': 'code',
     'client_id':  AuthConfig.ClientId,
-    'scope': AuthConfig.TokenScopesArray.join(' '),
+    'scope': (AuthConfig.TokenScopesArray||[]).join(' '),
   }
 
   const payload = Object.keys(params).map(key => `${key}=${params[key]}`).join('&')
@@ -41,7 +41,7 @@ export const GetRedirectUri = () => {
   return `https://${AuthConfig.AppWebDomain}/oauth2/authorize?${payload}`
 }
 
-export const SignIn = (callbackPath) => {
+export const SignIn = (callbackPath: string) => {
   localStorage.setItem('callbackPath', callbackPath)
   const auth = new CognitoAuth(AuthConfig)
   auth.useCodeGrantFlow();

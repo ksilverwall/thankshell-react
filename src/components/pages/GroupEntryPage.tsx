@@ -62,7 +62,9 @@ const GroupEntryPage = () => {
                 await groupRepository.entryToGroup(searchParams);
                 navigate(groupTopUrl);
               } catch(err) {
-                setErrorMessage(`招待リンクが無効です: ${err.message}`);
+                if (err instanceof Error){
+                  setErrorMessage(`招待リンクが無効です: ${err.message}`);
+                }
               }
             }
 

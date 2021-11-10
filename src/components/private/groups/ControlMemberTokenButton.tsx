@@ -1,11 +1,21 @@
 import React, {useState} from 'react'
 import Modal from 'react-modal'
 import { Button } from 'react-bootstrap'
+import { ThankshellApi } from 'libs/thankshell';
 
 Modal.setAppElement('#root')
 
-class ControlMemberTokenForm extends React.Component {
-  constructor(props) {
+class ControlMemberTokenForm<T extends { mutableFrom: boolean; from: string; api: any; defaultAmount: number; onComplete: () => void; }> extends React.Component<T> {
+  state: {
+    isSending: boolean;
+    message: string|null;
+    sendFrom: string;
+    sendTo: string;
+    sendAmount: number;
+    sendComment: string;
+  };
+
+  constructor(props: T) {
     super(props);
     this.state = {
       isSending: false,
@@ -26,7 +36,7 @@ class ControlMemberTokenForm extends React.Component {
 
 
           <div className="send-map">
-            <div className="from-block" colSpan="2">
+            <div className="from-block">
               {
                 this.props.mutableFrom
                 ? (
@@ -110,15 +120,17 @@ class ControlMemberTokenForm extends React.Component {
       await this.props.api.createTransaction('selan', sendInfo);
       this.props.onComplete()
     } catch(e) {
-      this.setState({
-        isSenging: false,
-        message: 'ERROR: ' + e.message,
-      })
+      if (e instanceof Error) {
+        this.setState({
+          isSenging: false,
+          message: 'ERROR: ' + e.message,
+        })
+      }
     }
   }
 }
 
-const ControlMemberTokenButton = ({callback, api}) => {
+const ControlMemberTokenButton = ({callback, api}: {callback:()=>void, api: ThankshellApi}) => {
   const [isModalOpening, setModalOpening] = useState(false)
 
   return (

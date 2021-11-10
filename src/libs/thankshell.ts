@@ -1,12 +1,8 @@
-interface Auth {
-  userhandler: {},
-  getSession: () => {},
-  signOut: () => void,
-};
+import { CognitoAuth, CognitoAuthSession } from "amazon-cognito-auth-js";
 
-interface AuthSession {
-  idToken: {jwtToken: string},
-};
+type Auth = CognitoAuth;
+
+type AuthSession = CognitoAuthSession;
 
 
 export interface ApiGroup {
@@ -31,7 +27,7 @@ export class Session {
     this.session = null;
   }
 
-  getSession(): Promise<AuthSession> {
+  getSession(): Promise<CognitoAuthSession> {
     return new Promise((resolve, reject) => {
       this.auth.userhandler = {
         onSuccess: resolve,
@@ -56,7 +52,7 @@ export class Session {
     if (!this.session) {
       throw Error('セッションの読み込みに失敗しました。再読込してください')
     }
-    return this.session.idToken.jwtToken
+    return this.session.getIdToken().getJwtToken();
   }
 
   close() {
@@ -172,6 +168,14 @@ export class RestApi {
   }
 }
 
+type Transaction = {
+  timestamp: number,
+  from_account: string,
+  to_account: string,
+  amount: number,
+  comment?: string,
+};
+
 export class ThankshellApi {
   restApi: RestApi;
 
@@ -229,7 +233,7 @@ export class ThankshellApi {
   }
 
   async loadTransactions(groupId: string, userId: string): Promise<[]> {
-    const data = await this.restApi.get(`/groups/${groupId}/token/transactions?user_id=${userId}`);
+    const data: any = await this.restApi.get(`/groups/${groupId}/token/transactions?user_id=${userId}`);
     if (!('history' in data)) {
       throw new Error("key 'history' is not in data");
     }
@@ -241,8 +245,8 @@ export class ThankshellApi {
     return history['Items'];
   }
 
-  async loadAllTransactions(groupId: string): Promise<[]> {
-    const data = await this.restApi.get(`/groups/${groupId}/token/transactions`);
+  async loadAllTransactions(groupId: string): Promise<Transaction[]> {
+    const data: any = await this.restApi.get(`/groups/${groupId}/token/transactions`);
     if (!('history' in data)) {
       throw new Error("key 'history' is not in data");
     }
@@ -257,7 +261,7 @@ export class ThankshellApi {
   //-------------------------------------------------
   // Publish
 
-  async publish(tokenName: string, to: string, amount: string): Promise<{}> {
+  async publish(tokenName: string, to: string, amount: number): Promise<{}> {
     const groupId = 'sla';
     return await this.restApi.post(`/groups/${groupId}/token/transactions`, {
       type: 'publish',
