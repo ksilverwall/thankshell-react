@@ -1,5 +1,5 @@
 .hero {
-  background-image: url("/images/hero.png");
+  background-image: url("assets/images/hero.png");
   background-position: 0% 100%;
   background-size: cover;
   padding: 30px;
@@ -8,7 +8,7 @@
 
 @media screen and (max-width:460px) {
     .hero {
-        background-image: url("/images/hero-mobile.png");
+        background-image: url("assets/images/hero-mobile.png");
         background-position: 50% 100%;
     }
 }
