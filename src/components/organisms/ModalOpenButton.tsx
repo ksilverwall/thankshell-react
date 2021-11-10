@@ -8,7 +8,7 @@ interface PropsType {
   className: string | undefined,
 };
 
-export default (props: PropsType) => {
+const ModalOpenButton = (props: PropsType) => {
   const [isOpening, setOpening] = useState<boolean>(false);
 
   return(
@@ -22,3 +22,5 @@ export default (props: PropsType) => {
     </>
   );
 };
+
+export default ModalOpenButton;

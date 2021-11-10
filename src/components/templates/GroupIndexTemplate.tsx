@@ -10,7 +10,7 @@ interface PropTypes {
   footerElement: JSX.Element,
 };
 
-export default (props: PropTypes) => {
+const GroupIndexTemplate = (props: PropTypes) => {
   return (
     <>
       {props.errorMessageElement}
@@ -34,3 +34,5 @@ export default (props: PropTypes) => {
     </>
   );
 };
+
+export default GroupIndexTemplate;

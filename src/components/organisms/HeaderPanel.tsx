@@ -10,7 +10,7 @@ interface PropTypes {
   memberSettingsView: JSX.Element,
 };
 
-export default (props: PropTypes) => {
+const HeaderPanel = (props: PropTypes) => {
   return (
     <div className={styles.container}>
       <img className={styles.logo} src={props.logoUri} alt="group-logo" />
@@ -23,3 +23,5 @@ export default (props: PropTypes) => {
     </div>
   )
 };
+
+export default HeaderPanel;

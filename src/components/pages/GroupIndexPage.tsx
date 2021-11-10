@@ -188,7 +188,7 @@ const GroupIndexPage = () => {
       const r = new GroupRepository(groupId, new RestApi(session, env.apiUrl));
       r.getGroup().then(setGroup).catch(()=>console.error("Fail to load"));
     }
-  }, [session]);
+  }, [session, env, groupId]);
 
   useEffect(()=>{
     if (session && groupId && group && group.permission !== 'visitor') {
@@ -201,7 +201,7 @@ const GroupIndexPage = () => {
 
       loadTransactions();
     }
-  }, [group]);
+  }, [env, session, groupId, group]);
 
   if (session) {
     if (!groupId) {

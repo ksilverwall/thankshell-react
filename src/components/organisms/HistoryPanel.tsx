@@ -95,7 +95,7 @@ const getBlocks = (records: Record[]): JSX.Element[] => {
   return list;
 };
 
-export default (props: {records: Record[]}) => {
+const HistoryPanel = (props: {records: Record[]}) => {
   const elements = getBlocks(props.records);
   return (
     <div className={style.container}>
@@ -103,3 +103,5 @@ export default (props: {records: Record[]}) => {
     </div>
   );
 };
+
+export default HistoryPanel;

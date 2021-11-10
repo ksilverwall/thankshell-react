@@ -10,7 +10,7 @@ interface PropsType {
     onLogout: () => void,
 };
 
-export default (props: PropsType) => {
+const MemberSettingsView = (props: PropsType) => {
   return (
     <div className={styles.area}>
       <label>ユーザー名</label>
@@ -22,3 +22,4 @@ export default (props: PropsType) => {
   );
 };
 
+export default MemberSettingsView;

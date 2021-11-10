@@ -10,7 +10,7 @@ interface PropTypes {
   sendTokenButton: JSX.Element,
 };
 
-export default (props: PropTypes) => {
+const ControlPanel = (props: PropTypes) => {
   // FIXME: change to message dialog
   const externalUrl = 'https://sketch-life-academy.com/selan-help/';
 
@@ -31,3 +31,5 @@ export default (props: PropTypes) => {
     </div>
   )
 };
+
+export default ControlPanel;

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default ({ markdown, footer }: {
+const TextPageTemplate = ({ markdown, footer }: {
   markdown: JSX.Element,
   footer: JSX.Element,
 }) => {
@@ -15,3 +15,5 @@ export default ({ markdown, footer }: {
     </main>
   );
 };
+
+export default TextPageTemplate;

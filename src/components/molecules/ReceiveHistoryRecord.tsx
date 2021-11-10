@@ -9,7 +9,7 @@ interface PropTypes {
   comment: string,
 }
 
-export default (props: PropTypes) => (
+const ReceiveHistoryRecord = (props: PropTypes) => (
   <div>
     <p className={style.title}>from {props.memberName}</p>
     <div className={style.internal_container}>
@@ -22,3 +22,5 @@ export default (props: PropTypes) => (
     <p className={style.date}>{props.datetime.toLocaleString()}</p>
   </div>
 );
+
+export default ReceiveHistoryRecord;

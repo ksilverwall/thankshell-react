@@ -10,7 +10,7 @@ interface PropTypes {
   onClose: () => void,
 };
 
-export default ({origin, groupId, memberId, onClose}: PropTypes) => {
+const ReceiveTokenForm = ({origin, groupId, memberId, onClose}: PropTypes) => {
   const [sendAmount, setSendingAmount] = useState<number>(0);
   const [url, setUrl] = useState<string>('');
 
@@ -51,3 +51,5 @@ export default ({origin, groupId, memberId, onClose}: PropTypes) => {
     </>
   )
 };
+
+export default ReceiveTokenForm;

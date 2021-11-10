@@ -5,7 +5,7 @@ import SignInButton from 'components/SignInButton';
 import FooterPanel from 'components/organisms/FooterPanel';
 
 
-export default function TopPage({onSignIn}: {onSignIn: ()=>void}) {
+const TopPage = ({onSignIn}: {onSignIn: ()=>void}) => {
   return (
     <article>
       <section className="hero">
@@ -20,3 +20,5 @@ export default function TopPage({onSignIn}: {onSignIn: ()=>void}) {
     </article>
   )
 }
+
+export default TopPage;

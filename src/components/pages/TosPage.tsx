@@ -6,7 +6,7 @@ import FooterPanel from 'components/organisms/FooterPanel';
 import TextPageTemplate from 'components/templates/TextPageTemplate';
 
 
-export default () => {
+const TosPage = () => {
   return <ReadText
     path='/text/tos.md'
     render={(text)=>(
@@ -17,3 +17,5 @@ export default () => {
     )}
   />
 };
+
+export default TosPage;

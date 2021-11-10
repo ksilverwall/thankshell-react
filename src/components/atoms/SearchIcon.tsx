@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default (props: {width: string, height: string}) => (
+const SearchIcon = (props: {width: string, height: string}) => (
   <svg
     width={props.width}
     height={props.height}
@@ -13,3 +13,5 @@ export default (props: {width: string, height: string}) => (
     <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z"/>
   </svg>
 );
+
+export default SearchIcon;

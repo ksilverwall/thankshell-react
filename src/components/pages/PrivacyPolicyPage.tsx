@@ -6,7 +6,7 @@ import FooterPanel from 'components/organisms/FooterPanel';
 import TextPageTemplate from 'components/templates/TextPageTemplate';
 
 
-export default function PrivacyPolicyPage() {
+const PrivacyPolicyPage = () => {
   return <ReadText
     path='/text/privacy-policy.md'
     render={(text) => (
@@ -17,3 +17,5 @@ export default function PrivacyPolicyPage() {
     )}
   />
 }
+
+export default PrivacyPolicyPage;

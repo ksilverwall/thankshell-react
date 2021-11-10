@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default (props: {width: string, height: string}) => (
+const InfoIcon = (props: {width: string, height: string}) => (
   <svg
     width={props.width}
     height={props.height}
@@ -14,3 +14,5 @@ export default (props: {width: string, height: string}) => (
     <circle cx="8" cy="4.5" r="1"/>
   </svg>
 );
+
+export default InfoIcon;

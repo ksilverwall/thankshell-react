@@ -8,7 +8,7 @@ interface PropsType {
   onUpdate: (value: string) => void,
 };
 
-export default (props: PropsType) => {
+const EditableText = (props: PropsType) => {
   const [newValue, setNewValue] = useState<string>(props.value);
   const [isEditting, setEditting] = useState<boolean>(false);
   const onSave = () => {
@@ -40,3 +40,4 @@ export default (props: PropsType) => {
   );
 };
 
+export default EditableText;
