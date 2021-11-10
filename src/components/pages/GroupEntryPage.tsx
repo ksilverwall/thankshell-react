@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useMatch } from 'react-router-dom';
 
 import LoadGroup from 'components/app/LoadGroup';
 import LoadUser from 'components/app/LoadUser';
@@ -16,15 +16,22 @@ import { RestApi } from 'libs/thankshell';
 import { useEnvironmentVariable, useSearchParams, useSession } from 'libs/userHooks';
 
 
-const GroupEntryPage = ({groupId}: {groupId: string}) => {
+const GroupEntryPage = () => {
+  const match = useMatch('/groups/:groupId');
+  const groupId = match ? match.params.groupId : null;
+
   const groupTopUrl = `/groups/${groupId}`;
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const searchParams = useSearchParams();
   const env = useEnvironmentVariable();
 
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [session, signIn] = useSession();
+
+  if (!groupId) {
+    return null;
+  }
 
   if (!session) {
     return (
@@ -53,7 +60,7 @@ const GroupEntryPage = ({groupId}: {groupId: string}) => {
             const entry = async() => {
               try {
                 await groupRepository.entryToGroup(searchParams);
-                history.push(groupTopUrl);
+                navigate(groupTopUrl);
               } catch(err) {
                 setErrorMessage(`招待リンクが無効です: ${err.message}`);
               }
@@ -67,7 +74,7 @@ const GroupEntryPage = ({groupId}: {groupId: string}) => {
             ) : (
               <div>
                 <p>グループ『{groupId}』に登録済みです</p>
-                <PrimaryButton text="トップへ" onClick={()=>history.push(groupTopUrl)}/>
+                <PrimaryButton text="トップへ" onClick={()=>navigate(groupTopUrl)}/>
               </div>
             );
           }

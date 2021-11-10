@@ -22,7 +22,7 @@ import UserRepository from 'libs/UserRepository';
 import GroupRepository from 'libs/GroupRepository';
 import { RestApi } from 'libs/thankshell';
 
-import { useLocation } from 'react-router-dom';
+import { useLocation, useMatch } from 'react-router-dom';
 import ErrorMessage from 'components/ErrorMessage';
 
 
@@ -407,8 +407,14 @@ const GroupAdmin = ({api, group}: any) => {
   )
 }
 
-const GroupAdminPage = ({groupId}: {groupId: string}) => {
+const GroupAdminPage = () => {
+  const match = useMatch('/groups/:groupId');
+  const groupId = match ? match.params.groupId : null;
   const location = useLocation();
+
+  if (!groupId) {
+    return null;
+  }
 
   return (
     <LoadEnv render={(env)=>(

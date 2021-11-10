@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
-import { Redirect, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useMatch } from 'react-router-dom';
 
 import UseSession from 'components/app/UseSession';
 import LoadEnv from 'components/app/LoadEnv';
@@ -169,11 +169,18 @@ const getDefaultState = (parameters: {[key: string]: string}): PageState => {
   return {mode: 'index'};
 };
 
-const GroupIndexPage = ({groupId}: {groupId: string}) => {
+const GroupIndexPage = () => {
+  const match = useMatch('/groups/:groupId');
+  const groupId = match ? match.params.groupId : null;
+
   const location = useLocation();
   const searchParams = useSearchParams();
   const [state, setState] = useState<PageState>(getDefaultState(searchParams));
   const [errorMessage, setErrorMessage] = useState<string>('');
+
+  if (!groupId) {
+    return null;
+  }
 
   return <LoadEnv render={(env)=>(
     <UseSession
@@ -225,7 +232,7 @@ const GroupIndexPage = ({groupId}: {groupId: string}) => {
                     )
                   }}
                 />
-              ) : <Redirect to={`${pathPrefix}/visitor`}/>
+              ) : <Navigate to={`${pathPrefix}/visitor`}/>
               : <p>Loading ...</p>
             }
           />

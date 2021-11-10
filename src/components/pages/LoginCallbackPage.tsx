@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react';
 import { GetCognitoAuth } from '../../libs/auth'
 
 import FooterPanel from 'components/organisms/FooterPanel';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 
 const LoginCallbackPage = () => {
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const [message, setMessage] = useState<string>('ログイン中...');
 
   useEffect(()=>{
@@ -17,7 +17,7 @@ const LoginCallbackPage = () => {
       const auth = GetCognitoAuth(null, null);
       auth.userhandler = {
         onSuccess: () => {
-          history.push(localStorage.getItem('callbackPath') || '/')
+          navigate(localStorage.getItem('callbackPath') || '/')
         },
         onFailure: (err: any) => {
           setMessage(`ERROR: ${err}`);
@@ -27,7 +27,7 @@ const LoginCallbackPage = () => {
     } catch(err) {
       setMessage(`ERROR on parse ${responseToken}: ${err}`);
     }
-  }, [history, location.search]);
+  }, [navigate, location.search]);
 
   return (
     <main>

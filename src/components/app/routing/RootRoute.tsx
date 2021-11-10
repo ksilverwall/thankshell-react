@@ -1,38 +1,35 @@
 import React from 'react';
-import { Route, Switch } from 'react-router-dom'
-
-// Sub-Router
-import GroupPageRoute from './GroupPageRoute';
+import { Route, Routes } from 'react-router-dom'
 
 import LoginCallbackPage from 'components/pages/LoginCallbackPage'
 import PrivacyPolicyPage from 'components/pages/PrivacyPolicyPage';
 import TosPage from 'components/pages/TosPage';
 import TopPage from 'components/pages/TopPage';
 import NotFoundPage from 'components/pages/NotFoundPage';
+import GroupIndexPage from 'components/pages/GroupIndexPage';
+import GroupVisitorPage from 'components/pages/GroupVisitorPage';
+import GroupEntryPage from 'components/pages/GroupEntryPage';
+import GroupAdminPage from 'components/pages/GroupAdminPage';
 
 import { SignIn } from 'libs/auth';
 
 
 const RootRoute = () => {
   return (
-    <Switch>
-      <Route path="/" exact>
-        <TopPage onSignIn={()=>SignIn('/groups/sla')}/>
+    <Routes>
+      <Route path="/" element={<TopPage onSignIn={()=>SignIn('/groups/sla')}/>}/>
+      <Route path="/tos" element={<TosPage/>}/>
+      <Route path="/privacy-policy" element={<PrivacyPolicyPage/>}/>
+      <Route path='/login/callback' element={<LoginCallbackPage/>}/>
+      <Route path='/groups/:id' element={<GroupIndexPage/>}>
+        <Route path={'visitor'} element={<GroupVisitorPage/>}/>
+        <Route path={'entry'} element={<GroupEntryPage/>}/>
+        <Route path={'admin'} element={<GroupAdminPage/>}/>
+        <Route path='*' element={<NotFoundPage/>} />
       </Route>
-      <Route path="/tos" exact>
-        <TosPage/>
+      <Route path='*' element={<NotFoundPage/>}>
       </Route>
-      <Route path="/privacy-policy" exact>
-        <PrivacyPolicyPage/>
-      </Route>
-      <Route path='/login/callback' exact>
-        <LoginCallbackPage/>
-      </Route>
-      <Route path='/groups/:id' render={({match})=>(
-        <GroupPageRoute groupId={match.params.id}/>
-      )}/>
-      <Route path='*' component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 };
 
