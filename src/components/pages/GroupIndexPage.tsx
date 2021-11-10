@@ -2,10 +2,6 @@ import React, { useState } from 'react';
 import Modal from 'react-modal';
 import { Navigate, useLocation, useMatch } from 'react-router-dom';
 
-import UseSession from 'components/app/UseSession';
-import LoadEnv from 'components/app/LoadEnv';
-import LoadGroup from 'components/app/LoadGroup';
-import LoadTransactions from 'components/app/LoadTransactions';
 import RevisionUpdateMessage from 'components/RevisionUpdateMessage';
 
 import GroupIndexTemplate from 'components/templates/GroupIndexTemplate';
@@ -19,12 +15,14 @@ import SendTokenForm from 'components/organisms/SendTokenForm';
 import SendTokenButton from 'components/atoms/SendTokenButton';
 import ReceiveTokenButton from 'components/atoms/ReceiveTokenButton';
 
-import { GroupWithPermission, Record } from 'libs/GroupRepository';
+import { Group, GroupWithPermission, Record } from 'libs/GroupRepository';
 import GroupRepository from 'libs/GroupRepository';
 import { RestApi } from 'libs/thankshell';
 
 import ReceiveTokenForm from 'components/organisms/ReceiveTokenForm';
-import { useSearchParams } from '../../libs/userHooks';
+import { useEnvironmentVariable, useSearchParams, useSession } from '../../libs/userHooks';
+import PrimaryButton from 'components/atoms/PrimaryButton';
+import { useEffect } from 'react';
 
 
 Modal.setAppElement('#root');
@@ -69,7 +67,7 @@ const CreateGroupIndexPageView = ({
   message: string,
   group: GroupWithPermission,
   balance: number|null,
-  records: Record[],
+  records: Record[]|null,
   modalElement: JSX.Element|null,
   onSignOut: ()=>void,
   onUpdateMemberName: (value: string)=>Promise<void>,
@@ -110,7 +108,7 @@ const CreateGroupIndexPageView = ({
         }
       />
     }
-    historyPanel={<HistoryPanel records={records}/>}
+    historyPanel={<HistoryPanel records={records||[]}/>}
     modalElement={modalElement}
     footerElement={<FooterPanel/>}
   />
@@ -175,71 +173,95 @@ const GroupIndexPage = () => {
 
   const location = useLocation();
   const searchParams = useSearchParams();
+  const env = useEnvironmentVariable();
+
+  const [session, signIn] = useSession();
   const [state, setState] = useState<PageState>(getDefaultState(searchParams));
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  if (!groupId) {
-    return null;
-  }
+  const [group, setGroup] = useState<Group|null>(null);
+  const [balance, setBalance] = useState<number|null>(null);
+  const [records, setRecords] = useState<Record[]|null>(null);
 
-  return <LoadEnv render={(env)=>(
-    <UseSession
-      callbackPath={location.pathname + location.search}
-      render={({session, onSignOut})=> {
-        const restApi = new RestApi(session, env.apiUrl);
-        const controller = new GroupRepository(groupId, restApi);
-        const pathPrefix = `/groups/${groupId}`;
+  useEffect(()=>{
+    if (session && groupId) {
+      const r = new GroupRepository(groupId, new RestApi(session, env.apiUrl));
+      r.getGroup().then(setGroup).catch(()=>console.error("Fail to load"));
+    }
+  }, [session]);
 
-        return (
-          <LoadGroup
-            groupRepository={controller}
-            render={({group})=>group
-              ? group.permission !== 'visitor' ? (
-                <LoadTransactions
-                  controller={controller}
-                  group={group}
-                  render={({balance, records, onUpdated})=>{
-                    const onSendToken = async(memberId: string, toMemberId: string, amount: number, comment: string) => {
-                      await controller.send(memberId, toMemberId, amount, comment);
-                      onUpdated();
-                    }
-                    const onUpdateMemberName = async(value: string)=>{
-                      try {
-                        await controller.updateMemberName(value);
-                      } catch(error) {
-                        setErrorMessage(error.message);
-                      }
-                    }
+  useEffect(()=>{
+    if (session && groupId && group && group.permission !== 'visitor') {
+      const r = new GroupRepository(groupId, new RestApi(session, env.apiUrl));
 
-                    return (
-                      <CreateGroupIndexPageView
-                        localVersion={env.version || ''}
-                        message={errorMessage}
-                        group={group}
-                        balance={balance}
-                        records={records}
-                        modalElement={<CreateModal
-                          pageState={state}
-                          group={group}
-                          onClose={()=>setState({mode: 'index'})}
-                          onSendToken={onSendToken}
-                        />}
-                        onSignOut={onSignOut}
-                        onUpdateMemberName={onUpdateMemberName}
-                        onOpenSendTokenModal={()=>setState({mode: 'send'})}
-                        onOpenRecieveTokenModal={()=>setState({mode: 'receive'})}
-                      />
-                    )
-                  }}
-                />
-              ) : <Navigate to={`${pathPrefix}/visitor`}/>
-              : <p>Loading ...</p>
-            }
-          />
-        );
+      const loadTransactions = async() => {
+        setBalance(await r.getHolding(group.memberId));
+        setRecords(await r.getTransactions(group, group.memberId));
       }
-    }/>
-  )}/>
+
+      loadTransactions();
+    }
+  }, [group]);
+
+  if (session) {
+    if (!groupId) {
+      return null;
+    }
+
+    const restApi = new RestApi(session, env.apiUrl);
+    const controller = new GroupRepository(groupId, restApi);
+    const pathPrefix = `/groups/${groupId}`;
+
+    if (!group) {
+      return <p>group info Loading ...</p>
+    }
+
+    if (group.permission === 'visitor') {
+      return <Navigate to={`${pathPrefix}/visitor`}/>
+    }
+
+    const onSendToken = async(memberId: string, toMemberId: string, amount: number, comment: string) => {
+      await controller.send(memberId, toMemberId, amount, comment);
+
+      setBalance(await controller.getHolding(group.memberId));
+      setRecords(await controller.getTransactions(group, group.memberId));
+    }
+
+    const onUpdateMemberName = async(value: string)=>{
+      try {
+        await controller.updateMemberName(value);
+      } catch(error) {
+        setErrorMessage(error.message);
+      }
+    }
+
+    return (
+      <CreateGroupIndexPageView
+        localVersion={env.version || ''}
+        message={errorMessage}
+        group={group}
+        balance={balance}
+        records={records}
+        modalElement={<CreateModal
+          pageState={state}
+          group={group}
+          onClose={()=>setState({mode: 'index'})}
+          onSendToken={onSendToken}
+        />}
+        onSignOut={session.close}
+        onUpdateMemberName={onUpdateMemberName}
+        onOpenSendTokenModal={()=>setState({mode: 'send'})}
+        onOpenRecieveTokenModal={()=>setState({mode: 'receive'})}
+      />
+    );
+  } else {
+    return (
+      <div>
+        <h2>サインインされていません</h2>
+        <PrimaryButton text='Sign In' onClick={()=>signIn(location.pathname + location.search)} />
+      </div>
+    );
+  }
 };
 
 export default GroupIndexPage;
