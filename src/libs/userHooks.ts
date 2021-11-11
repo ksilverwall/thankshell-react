@@ -1,3 +1,5 @@
+import { CognitoAuth } from 'amazon-cognito-auth-js';
+import { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { parseSearchParameters } from '../components/pages/GroupIndexPage';
 import { GetCognitoAuth, SignIn } from './auth';
@@ -23,18 +25,32 @@ export const useEnvironmentVariable = (): EnvironmentVariables => {
     throw new Error("Application Error: process.env.REACT_APP_THANKSHELL_API_URL is not set");
   }
 
-  return {
-    apiUrl: process.env.REACT_APP_THANKSHELL_API_URL,
+  return useMemo<EnvironmentVariables>(()=>({
+    apiUrl: process.env.REACT_APP_THANKSHELL_API_URL||'',
     version: process.env.REACT_APP_VERSION,
-  };
+  }), []);
 };
 
-export const useSession = (): [Session|null, (callbackPath: string)=>void] => {
-  const auth = GetCognitoAuth(null, null);
+const useAuth = (): CognitoAuth|null => {
+  const [auth, setAuth] = useState<CognitoAuth|null>(null);
 
-  if (!auth.isUserSignedIn()) {
-    return [null, SignIn];
+  if (auth && auth.isUserSignedIn()) {
+    return auth;
   }
 
-  return [new Session(auth), SignIn];
+  const newAuth = GetCognitoAuth(null, null);
+  if (!newAuth.isUserSignedIn()) {
+    return null
+  }
+
+  setAuth(newAuth);
+
+  return newAuth;
+}
+
+export const useSession = (): [Session|null, (callbackPath: string)=>void] => {
+  const auth = useAuth();
+  const session = useMemo(()=> auth ? new Session(auth) : null, [auth]);
+
+  return [session, SignIn];
 }
