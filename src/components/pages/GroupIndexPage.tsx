@@ -55,8 +55,7 @@ const CreateGroupIndexPageView = ({
   localVersion,
   message,
   group,
-  balance,
-  records,
+  transactionSummary,
   modalElement,
   onSignOut,
   onUpdateMemberName,
@@ -66,8 +65,7 @@ const CreateGroupIndexPageView = ({
   localVersion: string,
   message: string,
   group: GroupWithPermission,
-  balance: number|null,
-  records: Record[]|null,
+  transactionSummary?: TransactionSummary,
   modalElement: JSX.Element|null,
   onSignOut: ()=>void,
   onUpdateMemberName: (value: string)=>Promise<void>,
@@ -98,7 +96,7 @@ const CreateGroupIndexPageView = ({
     }
     controlPanelElement={
       <ControlPanel
-        balance={balance}
+        balance={transactionSummary ? transactionSummary.balance : null}
         tokenName={group.tokenName}
         sendTokenButton={
           <>
@@ -108,7 +106,7 @@ const CreateGroupIndexPageView = ({
         }
       />
     }
-    historyPanel={<HistoryPanel records={records||[]}/>}
+    historyPanel={<HistoryPanel records={transactionSummary?.records||[]}/>}
     modalElement={modalElement}
     footerElement={<FooterPanel/>}
   />
@@ -167,6 +165,11 @@ const getDefaultState = (parameters: {[key: string]: string}): PageState => {
   return {mode: 'index'};
 };
 
+type TransactionSummary = {
+  balance: number,
+  records: Record[],
+};
+
 const GroupIndexPage = () => {
   const match = useMatch('/groups/:groupId');
   const groupId = match ? match.params.groupId : null;
@@ -180,12 +183,11 @@ const GroupIndexPage = () => {
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   const [group, setGroup] = useState<Group|null>(null);
-  const [balance, setBalance] = useState<number|null>(null);
-  const [records, setRecords] = useState<Record[]|null>(null);
+  const [transactionSummary, setTransactionSummary] = useState<TransactionSummary>();
 
   useEffect(()=>{
     if (session && groupId) {
-      const r = new GroupRepository(groupId, new RestApi(session, env.apiUrl));
+      const r = new GroupRepository(groupId, new RestApi(session, "https://staging-api.thankshell.com/v2.0"));
       r.getGroup().then(setGroup).catch(()=>console.error("Fail to load"));
     }
   }, [session, env, groupId]);
@@ -195,8 +197,10 @@ const GroupIndexPage = () => {
       const r = new GroupRepository(groupId, new RestApi(session, env.apiUrl));
 
       const loadTransactions = async() => {
-        setBalance(await r.getHolding(group.memberId));
-        setRecords(await r.getTransactions(group, group.memberId));
+        setTransactionSummary({
+          balance: await r.getHolding(group.memberId),
+          records: await r.getTransactions(group, group.memberId),
+        })
       }
 
       loadTransactions();
@@ -223,8 +227,10 @@ const GroupIndexPage = () => {
     const onSendToken = async(memberId: string, toMemberId: string, amount: number, comment: string) => {
       await controller.send(memberId, toMemberId, amount, comment);
 
-      setBalance(await controller.getHolding(group.memberId));
-      setRecords(await controller.getTransactions(group, group.memberId));
+      setTransactionSummary({
+        balance: await controller.getHolding(group.memberId),
+        records: await controller.getTransactions(group, group.memberId),
+      });
     }
 
     const onUpdateMemberName = async(value: string)=>{
@@ -242,8 +248,7 @@ const GroupIndexPage = () => {
         localVersion={env.version || ''}
         message={errorMessage}
         group={group}
-        balance={balance}
-        records={records}
+        transactionSummary={transactionSummary}
         modalElement={<CreateModal
           pageState={state}
           group={group}
