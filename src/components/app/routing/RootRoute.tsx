@@ -21,10 +21,11 @@ const RootRoute = () => {
       <Route path="/tos" element={<TosPage/>}/>
       <Route path="/privacy-policy" element={<PrivacyPolicyPage/>}/>
       <Route path='/login/callback' element={<LoginCallbackPage/>}/>
-      <Route path='/groups/:id' element={<GroupIndexPage/>}>
-        <Route path={'visitor'} element={<GroupVisitorPage/>}/>
-        <Route path={'entry'} element={<GroupEntryPage/>}/>
-        <Route path={'admin'} element={<GroupAdminPage/>}/>
+      <Route path='/groups/:id'>
+        <Route path='' element={<GroupIndexPage/>}/>
+        <Route path='visitor' element={<GroupVisitorPage/>}/>
+        <Route path='entry' element={<GroupEntryPage/>}/>
+        <Route path='admin' element={<GroupAdminPage/>}/>
         <Route path='*' element={<NotFoundPage/>} />
       </Route>
       <Route path='*' element={<NotFoundPage/>}>

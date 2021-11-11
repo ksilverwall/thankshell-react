@@ -17,7 +17,7 @@ import { useEnvironmentVariable, useSearchParams, useSession } from 'libs/userHo
 
 
 const GroupEntryPage = () => {
-  const match = useMatch('/groups/:groupId');
+  const match = useMatch('/groups/:groupId/*');
   const groupId = match ? match.params.groupId : null;
 
   const groupTopUrl = `/groups/${groupId}`;

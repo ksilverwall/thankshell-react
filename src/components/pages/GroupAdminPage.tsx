@@ -460,10 +460,11 @@ const GroupAdmin = ({api, group}: {api: ThankshellApi, group: GroupWithPermissio
 
 const GroupAdminPage = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
-  const match = useMatch('/groups/:groupId');
+  const match = useMatch('/groups/:groupId/*');
   const groupId = match ? match.params.groupId : null;
   const location = useLocation();
 
+  console.log(match);
   if (!groupId) {
     return null;
   }
