@@ -80,21 +80,24 @@ const getBlocks = (records: Record[]): JSX.Element[] => {
   const minYm = getYm(new Date(Math.min(...records.map((record)=> record.datetime.getTime()))));
   const maxYm = getYm(new Date(Math.max(...records.map((record)=> record.datetime.getTime()))));
 
-  const list = [];
+  const list: {targetYm: Date; items: Record[]}[] = [];
   for (let targetYm = maxYm; minYm <= targetYm; targetYm = getPreviousYm(targetYm)) {
     const blockRecords = records.filter((record)=> targetYm <= record.datetime && record.datetime < getNextYm(targetYm));
     if (blockRecords.length) {
-      list.push(
-        <GroupList
-          key={targetYm.toTimeString()}
-          datetime={targetYm}
-          items={blockRecords.sort((a, b)=>b.datetime.getTime() - a.datetime.getTime()).map(getRecordElement)}
-        />
-      )
+      list.push({
+        targetYm: targetYm,
+        items: blockRecords.sort((a, b)=>b.datetime.getTime() - a.datetime.getTime()),
+      });
     }
   }
 
-  return list;
+  return list.map(({targetYm, items}, idx)=>(
+    <GroupList
+      key={idx}
+      datetime={targetYm}
+      items={items.map(getRecordElement)}
+    />
+  ));
 };
 
 const HistoryPanel = (props: {records: Record[]}) => {
