@@ -280,7 +280,7 @@ export class ThankshellApi {
   async getHolding(groupId: string, memberId: string): Promise<number> {
     const holdings = await this.getHoldings(groupId);
     if (!(memberId in holdings)) {
-      throw new Error(`${memberId}の保有情報を取得できませんでした`);
+      return 0;
     }
 
     return holdings[memberId];
