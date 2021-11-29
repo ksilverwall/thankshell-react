@@ -56,5 +56,5 @@ export const SignIn = (callbackPath: string) => {
     scope: (AuthConfig.TokenScopesArray||[]).join(' '),
   });
 
-  auth.launchUri(`https://${AuthConfig.AppWebDomain}/oauth2/authorize?${payload}`);
+  auth.launchUri(`https://${AuthConfig.AppWebDomain}/login?${payload}`);
 }
