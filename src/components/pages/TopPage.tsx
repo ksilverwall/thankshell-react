@@ -1,11 +1,13 @@
-import React from 'react';
 import './TopPage.css';
 
 import SignInButton from 'components/SignInButton';
 import FooterPanel from 'components/organisms/FooterPanel';
+import { SignIn } from 'libs/auth';
 
 
-const TopPage = ({onSignIn}: {onSignIn: ()=>void}) => {
+const TopPage = () => {
+  const onSignIn = () => SignIn('/groups/sla');
+
   return (
     <article>
       <section className="hero">

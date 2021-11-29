@@ -11,13 +11,11 @@ import GroupVisitorPage from 'components/pages/GroupVisitorPage';
 import GroupEntryPage from 'components/pages/GroupEntryPage';
 import GroupAdminPage from 'components/pages/GroupAdminPage';
 
-import { SignIn } from 'libs/auth';
-
 
 const RootRoute = () => {
   return (
     <Routes>
-      <Route path="/" element={<TopPage onSignIn={()=>SignIn('/groups/sla')}/>}/>
+      <Route path="/" element={<TopPage/>}/>
       <Route path="/tos" element={<TosPage/>}/>
       <Route path="/privacy-policy" element={<PrivacyPolicyPage/>}/>
       <Route path='/login/callback' element={<LoginCallbackPage/>}/>

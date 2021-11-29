@@ -2,11 +2,11 @@ import { CognitoAuth, CognitoAuthOptions, CognitoAuthSession } from 'amazon-cogn
 
 export const AuthConfig: CognitoAuthOptions = {
   ClientId           : process.env.REACT_APP_COGNITO_AUTH_CLIENT_ID || '',
-  AppWebDomain       : 'auth2.thankshell.com',
+  AppWebDomain       : process.env.REACT_APP_COGNITO_AUTH_APP_WEB_DOMAIN || '',
   TokenScopesArray   : ['openid'],
   RedirectUriSignIn  : window.location.origin + '/login/callback',
   RedirectUriSignOut : window.location.origin + '/',
-  IdentityProvider   : ''
+  IdentityProvider   : undefined,
 }
 
 export const GetCognitoAuth = (onSuccess: ((session: CognitoAuthSession)=>void)|null, onFailure: ((err: any)=>void)|null) => {
@@ -28,22 +28,33 @@ export const GetCognitoAuth = (onSuccess: ((session: CognitoAuthSession)=>void)|
   return auth
 }
 
-export const GetRedirectUri = () => {
-  const params: {[key: string]: string} = {
-    'redirect_uri': encodeURIComponent(AuthConfig.RedirectUriSignIn),
-    'response_type': 'code',
-    'client_id':  AuthConfig.ClientId,
-    'scope': (AuthConfig.TokenScopesArray||[]).join(' '),
-  }
+const getPayload = ({redirectUri, responseType, clientId, scope}: {
+  redirectUri: string,
+  responseType: string,
+  clientId: string,
+  scope: string,
+}) => {
+  const params = {
+    'redirect_uri': redirectUri,
+    'response_type': responseType,
+    'client_id': clientId,
+    'scope': scope,
+  } as const;
 
-  const payload = Object.keys(params).map(key => `${key}=${params[key]}`).join('&')
-
-  return `https://${AuthConfig.AppWebDomain}/oauth2/authorize?${payload}`
-}
+  return (Object.keys(params) as (keyof typeof params)[]).map(key=>`${key}=${params[key]}`).join('&')
+};
 
 export const SignIn = (callbackPath: string) => {
   localStorage.setItem('callbackPath', callbackPath)
   const auth = new CognitoAuth(AuthConfig)
   auth.useCodeGrantFlow();
-  auth.launchUri(GetRedirectUri())
+
+  const payload = getPayload({
+    redirectUri: encodeURIComponent(AuthConfig.RedirectUriSignIn),
+    responseType: 'code',
+    clientId:  AuthConfig.ClientId,
+    scope: (AuthConfig.TokenScopesArray||[]).join(' '),
+  });
+
+  auth.launchUri(`https://${AuthConfig.AppWebDomain}/oauth2/authorize?${payload}`);
 }
