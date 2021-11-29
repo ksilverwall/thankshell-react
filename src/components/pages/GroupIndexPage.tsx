@@ -182,13 +182,16 @@ const GroupIndexPage = () => {
   const [state, setState] = useState<PageState>(getDefaultState(searchParams));
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const [group, setGroup] = useState<Group|null>(null);
+  const [group, setGroup] = useState<Group|null>();
   const [transactionSummary, setTransactionSummary] = useState<TransactionSummary>();
 
   useEffect(()=>{
     if (session && groupId) {
       const r = new GroupRepository(groupId, new RestApi(session, "https://staging-api.thankshell.com/v2.0"));
-      r.getGroup().then(setGroup).catch(()=>console.error("Fail to load"));
+      r.getGroup().then(setGroup).catch((e)=>{
+        setGroup(null);
+        setErrorMessage(e?.message)
+      });
     }
   }, [session, env, groupId]);
 
@@ -216,8 +219,17 @@ const GroupIndexPage = () => {
     const controller = new GroupRepository(groupId, restApi);
     const pathPrefix = `/groups/${groupId}`;
 
-    if (!group) {
+    if (group === undefined) {
       return <p>group info Loading ...</p>
+    }
+
+    if (group === null) {
+      return (
+        <div>
+          <ErrorMessage message={errorMessage}/>
+          <p>グループの読み込みに失敗しました</p>
+        </div>
+      );
     }
 
     if (group.permission === 'visitor') {
