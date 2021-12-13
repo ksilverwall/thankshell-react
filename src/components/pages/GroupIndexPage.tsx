@@ -187,7 +187,7 @@ const GroupIndexPage = () => {
 
   useEffect(()=>{
     if (session && groupId) {
-      const r = new GroupRepository(groupId, new RestApi(session, "https://staging-api.thankshell.com/v2.0"));
+      const r = new GroupRepository(groupId, new RestApi(session, process.env.REACT_APP_THANKSHELL_API_URL || ''));
       r.getGroup().then(setGroup).catch((e)=>{
         setGroup(null);
         setErrorMessage(e?.message)
