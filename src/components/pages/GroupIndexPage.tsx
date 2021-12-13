@@ -233,7 +233,13 @@ const GroupIndexPage = () => {
     }
 
     if (group.permission === 'visitor') {
-      return <Navigate to={`${pathPrefix}/visitor`}/>
+      console.log('FATAL! dump group');
+      console.log(group);
+      return (
+        <div>
+          <p>グループの閲覧権限がありません</p>
+        </div>
+      );
     }
 
     const onSendToken = async(memberId: string, toMemberId: string, amount: number, comment: string) => {

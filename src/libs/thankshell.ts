@@ -199,6 +199,7 @@ export class ThankshellApi {
   // Groups
 
   async getGroup(groupId: string): Promise<any> {
+    console.log(`request is send to /groups/${groupId}`);
     return await this.restApi.get(`/groups/${groupId}`);
   }
 
